@@ -6,12 +6,16 @@ interface CustomModal2Props {
   showModal: boolean;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
   children: React.ReactNode;
+  top: number;
+  right: number;
 }
 
 const CustomModal2 = ({
   showModal,
   setShowModal,
   children,
+  top,
+  right,
 }: CustomModal2Props) => {
   return (
     <Modal transparent visible={showModal} animationType="fade">
@@ -20,7 +24,9 @@ const CustomModal2 = ({
         <View style={styles.modalOverlay}>
           {/* Prevent modal from closing when clicking inside */}
           <TouchableWithoutFeedback>
-            <View style={styles.modalContent}>{children}</View>
+            <View style={[styles.modalContent, {top}, {right}]}>
+              {children}
+            </View>
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
@@ -43,8 +49,7 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 8,
     maxHeight: 500,
-    position: 'absolute',
-    top: 130,
-    right: 20, // Ensures scrollability
+    // position: 'absolute',
+    // Ensures scrollability
   },
 });

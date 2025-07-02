@@ -277,8 +277,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
 
         <TouchableOpacity onPress={handleSignOut}>
           <View style={styles.lineContainer}>
-            <SVGController name="Logout" color={COLORS.primary} />
-            <Text style={{fontSize: 13, color: COLORS.primary}}>Logout</Text>
+            <SVGController name="Logout" color={COLORS.red} />
+            <Text style={{fontSize: 13, color: COLORS.red}}>Logout</Text>
           </View>
         </TouchableOpacity>
       </View>

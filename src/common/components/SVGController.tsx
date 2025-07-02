@@ -12,6 +12,7 @@ import HomeIcon from '../../assets/Icons/house.svg';
 import ActionItemsIcon from '../../assets/Icons/list-todo.svg';
 import MailIcon from '../../assets/Icons/mail.svg';
 import ChevronDownIcon from '../../assets/Icons/chevron-down.svg';
+import ChevronUpIcon from '../../assets/Icons/chevron-up.svg';
 import ChevronRightIcon from '../../assets/Icons/chevron-right.svg';
 import ChevronLeftIcon from '../../assets/Icons/chevron-left';
 import SendIcon from '../../assets/Icons/send.svg';
@@ -22,6 +23,7 @@ import ArrowLeftIcon from '../../assets/Icons/arrow-left.svg';
 import PlusIcon from '../../assets/Icons/plus.svg';
 import QRIcon from '../../assets/Icons/qr.svg';
 import SearchIcon from '../../assets/Icons/search.svg';
+import CheckIcon from '../../assets/Icons/check.svg';
 
 interface SVGControllerProps {
   name: string;
@@ -75,6 +77,8 @@ const SVGController = ({
         return <ScanTextIcon width={width} height={height} color={color} />;
       case 'Chevron-Down':
         return <ChevronDownIcon width={width} height={height} color={color} />;
+      case 'Chevron-Up':
+        return <ChevronUpIcon width={width} height={height} color={color} />;
       case 'Chevron-Right':
         return <ChevronRightIcon width={width} height={height} color={color} />;
       case 'Chevron-Left':
@@ -85,6 +89,8 @@ const SVGController = ({
         return <QRIcon width={width} height={height} color={color} />;
       case 'SEARCH':
         return <SearchIcon width={width} height={height} color={color} />;
+      case 'Check':
+        return <CheckIcon width={width} height={height} color={color} />;
 
       default:
         return <BellIcon width={width} height={height} color={color} />;
