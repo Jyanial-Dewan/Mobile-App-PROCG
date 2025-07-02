@@ -173,6 +173,8 @@ const ViewRequestsScreen = observer(() => {
     [selectedItem],
   );
 
+  console.log(selectedItem?.result);
+
   return (
     <ContainerNew
       isScrollView={false}
@@ -282,7 +284,9 @@ const ViewRequestsScreen = observer(() => {
           <CustomTextNew
             text={
               selectedItem?.result
-                ? selectedItem?.result?.values().next().value
+                ? !Array.isArray(selectedItem.result)
+                  ? selectedItem.result?.values?.().next().value
+                  : 'null'
                 : 'null'
             }
             txtColor={COLORS.inputTextColor}

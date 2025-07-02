@@ -11,7 +11,12 @@ export const viewRequestModel = types.model('RequestModel', {
   user_task_name: types.maybeNull(types.string),
   user_schedule_name: types.maybeNull(types.string),
   parameters: types.maybeNull(types.optional(types.map(types.integer), {})),
-  result: types.maybeNull(types.map(types.union(types.string, types.number))),
+  result: types.maybeNull(
+    types.union(
+      types.map(types.union(types.string, types.number)),
+      types.array(types.frozen()),
+    ),
+  ),
 });
 
 export const viewRequestStore = types
