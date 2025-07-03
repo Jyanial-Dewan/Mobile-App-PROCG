@@ -339,12 +339,8 @@ const DraftsDetails = observer(() => {
             onPress={handleSend}
             style={[
               styles.sentBtn,
-              {
-                opacity:
-                  recivers.length === 0 || body === '' || subject === ''
-                    ? 0.5
-                    : 1,
-              },
+              (recivers.length === 0 || body === '' || subject === '') &&
+                styles.disabled,
             ]}
             disabled={
               recivers.length === 0 ||
@@ -372,15 +368,11 @@ const DraftsDetails = observer(() => {
             }
             style={[
               styles.draftBtn,
-              {
-                opacity:
-                  (!userChanged &&
-                    oldMsgState?.subject === subject &&
-                    oldMsgState?.body === body) ||
-                  isDrafting
-                    ? 0.5
-                    : 1,
-              },
+              ((!userChanged &&
+                oldMsgState?.subject === subject &&
+                oldMsgState?.body === body) ||
+                isDrafting) &&
+                styles.disabled,
             ]}>
             {isDrafting ? (
               <ActivityIndicator
@@ -580,37 +572,40 @@ const styles = StyleSheet.create({
     width: '100%',
     color: COLORS.black,
   },
+  disabled: {
+    backgroundColor: 'rgba(55, 134, 230, 0.15)',
+  },
   sentBtn: {
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.primaryBtn,
     padding: 8,
     borderRadius: 99,
     // iOS Shadow
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 4},
+    // shadowOpacity: 0.3,
+    // shadowRadius: 4,
 
     // Android Shadow
-    elevation: 5,
+    // elevation: 5,
   },
   draftBtn: {
     position: 'absolute',
     right: 70,
     bottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.primaryBtn,
     padding: 8,
     borderRadius: 99,
     // iOS Shadow
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 4},
+    // shadowOpacity: 0.3,
+    // shadowRadius: 4,
 
     // Android Shadow
-    elevation: 5,
+    // elevation: 5,
   },
   modal: {
     paddingHorizontal: 15,
