@@ -24,6 +24,8 @@ import PlusIcon from '../../assets/Icons/plus.svg';
 import QRIcon from '../../assets/Icons/qr.svg';
 import SearchIcon from '../../assets/Icons/search.svg';
 import CheckIcon from '../../assets/Icons/check.svg';
+import TrashIcon from '../../assets/Icons/trash.svg';
+import TrashIcon2 from '../../assets/Icons/trash-2.svg';
 
 interface SVGControllerProps {
   name: string;
@@ -91,6 +93,10 @@ const SVGController = ({
         return <SearchIcon width={width} height={height} color={color} />;
       case 'Check':
         return <CheckIcon width={width} height={height} color={color} />;
+      case 'move to Recycle Bin':
+        return <TrashIcon width={width} height={height} color={color} />;
+      case 'delete permanently':
+        return <TrashIcon2 width={width} height={height} color={color} />;
 
       default:
         return <BellIcon width={width} height={height} color={color} />;

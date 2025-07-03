@@ -1,26 +1,29 @@
 import React from 'react';
 import {Modal, Platform, Pressable, StyleSheet, Text, View} from 'react-native';
 import {COLORS, SIZES} from '../constant/Themes';
+import SVGController from './SVGController';
 
 interface props {
   total: number;
+  children?: React.ReactNode;
   setIsModalShow: any;
   isModalShow: boolean;
   onPressCallApi?: any;
   modalText?: string;
-  deleteMessage?: string;
+  actionName: string;
   deleteText?: string;
   isDisabled?: boolean;
   onCancel?: any;
 }
 const CustomDeleteModal = ({
   total,
+  children,
   setIsModalShow,
   isModalShow,
   onPressCallApi,
   onCancel,
   modalText,
-  deleteMessage,
+  actionName,
   deleteText = 'Continue',
   isDisabled = false,
 }: props) => {
@@ -38,20 +41,27 @@ const CustomDeleteModal = ({
             style={
               Platform.OS === 'ios'
                 ? styles.paddingHorizontal30
-                : styles.paddingHorizontal0
+                : styles.boxStyle
             }>
+            <View style={styles.iconStyle}>
+              <SVGController
+                name={actionName}
+                width={39}
+                height={39}
+                color={COLORS.white}
+              />
+            </View>
             {Platform.OS === 'ios' ? (
               <Text style={styles.confermationText}>
                 Delete {total} Conversations?
               </Text>
             ) : (
               <Text style={styles.title}>
-                {deleteMessage ? deleteMessage : 'Delete Notification'}
+                Are you sure you want to {actionName}?
               </Text>
             )}
-            {/* <Text style={styles.modalText}>{modalText}</Text> */}
+            {children}
           </View>
-          <View style={styles.itemListWrapper}></View>
 
           {Platform.OS === 'android' ? (
             <View style={styles.textBottom}>
@@ -102,12 +112,13 @@ const styles = StyleSheet.create({
   },
 
   modalView: {
+    position: 'relative',
     backgroundColor: 'white',
-    paddingHorizontal: Platform.OS === 'android' ? 20 : 0,
-    paddingVertical: Platform.OS === 'ios' ? 20 : 20,
+    paddingHorizontal: Platform.OS === 'android' ? 18 : 0,
+    paddingVertical: Platform.OS === 'ios' ? 20 : 48,
     shadowColor: '#000',
-    borderRadius: 4,
-    width: '90%',
+    borderRadius: 5,
+    width: '80%',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -116,6 +127,28 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     overflow: 'hidden',
+  },
+
+  boxStyle: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '20%',
+    position: 'relative',
+    borderRadius: 5,
+
+    backgroundColor: '#FB1A2026',
+  },
+  iconStyle: {
+    position: 'absolute',
+    top: -35,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'red',
+    height: 65,
+    width: 65,
+    borderRadius: 50,
   },
   modalText: {
     fontSize: 14,
@@ -127,19 +160,29 @@ const styles = StyleSheet.create({
   },
   textStyle: {
     color: COLORS.white,
-    padding: 7,
-    backgroundColor: COLORS.black,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    fontSize: 14,
+    fontWeight: '400',
+    borderWidth: 1,
+    borderColor: '#D3DCE7',
+    backgroundColor: COLORS.primaryRed,
+    borderRadius: 50,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
   },
   cancelTxtStyle: {
-    color: COLORS.black,
-    padding: 7,
+    color: COLORS.primaryRed,
+    fontSize: 14,
+    fontWeight: '400',
+    borderWidth: 1,
+    borderColor: '#D3DCE7',
+    borderRadius: 50,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
   },
   textBottom: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    // marginTop: 30,
+    justifyContent: 'center',
+    marginTop: 24,
     fontSize: 14,
     fontWeight: '500',
     lineHeight: 16,
@@ -174,22 +217,13 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: COLORS.offDay,
   },
-  paddingHorizontal0: {
-    paddingHorizontal: 0,
-  },
   paddingHorizontal30: {
     paddingHorizontal: 30,
   },
   title: {
     fontSize: 18,
-    lineHeight: 28,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#1C1B1F',
-  },
-  itemListWrapper: {
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    marginTop: 5,
-    marginBottom: 10,
+    textAlign: 'center',
   },
 });
