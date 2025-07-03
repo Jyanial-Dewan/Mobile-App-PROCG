@@ -178,7 +178,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       <View style={styles.main}>
         <View>
           <Image source={Images.AppLogoWithNameLarge} style={styles.logo} />
-          {/* <Text style={styles.appName}>PRO-CG</Text> */}
+          <Text style={styles.textStyle}>Advanced Controls</Text>
         </View>
         {/* To Login */}
         <Column>
@@ -310,19 +310,17 @@ const styles = StyleSheet.create({
   },
   logo: {
     marginTop: 22,
-    marginBottom: 79,
     alignSelf: 'center',
     height: 60,
     width: 186,
     resizeMode: 'contain',
   },
-  appName: {
-    color: COLORS.transparentDark,
-    fontSize: 30,
-    fontWeight: 'bold',
-    lineHeight: 38,
+  textStyle: {
+    marginBottom: 53,
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '700',
     textAlign: 'center',
-    paddingBottom: 30,
   },
   btn: {
     borderRadius: 8,
