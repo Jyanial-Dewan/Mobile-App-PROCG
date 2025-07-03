@@ -153,7 +153,7 @@ const RenderMessageItem = observer(
             total={1}
             onPressCallApi={() => handleDelete()}
             onCancel={() => onCancel()}
-            deleteMessage="Are you sure you want to delete permanently?"
+            actionName="delete permanently"
           />
         )}
         <GestureDetector gesture={panGesture}>
@@ -519,8 +519,7 @@ const RecycleBin = observer(() => {
         onCancel={handleCancelLongPress}
         setIsModalShow={setIsModalShow}
         onPressCallApi={handleMultipleDelete}
-        modalText={`This is parmanent and can't be undone`}
-        deleteText="Delete"
+        actionName="delete permanently"
       />
     </ContainerNew>
   );

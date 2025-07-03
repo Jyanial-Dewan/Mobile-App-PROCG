@@ -156,7 +156,7 @@ const RenderMessageItem = ({
           total={1}
           onPressCallApi={() => handleDelete()}
           onCancel={() => onCancel()}
-          deleteMessage="Are you sure you want to move to Recycle Bin?"
+          actionName="move to Recycle Bin"
         />
       )}
       <GestureDetector gesture={panGesture}>
