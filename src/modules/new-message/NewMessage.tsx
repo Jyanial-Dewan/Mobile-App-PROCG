@@ -221,15 +221,11 @@ const NewMessage = () => {
             onPress={handleSend}
             style={[
               styles.sentBtn,
-              {
-                opacity:
-                  recivers.length === 0 ||
-                  body === '' ||
-                  subject === '' ||
-                  isSending
-                    ? 0.5
-                    : 1,
-              },
+              (recivers.length === 0 ||
+                body === '' ||
+                subject === '' ||
+                isSending) &&
+                styles.disabled,
             ]}
             disabled={
               recivers.length === 0 ||
@@ -255,13 +251,9 @@ const NewMessage = () => {
             }
             style={[
               styles.draftBtn,
-              {
-                opacity:
-                  (recivers.length === 0 && body === '' && subject === '') ||
-                  isDrafting
-                    ? 0.5
-                    : 1,
-              },
+              ((recivers.length === 0 && body === '' && subject === '') ||
+                isDrafting) &&
+                styles.disabled,
             ]}>
             {isDrafting ? (
               <ActivityIndicator
@@ -411,6 +403,7 @@ const NewMessage = () => {
             value={body}
             onChangeText={text => setBody(text)}
             multiline={true}
+            placeholderTextColor={COLORS.darkGray}
           />
         </View>
       </View>
@@ -464,33 +457,36 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.primaryBtn,
     padding: 8,
     borderRadius: 99,
     // iOS Shadow
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 4},
+    // shadowOpacity: 0.3,
+    // shadowRadius: 4,
 
     // Android Shadow
-    elevation: 5,
+    // elevation: 5,
+  },
+  disabled: {
+    backgroundColor: 'rgba(55, 134, 230, 0.15)',
   },
   draftBtn: {
     position: 'absolute',
     right: 70,
     bottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.primaryBtn,
     padding: 8,
     borderRadius: 99,
     // iOS Shadow
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 4},
+    // shadowOpacity: 0.3,
+    // shadowRadius: 4,
 
     // Android Shadow
-    elevation: 5,
+    // elevation: 5,
   },
   modal: {
     paddingHorizontal: 15,

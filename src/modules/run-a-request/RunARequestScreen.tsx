@@ -44,6 +44,8 @@ const RunARequestScreen = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const url = selectedUrl || ProcgURL;
 
+  console.log(isVisible, 'isvisible');
+
   const selectData = [{title: 'True'}, {title: 'False'}];
 
   //Fetch ARM Tasks
@@ -305,7 +307,10 @@ const RunARequestScreen = () => {
                       alignItems: 'center',
                       flex: 1,
                     }}
-                    onPress={() => setIsVisible(true)}>
+                    onPress={() => {
+                      setIsVisible(false);
+                      setTimeout(() => setIsVisible(true), 100);
+                    }}>
                     <Text style={{color: COLORS.black}}>
                       {selectedDate?.toLocaleString() || 'Select Date and Time'}
                     </Text>
@@ -320,6 +325,7 @@ const RunARequestScreen = () => {
                         ...prev,
                         [param.parameter_name]: String(date),
                       }));
+                      setIsVisible(false);
                     }}
                     onCancel={() => setIsVisible(false)}
                   />
