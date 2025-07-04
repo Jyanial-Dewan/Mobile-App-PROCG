@@ -326,6 +326,7 @@ const DraftScreen = observer(() => {
         }));
 
         messageStore.saveDraftMessages(formattedRes);
+        setIsLoading(false);
       }
       if (res.length < 5) {
         setIsLoading(false);
