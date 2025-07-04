@@ -281,7 +281,7 @@ const RecycleBin = observer(() => {
   const isFocused = useIsFocused();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(0);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
@@ -317,12 +317,19 @@ const RecycleBin = observer(() => {
           date: new Date(msg.date),
         }));
         messageStore.saveBinMessages(formattedRes);
+        setIsLoading(false);
       }
       if (res.length < 5) {
+        setIsLoading(false);
         return;
       }
     },
-    [isFocused, currentPage, messageStore.binMessages.length],
+    [
+      isFocused,
+      currentPage,
+      messageStore.binMessages.length,
+      messageStore.refreshing,
+    ],
   );
 
   const handleRefresh = () => {
@@ -508,7 +515,11 @@ const RecycleBin = observer(() => {
         contentContainerStyle={
           messageStore.binMessages.length === 0 ? styles.flexGrow : null
         }
-        emptyItem={EmptyListItem}
+        emptyItem={
+          !isLoading && messageStore.binMessages.length === 0
+            ? EmptyListItem
+            : null
+        }
         refreshing={messageStore.refreshing}
         onRefresh={handleRefresh}
       />

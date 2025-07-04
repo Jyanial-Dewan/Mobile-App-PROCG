@@ -242,9 +242,11 @@ const RenderMessageItem = ({
                   <CustomTextNew
                     txtStyle={styles.headText}
                     text={
-                      item.recivers.length > 1
-                        ? `${item.recivers[0]?.name} ...`
-                        : item.recivers[0]?.name
+                      item.recivers.length > 0 && item.recivers[0]?.name
+                        ? item.recivers.length > 1
+                          ? `${item.recivers[0]?.name} ...`
+                          : item.recivers[0]?.name
+                        : '(no user)'
                     }
                   />
                   <View style={{flexDirection: 'row', gap: 5}}>
@@ -285,7 +287,7 @@ const DraftScreen = observer(() => {
     useNavigation<NativeStackNavigationProp<RootStackScreensParms>>();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {control, setValue} = useForm();
   const [currentPage, setCurrentPage] = useState(1);
@@ -304,9 +306,11 @@ const DraftScreen = observer(() => {
   );
   useAsyncEffect(
     async isMounted => {
+      setIsLoading(true);
       if (!isMounted()) {
         return null;
       }
+
       const api_params = {
         url: api.DraftMessages + userInfo?.user_name + `/${currentPage}`,
         baseURL: url,
@@ -322,8 +326,10 @@ const DraftScreen = observer(() => {
         }));
 
         messageStore.saveDraftMessages(formattedRes);
+        setIsLoading(false);
       }
       if (res.length < 5) {
+        setIsLoading(false);
         return;
       }
     },
@@ -474,7 +480,11 @@ const DraftScreen = observer(() => {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         hasMore={hasMore}
-        emptyItem={EmptyListItem}
+        emptyItem={
+          !isLoading && messageStore.draftMessages.length === 0
+            ? EmptyListItem
+            : null
+        }
         contentContainerStyle={
           messageStore.draftMessages.length === 0 ? styles.flexGrow : null
         }
