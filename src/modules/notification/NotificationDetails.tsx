@@ -36,13 +36,12 @@ const NotificationDetails = observer(() => {
   const {_id} = route.params as {_id: string};
   const navigation = useNavigation();
   const [totalMessages, setTotalMessages] = useState<any[]>([]);
-  const [totalInvolvedUsers, setTotalInvolvedUsers] = useState<string[]>([]);
+  // const [totalInvolvedUsers, setTotalInvolvedUsers] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [recivers, setRecivers] = useState<User[]>([]);
   const [parrentMessage, setParrentMessage] = useState<any>();
-  const {datePart, timePart} = formateDateTime(parrentMessage?.date);
 
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
@@ -82,39 +81,39 @@ const NotificationDetails = observer(() => {
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
         setParrentMessage(res);
-        setTotalInvolvedUsers(res.involvedusers);
+        // setTotalInvolvedUsers(res.involvedusers);
       }
     },
     [isFocused, _id],
   );
 
-  const handleDeleteMessage = async (msgId: string) => {
-    const deleteParams = {
-      url: api.DeleteMessage + msgId + `/${userInfo?.user_name}`,
-      method: 'put',
-      baseURL: url,
-      isConsole: true,
-      isConsoleParams: true,
-    };
-    try {
-      setIsLoading(true);
-      const response = await httpRequest(deleteParams, setIsLoading);
-      if (response) {
-        socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_name});
-        toaster.show({
-          message: 'Message has been moved to recyclebin.',
-          type: 'warning',
-        });
-        setTimeout(async () => {
-          navigation.goBack();
-        }, 1000);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        toaster.show({message: error.message, type: 'error'});
-      }
-    }
-  };
+  // const handleDeleteMessage = async (msgId: string) => {
+  //   const deleteParams = {
+  //     url: api.DeleteMessage + msgId + `/${userInfo?.user_name}`,
+  //     method: 'put',
+  //     baseURL: url,
+  //     isConsole: true,
+  //     isConsoleParams: true,
+  //   };
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await httpRequest(deleteParams, setIsLoading);
+  //     if (response) {
+  //       socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_name});
+  //       toaster.show({
+  //         message: 'Message has been moved to recyclebin.',
+  //         type: 'warning',
+  //       });
+  //       setTimeout(async () => {
+  //         navigation.goBack();
+  //       }, 1000);
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       toaster.show({message: error.message, type: 'error'});
+  //     }
+  //   }
+  // };
 
   const handleReceivers = (id: string) => {
     setShowModal(true);

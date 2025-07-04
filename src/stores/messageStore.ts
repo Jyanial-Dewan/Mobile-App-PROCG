@@ -153,7 +153,13 @@ export const MessageStore = types
       self.draftMessages.replace(uniqueMessages);
     },
     addDraftMessage(msg: MessageSnapshotType) {
-      if (self.draftMessages) {
+      const existingIndex = self.draftMessages.findIndex(m => m.id === msg.id);
+
+      if (existingIndex !== -1) {
+        // Replace the existing message with a model instance
+        self.draftMessages[existingIndex] = MessageModel.create(msg);
+      } else {
+        // Add new message at the start as a model instance
         self.draftMessages.unshift(msg);
       }
     },
@@ -172,7 +178,7 @@ export const MessageStore = types
       );
       if (messageToRemove) {
         const snapshot = getSnapshot(messageToRemove);
-        this.addBinMessage(getSnapshot(messageToRemove));
+        // this.addBinMessage(getSnapshot(messageToRemove));
         self.draftMessages.remove(messageToRemove);
         self.totalDraft--;
         this.addBinMessage(snapshot);

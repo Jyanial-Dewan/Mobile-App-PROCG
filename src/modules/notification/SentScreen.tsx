@@ -292,7 +292,7 @@ const SentScreen = observer(() => {
   const navigation = useNavigation<NotificationDetailsNavigationProp>();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const {control, setValue} = useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(0);
@@ -313,7 +313,9 @@ const SentScreen = observer(() => {
       if (!isMounted()) {
         return null;
       }
+
       if (messageStore.sentMessages.length === messageStore.totalSent) {
+        setIsLoading(false);
         return;
       }
       const api_params = {
@@ -331,8 +333,10 @@ const SentScreen = observer(() => {
         }));
 
         messageStore.saveSentMessages(formattedRes);
+        setIsLoading(false);
       }
       if (res.length < 5) {
+        setIsLoading(false);
         return;
       }
     },
@@ -488,7 +492,11 @@ const SentScreen = observer(() => {
         }
         refreshing={messageStore.refreshing}
         onRefresh={handleRefresh}
-        emptyItem={EmptyListItem}
+        emptyItem={
+          !isLoading && messageStore.sentMessages.length === 0
+            ? EmptyListItem
+            : null
+        }
       />
     </ContainerNew>
   );

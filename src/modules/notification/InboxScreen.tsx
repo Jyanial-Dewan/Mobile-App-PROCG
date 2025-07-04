@@ -477,22 +477,22 @@ const InboxScreen = observer(() => {
     );
   };
 
-  const renderInboxMessages = useCallback(
-    ({item}: any) => {
-      <RenderMessageItem
-        item={item}
-        userInfo={userInfo}
-        selectedIds={selectedIds}
-        setSelectedIds={setSelectedIds}
-        notificationIds={notificationIds}
-        setIsLongPressed={setIsLongPressed}
-        handleLongPress={handleLongPress}
-        handlePress={handlePress}
-        handleSingleDeleteMessage={handleSingleDeleteMessage}
-      />;
-    },
-    [messageStore.refreshing],
-  );
+  // const renderInboxMessages = useCallback(
+  //   ({item}: any) => {
+  //     <RenderMessageItem
+  //       item={item}
+  //       userInfo={userInfo}
+  //       selectedIds={selectedIds}
+  //       setSelectedIds={setSelectedIds}
+  //       notificationIds={notificationIds}
+  //       setIsLongPressed={setIsLongPressed}
+  //       handleLongPress={handleLongPress}
+  //       handlePress={handlePress}
+  //       handleSingleDeleteMessage={handleSingleDeleteMessage}
+  //     />;
+  //   },
+  //   [messageStore.refreshing],
+  // );
 
   return (
     <ContainerNew
@@ -534,7 +534,11 @@ const InboxScreen = observer(() => {
         contentContainerStyle={
           messageStore.sentMessages.length === 0 ? styles.flexGrow : null
         }
-        emptyItem={EmptyListItem}
+        emptyItem={
+          !isLoading && messageStore.receivedMessages.length === 0
+            ? EmptyListItem
+            : null
+        }
         refreshing={messageStore.refreshing}
         onRefresh={handleRefresh}
       />
