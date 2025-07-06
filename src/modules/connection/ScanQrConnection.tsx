@@ -12,21 +12,13 @@ import {useNavigation} from '@react-navigation/native';
 
 export interface NavigationStackParamList {
   [key: string]: undefined | object;
-  ChooseConnection: {url: string};
+  ChooseConnection: {isValid: boolean};
 }
 
 export type ChooseConnectionNavigationProp = NativeStackNavigationProp<
   NavigationStackParamList,
   'ChooseConnection'
 >;
-
-interface PayloadType {
-  link: string;
-}
-
-const initValue = {
-  link: '',
-};
 
 const CustomMarker = () => (
   <View style={styles.customMarkerContainer}>
@@ -48,11 +40,11 @@ const ScanQrConnection = observer<RootStackScreenProps<'ScanQrConnection'>>(
         rootStore.addUrl(url);
         rootStore.setSelectedUrl(url);
         navigation.navigate('ChooseConnection', {
-          url: '',
+          isValid: true,
         });
       } else {
         navigation.navigate('ChooseConnection', {
-          url: 'Invalid',
+          isValid: false,
         });
       }
     };

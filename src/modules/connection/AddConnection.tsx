@@ -26,7 +26,7 @@ const AddConnection = observer<RootStackScreenProps<'AddConnection'>>(
     const {control, handleSubmit, setValue} = useForm({
       defaultValues: initValue,
     });
-    const {isDirty} = useFormState({control});
+    const {isDirty} = useFormState({control, name: ['link']});
 
     const onSubmit = (data: PayloadType) => {
       const payload = {
@@ -34,19 +34,22 @@ const AddConnection = observer<RootStackScreenProps<'AddConnection'>>(
         checked: true,
       };
 
-      if (payload.link.trim()) {
-        rootStore.addUrl(payload.link.trim());
-        rootStore.setSelectedUrl(payload.link.trim());
+      const url = payload.link.replace(/\s+/g, '');
+
+      if (url) {
+        rootStore.addUrl(url);
+        rootStore.setSelectedUrl(url);
         navigation.goBack();
       }
     };
+
     return (
       <ContainerNew
         backgroundColor={COLORS.lightBackground}
         header={<MainHeader routeName="Add_Connection" />}
         footer={
           <CustomButtonNew
-            disabled={isDirty}
+            disabled={!isDirty}
             btnText="Done"
             onBtnPress={handleSubmit(onSubmit)}
             btnstyle={styles.btn}

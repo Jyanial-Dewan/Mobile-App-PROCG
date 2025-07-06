@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
 import MainHeader from '../../common/components/MainHeader';
@@ -15,13 +15,9 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {useRootStore} from '../../stores/rootStore';
-import CustomFlatList from '../../common/components/CustomFlatList';
+import ConnectionList from '../../common/components/ConnectionList';
 import CustomQrModel from '../../common/components/CustomInvalidModal';
 import SVGController from '../../common/components/SVGController';
-
-const PlusIcon = () => {
-  return <Plus name="plus" size={24} color="gray" />;
-};
 
 const Last = () => {
   const navigation = useNavigation();
@@ -34,21 +30,27 @@ const Last = () => {
 
 const ChooseConnection = observer(() => {
   const [isModalShow, setIsModalShow] = useState(false);
+  const navigation = useNavigation();
   const rootStore = useRootStore();
   const isFocused = useIsFocused();
   type RouteParams = {
     ChooseConnection: {
-      url?: string;
+      isValid?: boolean;
     };
   };
   const route = useRoute<RouteProp<RouteParams, 'ChooseConnection'>>();
-  const invalidUrl = route.params?.url;
+  const invalidUrl = route.params?.isValid;
 
   useEffect(() => {
-    if (invalidUrl === 'Invalid') {
-      setIsModalShow(true);
-    }
-  }, [invalidUrl]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route.params?.isValid === false) {
+        setIsModalShow(true);
+      }
+    });
+    return unsubscribe;
+  }, [invalidUrl, route.params]);
+
+  console.log(invalidUrl);
 
   useEffect(() => {
     if (isFocused) {
@@ -65,10 +67,14 @@ const ChooseConnection = observer(() => {
       header={<MainHeader routeName="Choose_Connection" last={<Last />} />}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}>
-      <CustomFlatList
+      <ConnectionList
         data={rootStore.urls}
         RenderItems={({item}: any) => (
-          <View
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              handleCheckboxChange(item);
+            }}
             style={[
               styles.connections,
               rootStore.isSelected(item)
@@ -79,13 +85,9 @@ const ChooseConnection = observer(() => {
               color="#000000"
               uncheckedColor={COLORS.borderColor}
               status={rootStore.isSelected(item) ? 'checked' : 'unchecked'}
-              onPress={() => {
-                handleCheckboxChange(item);
-                console.log(item);
-              }}
             />
             <CustomTextNew text={item} txtWeight={400} txtSize={15} />
-          </View>
+          </TouchableOpacity>
         )}
       />
       <CustomQrModel

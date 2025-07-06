@@ -52,7 +52,7 @@ const CustomInputNew = ({
     if (onChange) {
       onChange(e);
     } else {
-      setValue(name, e);
+      setValue(name, e, {shouldDirty: true});
     }
   };
   return (
