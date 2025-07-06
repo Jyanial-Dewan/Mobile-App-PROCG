@@ -30,21 +30,27 @@ const Last = () => {
 
 const ChooseConnection = observer(() => {
   const [isModalShow, setIsModalShow] = useState(false);
+  const navigation = useNavigation();
   const rootStore = useRootStore();
   const isFocused = useIsFocused();
   type RouteParams = {
     ChooseConnection: {
-      url?: string;
+      isValid?: boolean;
     };
   };
   const route = useRoute<RouteProp<RouteParams, 'ChooseConnection'>>();
-  const invalidUrl = route.params?.url;
+  const invalidUrl = route.params?.isValid;
 
   useEffect(() => {
-    if (invalidUrl === 'Invalid') {
-      setIsModalShow(true);
-    }
-  }, [invalidUrl]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route.params?.isValid === false) {
+        setIsModalShow(true);
+      }
+    });
+    return unsubscribe;
+  }, [invalidUrl, route.params]);
+
+  console.log(invalidUrl);
 
   useEffect(() => {
     if (isFocused) {
