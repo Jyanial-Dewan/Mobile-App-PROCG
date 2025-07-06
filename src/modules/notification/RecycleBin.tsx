@@ -553,6 +553,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 14,
+    height: ITEMHEIGHT,
   },
   imageStyle: {
     borderRadius: 50,
