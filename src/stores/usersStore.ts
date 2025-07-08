@@ -24,7 +24,7 @@ export const UsersStore = types
   })
   .actions(self => ({
     saveUsers(usrs: Array<UserSnapshotType>) {
-      const validUsers = usrs.map(usr => UserModel.create(usr));
+      const validUsers = usrs?.map(usr => UserModel.create(usr));
       self.users.replace(validUsers);
     },
   }));

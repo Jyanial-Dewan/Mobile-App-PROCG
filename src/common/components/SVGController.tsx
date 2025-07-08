@@ -14,7 +14,7 @@ import MailIcon from '../../assets/Icons/mail.svg';
 import ChevronDownIcon from '../../assets/Icons/chevron-down.svg';
 import ChevronUpIcon from '../../assets/Icons/chevron-up.svg';
 import ChevronRightIcon from '../../assets/Icons/chevron-right.svg';
-import ChevronLeftIcon from '../../assets/Icons/chevron-left';
+import ChevronLeftIcon from '../../assets/Icons/chevron-left.svg';
 import SendIcon from '../../assets/Icons/send.svg';
 import ScanTextIcon from '../../assets/Icons/scan-text.svg';
 import CombineIcon from '../../assets/Icons/combine.svg';
@@ -26,6 +26,9 @@ import SearchIcon from '../../assets/Icons/search.svg';
 import CheckIcon from '../../assets/Icons/check.svg';
 import TrashIcon from '../../assets/Icons/trash.svg';
 import TrashIcon2 from '../../assets/Icons/trash-2.svg';
+import CircleCheckBig from '../../assets/Icons/circle-check-big.svg';
+import CircleCheck from '../../assets/Icons/circle-check.svg';
+import Circle from '../../assets/Icons/circle.svg';
 
 interface SVGControllerProps {
   name: string;
@@ -97,6 +100,12 @@ const SVGController = ({
         return <TrashIcon width={width} height={height} color={color} />;
       case 'delete permanently':
         return <TrashIcon2 width={width} height={height} color={color} />;
+      case 'Circle-Check-Big':
+        return <CircleCheckBig width={width} height={height} color={color} />;
+      case 'Circle-Check':
+        return <CircleCheck width={width} height={height} color={color} />;
+      case 'Circle':
+        return <Circle width={width} height={height} color={color} />;
 
       default:
         return <BellIcon width={width} height={height} color={color} />;
