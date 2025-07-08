@@ -70,6 +70,7 @@ const RenderMessageItem = ({
 
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const noUserFallback = [require('../../assets/prifileImages/person.png')];
 
   const openDeleteModal = () => {
     setOpenModal(true);
@@ -222,7 +223,9 @@ const RenderMessageItem = ({
                         Authorization: `Bearer ${userInfo?.access_token}`,
                       },
                     }}
-                    fallback={fallbacks}
+                    fallback={
+                      item.recivers.length === 0 ? noUserFallback : fallbacks
+                    }
                   />
                 )}
               </View>

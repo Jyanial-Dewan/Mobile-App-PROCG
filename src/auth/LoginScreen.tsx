@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     marginTop: 18,
     textAlign: 'right',
-    color: '#F7941D',
+    color: 'rgba(55, 134, 230,0.8)',
     fontSize: 14,
     fontWeight: '500',
   },

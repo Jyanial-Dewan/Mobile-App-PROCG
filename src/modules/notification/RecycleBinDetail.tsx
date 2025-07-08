@@ -241,10 +241,12 @@ const RecycleBinDetail = observer(() => {
                     txtColor={COLORS.inputTextColor}
                     txtWeight={'500'}
                     text={
-                      'to ' +
-                      (parrentMessage?.recivers.length > 1
-                        ? `${parrentMessage?.recivers[0]?.name} ...`
-                        : parrentMessage?.recivers[0]?.name)
+                      parrentMessage.recivers.length === 0
+                        ? '(no user)'
+                        : 'to ' +
+                          (parrentMessage?.recivers.length > 1
+                            ? `${parrentMessage?.recivers[0]?.name} ...`
+                            : parrentMessage?.recivers[0]?.name)
                     }
                   />
                 </View>
