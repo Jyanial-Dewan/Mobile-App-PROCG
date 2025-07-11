@@ -56,33 +56,33 @@ const MenuMainIndex = observer(() => {
               }}
               style={[
                 styles.menuItemHeader,
-                isExpandable && {backgroundColor: COLORS.lightGray7},
+                // isExpandable && {backgroundColor: COLORS.lightGray7},
               ]}>
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  gap: 5,
                 }}>
+                {isExpandable && (
+                  <SVGController
+                    name={
+                      openMenus[`${parentKey}-${item.id}`]
+                        ? 'Circle-Chevron-Down'
+                        : 'Circle-Chevron-Right'
+                    }
+                    color={COLORS.black}
+                  />
+                )}
                 {!isExpandable && (
-                  <Entypo name="dot-single" size={22} color={COLORS.black} />
+                  <SVGController name="Circle-Dot" color={COLORS.black} />
                 )}
                 <Text
                   style={[styles.menuText, {marginLeft: isExpandable ? 0 : 6}]}>
                   {item.name}
                 </Text>
               </View>
-
-              {isExpandable && (
-                <SVGController
-                  name={
-                    openMenus[`${parentKey}-${item.id}`]
-                      ? 'Chevron-Left'
-                      : 'Chevron-Down'
-                  }
-                  color={COLORS.black}
-                />
-              )}
             </TouchableOpacity>
 
             {isExpandable && openMenus[itemKey] && (
@@ -116,12 +116,15 @@ const MenuMainIndex = observer(() => {
                 <TouchableOpacity
                   style={styles.menuHeader}
                   onPress={() => toggleMenu(itemKey)}>
-                  <Text style={styles.menuTitle}>{menu.name}</Text>
-
                   <SVGController
-                    name={openMenus[itemKey] ? 'Chevron-Left' : 'Chevron-Down'}
+                    name={
+                      openMenus[itemKey]
+                        ? 'Circle-Chevron-Down'
+                        : 'Circle-Chevron-Right'
+                    }
                     color={COLORS.black}
                   />
+                  <Text style={styles.menuTitle}>{menu.name}</Text>
                 </TouchableOpacity>
                 {openMenus[itemKey] && (
                   <View style={styles.menuItemsContainer}>
@@ -153,18 +156,20 @@ const styles = StyleSheet.create({
   },
   menuHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
     backgroundColor: COLORS.lightBackground,
     borderRadius: 8,
+    gap: 5,
   },
 
   menuTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#212529',
+    maxWidth: '90%',
   },
   menuItemsContainer: {
     paddingLeft: 20,
