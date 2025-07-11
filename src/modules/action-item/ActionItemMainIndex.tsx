@@ -39,31 +39,31 @@ const actionItemsData = [
     id: 1,
     title: 'Action Item 1',
     time: 'Tue, 22 Jul 2025',
-    subject: 'lorem ipsum 1',
+    subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    status: 'Pending',
-    icon: 'Circle',
+    icon: 'Circle-Check-Big',
+    status: 'Completed',
   },
   {
     id: 2,
     title: 'Action Item 2',
     time: 'Tue, 22 Jul 2025',
-    subject: 'lorem ipsum 2',
+    subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    status: 'Completed',
-    icon: 'Circle-Check-Big',
+    icon: 'Circle-Check',
+    status: 'In Progress',
   },
   {
     id: 3,
     title: 'Action Item 3',
     time: 'Tue, 22 Jul 2025',
-    subject: 'lorem ipsum 3',
+    subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    status: 'In Progress',
-    icon: 'Circle-Check',
+    icon: 'Circle',
+    status: 'Pending',
   },
 ];
 const ActionItemMainIndex = () => {
