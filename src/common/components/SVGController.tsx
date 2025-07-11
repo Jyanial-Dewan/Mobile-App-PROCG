@@ -29,6 +29,9 @@ import TrashIcon2 from '../../assets/Icons/trash-2.svg';
 import CircleCheckBig from '../../assets/Icons/circle-check-big.svg';
 import CircleCheck from '../../assets/Icons/circle-check.svg';
 import Circle from '../../assets/Icons/circle.svg';
+import CircleChevronDown from '../../assets/Icons/circle-chevron-down.svg';
+import CircleChevronRight from '../../assets/Icons/circle-chevron-right.svg';
+import CircleDot from '../../assets/Icons/circle-dot.svg';
 
 interface SVGControllerProps {
   name: string;
@@ -106,6 +109,16 @@ const SVGController = ({
         return <CircleCheck width={width} height={height} color={color} />;
       case 'Circle':
         return <Circle width={width} height={height} color={color} />;
+      case 'Circle-Chevron-Down':
+        return (
+          <CircleChevronDown width={width} height={height} color={color} />
+        );
+      case 'Circle-Chevron-Right':
+        return (
+          <CircleChevronRight width={width} height={height} color={color} />
+        );
+      case 'Circle-Dot':
+        return <CircleDot width={width} height={height} color={color} />;
 
       default:
         return <BellIcon width={width} height={height} color={color} />;
