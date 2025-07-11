@@ -24,6 +24,8 @@ import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect'
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
 import axios from 'axios';
+import {convertDate} from '../../common/services/DateConverter';
+import Column from '../../common/components/Column';
 
 interface IViewRequest {
   request_id: number;
@@ -173,7 +175,7 @@ const ViewRequestsScreen = observer(() => {
     [selectedItem],
   );
 
-  console.log(selectedItem?.result);
+  console.log(JSON.stringify(selectedItem), 'selectedItem');
 
   return (
     <ContainerNew
@@ -240,25 +242,41 @@ const ViewRequestsScreen = observer(() => {
 
         {selectedItem?.parameters?.size > 0 ? (
           [...selectedItem?.parameters?.entries()]?.map(
-            ([keys, value], index) => (
+            ([key, value], index) => (
               <View key={index} style={{marginTop: 10}}>
-                <Row>
+                <Row
+                  rowStyle={{
+                    gap: 5,
+                    alignItems: 'center',
+                    // backgroundColor: COLORS.black40,
+                  }}>
                   <CustomTextNew
-                    text={`${keys}`}
+                    text={`${key}: `}
                     txtColor={COLORS.black}
                     txtSize={14}
                     txtWeight={500}
                   />
-                </Row>
-                <Row>
                   <CustomTextNew
                     key={index}
-                    text={`${value}`}
+                    text={
+                      key === 'Flag' && typeof value === 'boolean'
+                        ? value === true
+                          ? 'Yes'
+                          : 'No'
+                        : key === 'Date-Time'
+                          ? convertDate(new Date(value))
+                          : key === 'get_id'
+                            ? Number(value)
+                            : key === 'EMPLOYEE_ID'
+                              ? Number(value)
+                              : value
+                    }
                     txtColor={COLORS.inputTextColor}
-                    txtSize={13}
+                    txtSize={14}
                     txtWeight={400}
                   />
                 </Row>
+                <Row></Row>
               </View>
             ),
           )
@@ -280,21 +298,49 @@ const ViewRequestsScreen = observer(() => {
             txtWeight={400}
           />
         </Row>
-        <Row>
-          <CustomTextNew
-            text={
-              selectedItem?.result
-                ? !Array.isArray(selectedItem.result)
-                  ? selectedItem.result?.values?.().next().value
-                  : 'null'
-                : 'null'
-            }
-            txtColor={COLORS.inputTextColor}
-            txtSize={13}
-            txtWeight={400}
-            padTop={10}
-          />
-        </Row>
+        <Column>
+          {selectedItem?.result ? (
+            [...Object.entries(selectedItem?.result)]?.map(
+              ([key, value], index) => (
+                <View
+                  key={index}
+                  style={{
+                    marginTop: 10,
+                  }}>
+                  <Row
+                    rowStyle={{
+                      gap: 5,
+                      alignItems: 'center',
+                    }}>
+                    <CustomTextNew
+                      text={`${key}: `}
+                      txtColor={COLORS.black}
+                      txtSize={14}
+                      txtWeight={500}
+                      txtStyle={{
+                        textTransform: 'capitalize',
+                      }}
+                    />
+                    <CustomTextNew
+                      text={value as string}
+                      txtColor={COLORS.inputTextColor}
+                      txtSize={14}
+                      txtWeight={400}
+                    />
+                  </Row>
+                </View>
+              ),
+            )
+          ) : (
+            <CustomTextNew
+              text="null"
+              txtColor={COLORS.inputTextColor}
+              txtSize={13}
+              txtWeight={400}
+              padTop={10}
+            />
+          )}
+        </Column>
         <View style={[styles.itemListWrapper, {borderColor: '#E4E9F2'}]} />
       </CustomBottomSheetNew>
     </ContainerNew>

@@ -10,13 +10,18 @@ export const viewRequestModel = types.model('RequestModel', {
   status: types.string,
   user_task_name: types.maybeNull(types.string),
   user_schedule_name: types.maybeNull(types.string),
-  parameters: types.maybeNull(types.optional(types.map(types.integer), {})),
-  result: types.maybeNull(
-    types.union(
-      types.map(types.union(types.string, types.number)),
-      types.array(types.frozen()),
-    ),
-  ),
+  // parameters: types.maybeNull(types.optional(types.map(types.integer), {})),
+  // result: types.maybeNull(
+  //   types.union(
+  //     types.map(types.union(types.string, types.number)),
+  //     types.array(types.frozen()),
+  //   ),
+  // ),
+  parameters: types.maybeNull(types.map(types.frozen())),
+  result: types.maybeNull(types.frozen()),
+  // result: types.maybeNull(
+  //   types.map(types.union(types.string, types.number, types.boolean)),
+  // ),
 });
 
 export const viewRequestStore = types
