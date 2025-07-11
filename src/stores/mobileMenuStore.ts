@@ -1,37 +1,30 @@
 import {Instance, SnapshotOut, types} from 'mobx-state-tree';
 
-const MenuItemModel = types.model('menuItemModel', {
+const MenuItemModel = types.model('MenuItemModel', {
+  id: types.identifier,
   name: types.string,
-  routeName: types.union(types.string, types.undefined, types.null),
-});
-
-const SubMenusModel = types.model('subMenusModel', {
-  name: types.string,
-  routeName: types.maybe(types.string),
-  menuItems: types.optional(types.array(MenuItemModel), []),
   order: types.number,
-});
-
-export const subMenuModel = types.model('subMenuModel', {
-  submenu: types.string,
-  subMenus: types.array(SubMenusModel),
+  routeName: types.maybeNull(types.string),
+  children: types.optional(
+    types.array(types.late((): any => MenuItemModel)),
+    [],
+  ),
 });
 
 export const MenuStore = types
-  .model('menuStore', {
-    menu: types.array(subMenuModel),
+  .model('MenuStore', {
+    menu: types.array(MenuItemModel),
   })
   .actions(self => ({
-    saveMobileMenu(submenus: Array<MenuSnapshotType>) {
+    saveMobileMenu(menus: MenuSnapshotType[]) {
       try {
-        const validsubmenus = submenus.map(menu => subMenuModel.create(menu));
-
-        self.menu.replace(validsubmenus);
+        const validMenus = menus.map(menu => MenuItemModel.create(menu));
+        self.menu.replace(validMenus);
       } catch (err) {
         console.error('Menu parsing error:', err);
       }
     },
   }));
 
-export type MenuType = Instance<typeof subMenuModel>;
-export type MenuSnapshotType = SnapshotOut<typeof subMenuModel>;
+export type MenuType = Instance<typeof MenuItemModel>;
+export type MenuSnapshotType = SnapshotOut<typeof MenuItemModel>;
