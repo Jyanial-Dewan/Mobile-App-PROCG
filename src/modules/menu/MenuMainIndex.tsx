@@ -32,20 +32,20 @@ const MenuMainIndex = observer(() => {
   };
 
   const renderMenuItems = (
-    subMenus: any[],
+    children: any[],
     parentKey: string,
     level: number = 1,
   ) => {
-    return subMenus
-      .slice(0, subMenus.length + 1)
+    return children
+      .slice(0, children.length + 1)
       .sort((a, b) => a.order - b.order)
-      .map((item: any, index: number) => {
-        const itemKey = `${parentKey}-${item.name}`;
+      .map((item: any) => {
+        const itemKey = `${parentKey}-${item.id}`;
 
-        const isExpandable = item.menuItems?.length > 0;
+        const isExpandable = item.children && item.children.length > 0;
 
         return (
-          <View key={index} style={styles.menuItem}>
+          <View key={item.id} style={styles.menuItem}>
             <TouchableOpacity
               onPress={() => {
                 if (isExpandable) {
@@ -58,7 +58,12 @@ const MenuMainIndex = observer(() => {
                 styles.menuItemHeader,
                 isExpandable && {backgroundColor: COLORS.lightGray7},
               ]}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
                 {!isExpandable && (
                   <Entypo name="dot-single" size={22} color={COLORS.black} />
                 )}
@@ -71,7 +76,7 @@ const MenuMainIndex = observer(() => {
               {isExpandable && (
                 <SVGController
                   name={
-                    openMenus[`${parentKey}-${item.name}`]
+                    openMenus[`${parentKey}-${item.id}`]
                       ? 'Chevron-Left'
                       : 'Chevron-Down'
                   }
@@ -90,7 +95,7 @@ const MenuMainIndex = observer(() => {
                     alignItems: 'flex-start',
                   }, // indent deeper levels
                 ]}>
-                {renderMenuItems(item.menuItems, itemKey, level + 1)}
+                {renderMenuItems(item.children, itemKey, level + 1)}
               </View>
             )}
           </View>
@@ -101,25 +106,31 @@ const MenuMainIndex = observer(() => {
   return (
     <ContainerNew header={<MainHeader routeName="Menu" />}>
       <ScrollView contentContainerStyle={styles.container}>
-        {menuData.map((menu, index) => (
-          <View key={index} style={styles.menuContainer}>
-            <TouchableOpacity
-              style={styles.menuHeader}
-              onPress={() => toggleMenu(menu.submenu)}>
-              <Text style={styles.menuTitle}>{menu.submenu}</Text>
-              <SVGController
-                name={openMenus[menu.submenu] ? 'Chevron-Left' : 'Chevron-Down'}
-                color={COLORS.black}
-              />
-            </TouchableOpacity>
+        {menuData
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map(menu => {
+            const itemKey = `${menu.id}`;
+            return (
+              <View key={menu.id} style={styles.menuContainer}>
+                <TouchableOpacity
+                  style={styles.menuHeader}
+                  onPress={() => toggleMenu(itemKey)}>
+                  <Text style={styles.menuTitle}>{menu.name}</Text>
 
-            {openMenus[menu.submenu] && (
-              <View style={styles.menuItemsContainer}>
-                {renderMenuItems(menu.subMenus, menu.submenu)}
+                  <SVGController
+                    name={openMenus[itemKey] ? 'Chevron-Left' : 'Chevron-Down'}
+                    color={COLORS.black}
+                  />
+                </TouchableOpacity>
+                {openMenus[itemKey] && (
+                  <View style={styles.menuItemsContainer}>
+                    {renderMenuItems(menu.children, itemKey)}
+                  </View>
+                )}
               </View>
-            )}
-          </View>
-        ))}
+            );
+          })}
       </ScrollView>
     </ContainerNew>
   );
@@ -163,6 +174,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   menuItemHeader: {
+    width: '100%',
     paddingHorizontal: 8,
     paddingVertical: 4,
     flexDirection: 'row',
