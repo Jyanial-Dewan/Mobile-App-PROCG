@@ -9,6 +9,7 @@ import {UsersStore} from './usersStore';
 import {MenuStore} from './mobileMenuStore';
 import {FcmTokenStore, FcmTokenType} from '../stores/fcmToken-store';
 import {viewRequestStore} from './viewRequestStore';
+import {DevicesStore} from './linkedDevicesStore';
 
 const RootStore = types
   .model('RootStore', {
@@ -27,6 +28,7 @@ const RootStore = types
     fcmToken: types.maybe(FcmTokenStore),
     menuStore: types.optional(MenuStore, {menu: []}),
     viewRequestStore: viewRequestStore,
+    devicesStore: types.optional(DevicesStore, {devices: []}),
   })
 
   .actions(self => ({

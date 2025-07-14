@@ -81,12 +81,25 @@ const ScanLoginQrCode = observer(() => {
           `Bearer ${res?.access_token}`;
         userInfoSave(res);
         // navigation.replace('HomeScreen');
-        navigate('Drawer');
-        toaster.show({message: 'Login Successfully', type: 'success'});
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
 
-        if (response && deviceInfoData) {
-          deviceInfoSave({...deviceInfoData, id: response.id});
+        if (response) {
+          deviceInfoSave({
+            id: response.id,
+            user_id: response.user_id,
+            device_type: response.device_type,
+            browser_name: 'App',
+            browser_version: '1.0',
+            os: response.os,
+            user_agent: response.user_agent,
+            added_at: response.added_at,
+            is_active: 1,
+            ip_address: response.ip_address,
+            location: response.location || 'Unknown (Location off)',
+            user: res.user_name,
+          });
+          navigate('Drawer');
+          toaster.show({message: 'Login Successfully', type: 'success'});
         }
       } else if (res === undefined || res === 401) {
         setIsModalShow(true);

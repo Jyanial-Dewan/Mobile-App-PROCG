@@ -44,7 +44,7 @@ const actionItemsData = [
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    icon: 'Alert-High',
+    icon: 'Alert-Low',
     status: 'High',
   },
   {
@@ -54,7 +54,7 @@ const actionItemsData = [
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    icon: 'Alert-Normal',
+    icon: 'Alert-Low',
     status: 'Normal',
   },
   {
@@ -99,12 +99,12 @@ const Alerts = () => {
             style={{
               padding: 5,
               borderRadius: 50,
-              backgroundColor:
-                item.status === 'High'
-                  ? COLORS.red
-                  : item.status === 'Normal'
-                    ? COLORS.yellow
-                    : COLORS.sayn,
+              backgroundColor: COLORS.red,
+              // item.status === 'High'
+              //   ? COLORS.red
+              //   : item.status === 'Normal'
+              //     ? COLORS.yellow
+              //     : COLORS.sayn,
             }}>
             {/* style={styles.iconContainer}> */}
             <SVGController name={item.icon} color={COLORS.white} />
@@ -117,7 +117,7 @@ const Alerts = () => {
                 txtColor={COLORS.black}
                 style={{fontSize: 15, fontWeight: 'bold'}}
               />
-              <CustomTextNew
+              {/* <CustomTextNew
                 text={item.status}
                 txtColor={
                   item.status === 'High'
@@ -126,7 +126,7 @@ const Alerts = () => {
                       ? COLORS.yellow
                       : COLORS.sayn
                 }
-              />
+              /> */}
             </Row>
             <CustomTextNew text={item.time} txtColor={COLORS.textColor} />
           </Column>

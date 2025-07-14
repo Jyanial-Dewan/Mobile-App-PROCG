@@ -25,7 +25,7 @@ export function useSocketContext() {
 }
 
 export function SocketContextProvider({children}: SocketContextProps) {
-  const {userInfo, messageStore} = useRootStore();
+  const {userInfo, messageStore, devicesStore} = useRootStore();
   const [username, setUserName] = useState<string | null>();
 
   // Memoize the socket connection so that it's created only once
@@ -88,6 +88,11 @@ export function SocketContextProvider({children}: SocketContextProps) {
       }
     });
 
+    // Device Action
+    socket?.on('addDevice', data => {
+      devicesStore.addDevice(data);
+    });
+
     return () => {
       socket?.off('receivedMessage');
       socket?.off('draftMessage');
@@ -95,11 +100,16 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('sync');
       socket?.off('deletedMessage');
       socket?.off('draftMessageId');
+      socket?.off('addDevice');
     };
   }, [socket]);
 
   return (
-    <SocketContext.Provider value={{socket, setUserName}}>
+    <SocketContext.Provider
+      value={{
+        socket,
+        setUserName,
+      }}>
       {children}
     </SocketContext.Provider>
   );

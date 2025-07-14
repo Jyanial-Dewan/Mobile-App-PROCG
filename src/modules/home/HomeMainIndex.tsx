@@ -48,6 +48,7 @@ const HomeMainIndex = () => {
     fcmToken,
     selectedUrl,
     menuStore,
+    devicesStore,
   } = useRootStore();
   const navigation = useNavigation<NavigationProp<any>>();
   const drawerStatus = useDrawerStatus();
@@ -160,10 +161,29 @@ const HomeMainIndex = () => {
     },
     [isFocused],
   );
+  //Fetch Devices
+  useAsyncEffect(
+    async isMounted => {
+      if (!isMounted()) {
+        return null;
+      }
+      const api_params = {
+        url: api.getDevices,
+        baseURL: url,
+        headers: {Authorization: `Bearer ${userInfo?.access_token}`},
+        isConsole: true,
+        isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      devicesStore.setDevices(res);
+    },
+    [isFocused],
+  );
 
   //Socket Connection
   useEffect(() => {
     socket?.on('inactiveDevice', data => {
+      console.log(data, 'inactiveDevice');
       socket.disconnect();
       if (deviceInfoData && deviceInfoData.id === data.id) {
         logout();

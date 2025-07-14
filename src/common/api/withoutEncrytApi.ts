@@ -31,6 +31,9 @@ const withoutEncryptionApi = [
   api.GetARMTasks,
   api.GetParemeterByTaskName,
   api.PostTask,
+  api.getDevices,
+  api.addDevice,
+  api.inactiveDevice,
 ];
 
 export {withoutEncryptionApi};

@@ -270,6 +270,12 @@ const Main = observer(() => {
     getDeviceInfo();
   }, []);
 
+  useEffect(() => {
+    if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
+      socket?.emit('addDevice', deviceInfoData);
+    }
+  }, [socket]);
+
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <PaperProvider theme={theme}>
