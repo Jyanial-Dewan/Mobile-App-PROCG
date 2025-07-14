@@ -30,4 +30,7 @@ export const api = {
   GetARMTasks: '/arm-tasks/def_async_tasks',
   GetParemeterByTaskName: '/arm-tasks/task-params/',
   PostTask: '/asynchronous-requests-and-task-schedules/create-task-schedule',
+  getDevices: '/devices',
+  // addDevice: '/devices/add-device',
+  inactiveDevice: '/devices/inactive-device/${token.user_id}/${data.id}',
 };

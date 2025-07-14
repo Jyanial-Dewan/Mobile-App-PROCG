@@ -32,6 +32,9 @@ import Circle from '../../assets/Icons/circle.svg';
 import CircleChevronDown from '../../assets/Icons/circle-chevron-down.svg';
 import CircleChevronRight from '../../assets/Icons/circle-chevron-right.svg';
 import CircleDot from '../../assets/Icons/circle-dot.svg';
+import AlertHigh from '../../assets/Icons/shield-alert.svg';
+import AlertNormal from '../../assets/Icons/triangle-alert.svg';
+import AlertLow from '../../assets/Icons/circle-alert.svg';
 
 interface SVGControllerProps {
   name: string;
@@ -119,6 +122,12 @@ const SVGController = ({
         );
       case 'Circle-Dot':
         return <CircleDot width={width} height={height} color={color} />;
+      case 'Alert-High':
+        return <AlertHigh width={width} height={height} color={color} />;
+      case 'Alert-Normal':
+        return <AlertNormal width={width} height={height} color={color} />;
+      case 'Alert-Low':
+        return <AlertLow width={width} height={height} color={color} />;
 
       default:
         return <BellIcon width={width} height={height} color={color} />;

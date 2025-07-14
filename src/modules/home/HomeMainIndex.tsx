@@ -1,4 +1,8 @@
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 import {
@@ -26,6 +30,7 @@ import {useSocketContext} from '../../context/SocketContext';
 // import {Profile} from '../../common/components/custom-drawer';
 import {useDrawerStatus} from '@react-navigation/drawer';
 import axios from 'axios';
+import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
 
 const edges: Edge[] = ['right', 'left'];
 const wait = (timeout: any) => {
@@ -43,8 +48,9 @@ const HomeMainIndex = () => {
     fcmToken,
     selectedUrl,
     menuStore,
+    devicesStore,
   } = useRootStore();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
   const drawerStatus = useDrawerStatus();
   const {socket} = useSocketContext();
   const isFocused = useIsFocused();
@@ -155,10 +161,29 @@ const HomeMainIndex = () => {
     },
     [isFocused],
   );
+  //Fetch Devices
+  useAsyncEffect(
+    async isMounted => {
+      if (!isMounted()) {
+        return null;
+      }
+      const api_params = {
+        url: api.getDevices,
+        baseURL: url,
+        headers: {Authorization: `Bearer ${userInfo?.access_token}`},
+        isConsole: true,
+        isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      devicesStore.setDevices(res);
+    },
+    [isFocused],
+  );
 
   //Socket Connection
   useEffect(() => {
     socket?.on('inactiveDevice', data => {
+      console.log(data, 'inactiveDevice');
       socket.disconnect();
       if (deviceInfoData && deviceInfoData.id === data.id) {
         logout();
@@ -208,7 +233,7 @@ const HomeMainIndex = () => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Alerts')}>
           <SVGController name="Bell" />
         </TouchableOpacity>
       </View>
