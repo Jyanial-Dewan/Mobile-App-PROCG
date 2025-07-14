@@ -32,7 +32,7 @@ const withoutEncryptionApi = [
   api.GetParemeterByTaskName,
   api.PostTask,
   api.getDevices,
-  api.addDevice,
+  // api.addDevice,
   api.inactiveDevice,
 ];
 
