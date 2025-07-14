@@ -25,9 +25,10 @@ import RecycleBinDetail from '../modules/notification/RecycleBinDetail';
 import ReplyScreen from '../modules/reply/ReplyScree';
 import ViewRequestsScreen from '../modules/view-requests/ViewRequestsScreen';
 import RunARequestScreen from '../modules/run-a-request/RunARequestScreen';
+import Alerts from '../modules/Alerts/Alerts';
 
 export type DrawerScreensParams = {
-  //
+  Alerts: undefined;
 };
 
 export type DrawerScreens = keyof DrawerScreensParams;
@@ -61,6 +62,8 @@ const Drawer = () => {
       <Screen name="Reply" component={ReplyScreen} />
       <Screen name="View_Requests" component={ViewRequestsScreen} />
       <Screen name="Run_a_Request" component={RunARequestScreen} />
+      {/* Add more screens as needed */}
+      <Screen name="Alerts" component={Alerts} />
     </Navigator>
   );
 };

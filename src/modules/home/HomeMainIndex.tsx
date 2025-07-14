@@ -1,4 +1,8 @@
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 import {
@@ -26,6 +30,7 @@ import {useSocketContext} from '../../context/SocketContext';
 // import {Profile} from '../../common/components/custom-drawer';
 import {useDrawerStatus} from '@react-navigation/drawer';
 import axios from 'axios';
+import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
 
 const edges: Edge[] = ['right', 'left'];
 const wait = (timeout: any) => {
@@ -44,7 +49,7 @@ const HomeMainIndex = () => {
     selectedUrl,
     menuStore,
   } = useRootStore();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
   const drawerStatus = useDrawerStatus();
   const {socket} = useSocketContext();
   const isFocused = useIsFocused();
@@ -208,7 +213,7 @@ const HomeMainIndex = () => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Alerts')}>
           <SVGController name="Bell" />
         </TouchableOpacity>
       </View>
