@@ -7,14 +7,14 @@ import {
 } from 'mobx-state-tree';
 
 export const DeviceModel = types.model('deviceModel', {
-  id: types.string,
-  user_id: types.string,
+  id: types.number,
+  user_id: types.number,
   os: types.string,
   browser_name: types.string,
   device_type: types.string,
   browser_version: types.string,
   user_agent: types.string,
-  is_active: types.string,
+  is_active: types.number,
   added_at: types.string,
   ip_address: types.string,
   location: types.string,
@@ -45,7 +45,7 @@ export const DevicesStore = types
     inactiveDevice(data: SnapshotIn<typeof DeviceModel>) {
       const device = self.devices.find(device => device.id === data.id);
       if (device) {
-        device.is_active = '0';
+        device.is_active = 0;
       }
     },
   }))
@@ -53,7 +53,7 @@ export const DevicesStore = types
     get allDevices() {
       return self.devices.slice();
     },
-    getDeviceById(id: string) {
+    getDeviceById(id: number) {
       return self.devices.find(device => device.id === id);
     },
   }));

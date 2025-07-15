@@ -25,6 +25,7 @@ import ImageCropPicker from 'react-native-image-crop-picker';
 import {api} from '../api/api';
 import useAsyncEffect from '../packages/useAsyncEffect/useAsyncEffect';
 import {UserType} from '../../stores/usersStore';
+import {DeviceModel} from '../../types/device/device';
 
 const CustomDrawer = observer<DrawerContentComponentProps>(props => {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +37,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
 
   const {userInfo, logout, deviceInfoData, fcmToken, selectedUrl} =
     useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, inactiveDevice} = useSocketContext();
   const storage = new MMKV();
   const url = selectedUrl || ProcgURL;
   // const [profilePhoto, setProfilePhoto] = useState<Profile>({
@@ -66,9 +67,22 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
   );
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
+  // const res = async () => {
+  //   const res = await api.put(
+  //     `/devices/inactive-device/${token.user_id}/${data.id}`,
+  //     {
+  //       ...data,
+  //       is_active: 0,
+  //     },
+  //   );
 
+  //   if (res.status === 200) {
+  //     console.log(res.data, 'res.data');
+  //     inactiveDevice([res.data]);
+  //   }
+  // };
   const handleSignOut = async () => {
-    socket?.disconnect();
+    // socket?.disconnect();
     const payload = {
       is_active: 0,
     };
@@ -94,14 +108,37 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
       isConsole: true,
       isConsoleParams: true,
     };
-
-    logout(); // Ensure logout clears user state
+    // const inactivedeviceInfoData: DeviceModel[] = [
+    //   {
+    //     id: response.id,
+    //     user_id: response.user_id,
+    //     device_type: response.device_type,
+    //     browser_name: 'App',
+    //     browser_version: '1.0',
+    //     os: response.os,
+    //     user_agent: response.user_agent,
+    //     added_at: response.added_at,
+    //     is_active: 1,
+    //     ip_address: response.ip_address,
+    //     location: response.location || 'Unknown (Location off)',
+    //     user: res.user_name,
+    //   },
+    // ];
+    // inactiveDevice(deviceInfoData);
+    // res();
     navigation.navigate('Login');
     await httpRequest(api_params, setIsLoading);
+
+    inactiveDevice({
+      data: deviceInfoData ? [{...deviceInfoData, is_active: 0}] : [],
+      user: userInfo?.user_name || '',
+    });
+
     await httpRequest(tokenParams, setIsLoading);
     await FastImage.clearDiskCache();
     await FastImage.clearMemoryCache();
     storage.clearAll();
+    logout(); // Ensure logout clears user state
   };
 
   const handleOpenSheet = () => {
