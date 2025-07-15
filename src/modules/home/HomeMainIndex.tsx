@@ -31,6 +31,8 @@ import {useSocketContext} from '../../context/SocketContext';
 import {useDrawerStatus} from '@react-navigation/drawer';
 import axios from 'axios';
 import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
+import {Badge} from 'react-native-paper';
+import CustomTextNew from '~/common/components/CustomText';
 
 const edges: Edge[] = ['right', 'left'];
 const wait = (timeout: any) => {
@@ -234,7 +236,24 @@ const HomeMainIndex = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Alerts')}>
-          <SVGController name="Bell" />
+          <View>
+            <SVGController name="Bell" />
+
+            {/* {messageStore.notificationMessages.length > 0 && ( */}
+            <Badge
+              visible={true}
+              size={25}
+              style={{
+                position: 'absolute',
+                top: -10,
+                right: -10,
+                fontWeight: '700',
+                backgroundColor: COLORS.iconBGREDBadgeColor,
+              }}>
+              3{/* {messageStore.notificationMessages?.length} */}
+            </Badge>
+            {/* )} */}
+          </View>
         </TouchableOpacity>
       </View>
     </ContainerNew>

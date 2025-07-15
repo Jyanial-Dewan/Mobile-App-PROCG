@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
-    elevation: 1,
+    // elevation: 1,
   },
   iconContainer: {
     backgroundColor: COLORS.primary,
