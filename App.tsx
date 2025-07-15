@@ -162,7 +162,7 @@ const Main = observer(() => {
     messageStore,
   } = useRootStore();
   const rootStore = useRootStore();
-  const {socket, setUserName} = useSocketContext();
+  const {socket, setUserName, addDevice} = useSocketContext();
   const [isDark] = useIsDarkTheme();
 
   // Handle background messages
@@ -272,9 +272,9 @@ const Main = observer(() => {
 
   useEffect(() => {
     if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
-      socket?.emit('addDevice', deviceInfoData);
+      addDevice(deviceInfoData);
     }
-  }, [socket]);
+  }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>

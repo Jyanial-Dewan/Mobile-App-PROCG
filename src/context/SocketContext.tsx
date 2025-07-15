@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import {io, Socket} from 'socket.io-client';
 import {useRootStore} from '../stores/rootStore';
+import {DeviceModel} from '../types/device/device';
 
 interface SocketContextProps {
   children: ReactNode;
@@ -17,6 +18,8 @@ interface SocketContextProps {
 interface SocketContext {
   socket: Socket;
   setUserName: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+  addDevice: (device: DeviceModel) => void;
+  inactiveDevice: (deviceInfoData: {data: DeviceModel[]; user: string}) => void;
 }
 const SocketContext = createContext({} as SocketContext);
 
@@ -104,11 +107,23 @@ export function SocketContextProvider({children}: SocketContextProps) {
     };
   }, [socket]);
 
+  const addDevice = (device: DeviceModel) => {
+    socket?.emit('addDevice', device);
+  };
+  const inactiveDevice = (deviceInfoData: {
+    data: DeviceModel[];
+    user: string;
+  }) => {
+    socket?.emit('inactiveDevice', deviceInfoData);
+  };
+
   return (
     <SocketContext.Provider
       value={{
         socket,
         setUserName,
+        addDevice,
+        inactiveDevice,
       }}>
       {children}
     </SocketContext.Provider>

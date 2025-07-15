@@ -11,7 +11,7 @@ const SearchBar = (props: SearchBarProps) => {
   return (
     <>
       <View style={[styles.SectionStyle, props?.customStyle]}>
-        <SVGController name="SEARCH" color="#D70F64" />
+        <SVGController name="SEARCH" />
 
         <TextInput
           value={props?.value}

@@ -106,53 +106,33 @@ const ActionItemMainIndex = () => {
             <Row align="center" justify="space-between">
               <CustomTextNew
                 text={item.title}
-                txtColor={COLORS.black}
-                style={{fontSize: 15, fontWeight: 'bold'}}
+                // txtColor={COLORS.black}
+                style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
               />
-              <CustomTextNew
-                text={item.status}
-                txtColor={
-                  item.status === 'Completed'
-                    ? COLORS.green
-                    : item.status === 'In Progress'
-                      ? COLORS.yellow
-                      : COLORS.sayn
-                }
-              />
+              <View
+                style={{
+                  backgroundColor:
+                    item.status === 'Completed'
+                      ? COLORS.badgeGreen
+                      : item.status === 'In Progress'
+                        ? COLORS.badgeYellow
+                        : COLORS.badgeRed,
+                  padding: 5,
+                  borderRadius: 5,
+                  width: 90,
+                  alignItems: 'center',
+                }}>
+                <CustomTextNew text={item.status} txtColor={COLORS.white} />
+              </View>
             </Row>
-            <CustomTextNew text={item.time} txtColor={COLORS.textColor} />
-          </Column>
-
-          {/* Version @ */}
-          {/* <Column>
             <CustomTextNew
-              text={item.title}
-              txtColor={COLORS.black}
-              style={{fontSize: 15, fontWeight: 'bold'}}
+              text={item.time}
+              style={{color: COLORS.textNewBold}}
             />
-            <Row align="center" justify="space-between">
-              <CustomTextNew text={item.time} txtColor={COLORS.textColor} />
-              <CustomTextNew
-                text={item.status}
-                txtColor={
-                  item.status === 'Completed'
-                    ? COLORS.green
-                    : item.status === 'In Progress'
-                      ? COLORS.yellow
-                      : COLORS.sayn
-                }
-                // style={styles.stsTxt}
-              />
-            </Row>
-          </Column> */}
+          </Column>
         </Row>
       </Row>
       <Column colStyle={styles.colStyle}>
-        {/* <CustomTextNew
-          text={`${item.subject.slice(0, 40)} ${item.subject.length > 40 ? '...' : ''}`}
-          txtColor={COLORS.black}
-          txtSize={14}
-        /> */}
         <CustomTextNew
           text={`${item.description.slice(0, 180)} ${item.description.length > 100 ? '...' : ''}`}
           txtColor={COLORS.textColor}
@@ -260,8 +240,9 @@ const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: COLORS.white,
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 15,
     marginBottom: 10,
+    // elevation: 1,
   },
   iconContainer: {
     backgroundColor: COLORS.primary,
