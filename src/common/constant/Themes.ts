@@ -30,6 +30,12 @@ export const COLORS = {
   textGreen: '#00AC0B',
   grayBgColor: '#E1F0F8',
 
+  badgeGreen: '#0BA503',
+  badgeRed: '#f13c42ff',
+  badgeYellow: '#A1C900',
+  badgeBlue: '#5E91FF',
+
+  iconBGColor: '#FB1A20',
   //newDesign
   textNewColor: '#344054',
   iconColor: '#323232',
