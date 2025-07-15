@@ -35,7 +35,7 @@ export const COLORS = {
   badgeYellow: '#A1C900',
   badgeBlue: '#5E91FF',
 
-  iconBGColor: '#FB1A20',
+  iconBGREDColor: '#FB1A20',
   //newDesign
   textNewColor: '#344054',
   iconColor: '#323232',

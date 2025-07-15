@@ -99,86 +99,44 @@ const Alerts = () => {
             style={{
               padding: 5,
               borderRadius: 50,
-              backgroundColor: COLORS.red,
-              // item.status === 'High'
-              //   ? COLORS.red
-              //   : item.status === 'Normal'
-              //     ? COLORS.yellow
-              //     : COLORS.sayn,
+              backgroundColor: COLORS.iconBGREDColor,
             }}>
             {/* style={styles.iconContainer}> */}
             <SVGController name={item.icon} color={COLORS.white} />
           </View>
 
-          <Column>
-            <Row align="center" justify="space-between">
-              <CustomTextNew
-                text={item.title}
-                txtColor={COLORS.black}
-                style={{fontSize: 15, fontWeight: 'bold'}}
-              />
-              {/* <CustomTextNew
-                text={item.status}
-                txtColor={
-                  item.status === 'High'
-                    ? COLORS.red
-                    : item.status === 'Normal'
-                      ? COLORS.yellow
-                      : COLORS.sayn
-                }
-              /> */}
-            </Row>
-            <CustomTextNew text={item.time} txtColor={COLORS.textColor} />
-          </Column>
-
-          {/* Version @ */}
-          {/* <Column>
+          <Row align="center" justify="space-between">
             <CustomTextNew
               text={item.title}
-              txtColor={COLORS.black}
-              style={{fontSize: 15, fontWeight: 'bold'}}
+              style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
             />
-            <Row align="center" justify="space-between">
-              <CustomTextNew text={item.time} txtColor={COLORS.textColor} />
-              <CustomTextNew
-                text={item.status}
-                txtColor={
-                  item.status === 'Completed'
-                    ? COLORS.green
-                    : item.status === 'In Progress'
-                      ? COLORS.yellow
-                      : COLORS.sayn
-                }
-                // style={styles.stsTxt}
-              />
-            </Row>
-          </Column> */}
+            <CustomTextNew text={item.time} txtColor={COLORS.textNewBold} />
+          </Row>
         </Row>
       </Row>
       <Column colStyle={styles.colStyle}>
-        {/* <CustomTextNew
-          text={`${item.subject.slice(0, 40)} ${item.subject.length > 40 ? '...' : ''}`}
-          txtColor={COLORS.black}
-          txtSize={14}
-        /> */}
         <CustomTextNew
           text={`${item.description.slice(0, 180)} ${item.description.length > 100 ? '...' : ''}`}
           txtColor={COLORS.textColor}
           txtSize={12}
         />
+        <TouchableOpacity
+          onPress={() => {
+            // Handle item press
+            console.log('Item pressed:', item.title);
+          }}>
+          <CustomTextNew
+            text="View Details"
+            txtSize={12}
+            style={styles.linkText}
+          />
+        </TouchableOpacity>
       </Column>
       {/* Button here */}
       <Row justify="space-between">
         <CustomButtonNew
           disabled={false}
           btnText={'Item 1'}
-          // isLoading={false}
-          // onBtnPress={handleOpenSheet}
-          btnstyle={styles.btn}
-        />
-        <CustomButtonNew
-          disabled={false}
-          btnText={'Item 2'}
           // isLoading={false}
           // onBtnPress={handleOpenSheet}
           btnstyle={styles.btn}
@@ -262,7 +220,7 @@ const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: COLORS.white,
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 15,
     marginBottom: 10,
   },
   iconContainer: {
@@ -271,8 +229,8 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   colStyle: {
-    borderBottomColor: COLORS.borderBottom,
-    borderBottomWidth: 2,
+    // borderBottomColor: COLORS.borderBottom,
+    // borderBottomWidth: 2,
     marginBottom: 10,
     paddingVertical: 5,
   },
@@ -294,6 +252,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: 16,
     color: COLORS.green,
+  },
+  linkText: {
+    color: COLORS.iconBGREDColor,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
   cardSubTitle: {
     fontSize: 12,
