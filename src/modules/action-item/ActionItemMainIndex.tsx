@@ -116,7 +116,7 @@ const ActionItemMainIndex = () => {
                       ? COLORS.badgeGreen
                       : item.status === 'In Progress'
                         ? COLORS.badgeYellow
-                        : COLORS.badgeRed,
+                        : COLORS.badgeBlue,
                   padding: 5,
                   borderRadius: 5,
                   width: 90,

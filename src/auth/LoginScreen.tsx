@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   btn: {
-    borderRadius: 8,
+    borderRadius: 100,
     justifyContent: 'center',
     paddingVertical: 9,
   },
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   buttonContainer: {
-    borderRadius: Platform.OS === 'ios' ? 8 : 8,
+    borderRadius: Platform.OS === 'ios' ? 100 : 100,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',

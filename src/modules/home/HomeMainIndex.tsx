@@ -248,7 +248,8 @@ const HomeMainIndex = () => {
                 top: -10,
                 right: -10,
                 fontWeight: '700',
-                backgroundColor: COLORS.iconBGREDBadgeColor,
+                backgroundColor: COLORS.iconBGREDColor,
+                color: COLORS.white,
               }}>
               3{/* {messageStore.notificationMessages?.length} */}
             </Badge>

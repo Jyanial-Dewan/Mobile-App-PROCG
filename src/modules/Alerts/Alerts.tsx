@@ -190,13 +190,13 @@ const Alerts = () => {
         // contentContainerStyle={
         //   messageStore.sentMessages.length === 0 ? styles.flexGrow : null
         // }
-        emptyItem={() => {
-          return (
-            <View>
-              <Text>No Result Found.</Text>
-            </View>
-          );
-        }}
+        // emptyItem={() => {
+        //   return (
+        //     <View>
+        //       <Text>No Result Found.</Text>
+        //     </View>
+        //   );
+        // }}
         // refreshing={messageStore.refreshing}
         // onRefresh={handleRefresh}
       />

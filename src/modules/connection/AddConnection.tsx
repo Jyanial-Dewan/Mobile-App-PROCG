@@ -115,8 +115,11 @@ const styles = StyleSheet.create({
 
   btn: {
     height: 54,
+    marginHorizontal: 20,
+    marginBottom: 12,
     paddingVertical: 0,
     justifyContent: 'center',
+    borderRadius: 100,
   },
   btnTxt: {
     fontSize: 16,

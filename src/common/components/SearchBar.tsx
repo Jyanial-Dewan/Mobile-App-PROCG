@@ -1,6 +1,7 @@
 import React, {Dispatch, SetStateAction} from 'react';
 import {StyleSheet, TextInput, View} from 'react-native';
 import SVGController from '../../common/components/SVGController';
+import {COLORS} from '../constant/Themes';
 interface SearchBarProps {
   customStyle?: any;
   value?: string;
@@ -19,6 +20,7 @@ const SearchBar = (props: SearchBarProps) => {
           placeholder={props.placeholder}
           underlineColorAndroid="transparent"
           onChangeText={props?.onChangeText}
+          placeholderTextColor={COLORS.textColor}
         />
       </View>
     </>
