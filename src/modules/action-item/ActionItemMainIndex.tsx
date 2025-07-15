@@ -240,8 +240,9 @@ const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: COLORS.white,
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 15,
     marginBottom: 10,
+    elevation: 1,
   },
   iconContainer: {
     backgroundColor: COLORS.primary,

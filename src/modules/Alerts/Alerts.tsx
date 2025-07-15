@@ -93,54 +93,60 @@ const Alerts = () => {
 
   const renderItem = ({item}: any) => (
     <View style={styles.itemContainer}>
-      <Row justify="space-between" align="center">
-        <Row rowWidth="90%" align="center" rowStyle={{marginBottom: 5, gap: 5}}>
-          <View
-            style={{
-              padding: 5,
-              borderRadius: 50,
-              backgroundColor: COLORS.iconBGREDColor,
-            }}>
-            {/* style={styles.iconContainer}> */}
-            <SVGController name={item.icon} color={COLORS.white} />
-          </View>
-
-          <Row align="center" justify="space-between">
-            <CustomTextNew
-              text={item.title}
-              style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
-            />
-            <CustomTextNew text={item.time} txtColor={COLORS.textNewBold} />
-          </Row>
-        </Row>
-      </Row>
-      <Column colStyle={styles.colStyle}>
-        <CustomTextNew
-          text={`${item.description.slice(0, 180)} ${item.description.length > 100 ? '...' : ''}`}
-          txtColor={COLORS.textColor}
-          txtSize={12}
-        />
-        <TouchableOpacity
-          onPress={() => {
-            // Handle item press
-            console.log('Item pressed:', item.title);
+      <Row justify="space-between" rowStyle={{gap: 10}}>
+        <View
+          style={{
+            padding: 5,
+            borderRadius: 50,
+            backgroundColor: COLORS.iconBGREDColor,
+            alignSelf: 'flex-start',
           }}>
-          <CustomTextNew
-            text="View Details"
-            txtSize={12}
-            style={styles.linkText}
-          />
-        </TouchableOpacity>
-      </Column>
-      {/* Button here */}
-      <Row justify="space-between">
-        <CustomButtonNew
-          disabled={false}
-          btnText={'Item 1'}
-          // isLoading={false}
-          // onBtnPress={handleOpenSheet}
-          btnstyle={styles.btn}
-        />
+          <SVGController name={item.icon} color={COLORS.white} />
+        </View>
+        <Column>
+          <Row justify="space-between" align="center" rowWidth="90%">
+            <Row align="center" justify="space-between">
+              <CustomTextNew
+                text={item.title}
+                style={{
+                  fontSize: 15,
+                  fontWeight: 'bold',
+                  color: COLORS.black,
+                  marginTop: 5,
+                }}
+              />
+              <CustomTextNew text={item.time} txtColor={COLORS.textNewBold} />
+            </Row>
+          </Row>
+          <Column colStyle={styles.colStyle}>
+            <CustomTextNew
+              text={`${item.description.slice(0, 180)} ${item.description.length > 100 ? '...' : ''}`}
+              txtColor={COLORS.textColor}
+              txtSize={12}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                // Handle item press
+                console.log('Item pressed:', item.title);
+              }}>
+              <CustomTextNew
+                text="View Details"
+                txtSize={12}
+                style={[styles.linkText, {marginTop: 5}]}
+              />
+            </TouchableOpacity>
+          </Column>
+          {/* Button here */}
+          <Row justify="space-between">
+            <CustomButtonNew
+              disabled={false}
+              btnText={'Button'}
+              // isLoading={false}
+              // onBtnPress={handleOpenSheet}
+              btnstyle={styles.btn}
+            />
+          </Row>
+        </Column>
       </Row>
     </View>
   );
@@ -222,6 +228,14 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
+    // shadowColor: '#000',
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.4,
+    // shadowRadius: 3.84,
+    elevation: 1,
   },
   iconContainer: {
     backgroundColor: COLORS.primary,
@@ -231,7 +245,7 @@ const styles = StyleSheet.create({
   colStyle: {
     // borderBottomColor: COLORS.borderBottom,
     // borderBottomWidth: 2,
-    marginBottom: 10,
+    marginBottom: 5,
     paddingVertical: 5,
   },
   headText: {
@@ -266,7 +280,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   btn: {
-    width: '45%',
+    width: '35%',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
