@@ -16,7 +16,7 @@ const SearchBar = (props: SearchBarProps) => {
 
         <TextInput
           value={props?.value}
-          style={{flex: 1, fontSize: 17}}
+          style={{flex: 1, fontSize: 17, color: COLORS.black}}
           placeholder={props.placeholder}
           underlineColorAndroid="transparent"
           onChangeText={props?.onChangeText}

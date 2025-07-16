@@ -114,9 +114,10 @@ const BottomTab = observer(() => {
                   style={{
                     position: 'absolute',
                     top: -15,
-                    right: -17,
+                    right: -12,
                     fontWeight: '700',
-                    backgroundColor: COLORS.highLight,
+                    backgroundColor: COLORS.grayBgColor,
+                    color: COLORS.black,
                   }}>
                   {messageStore.notificationMessages?.length}
                 </Badge>

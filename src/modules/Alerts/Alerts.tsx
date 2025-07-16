@@ -103,8 +103,8 @@ const Alerts = () => {
           }}>
           <SVGController name={item.icon} color={COLORS.white} />
         </View>
-        <Column>
-          <Row justify="space-between" align="center" rowWidth="90%">
+        <Column colWidth="90%">
+          <Row justify="space-between" align="center">
             <Row align="center" justify="space-between">
               <CustomTextNew
                 text={item.title}
