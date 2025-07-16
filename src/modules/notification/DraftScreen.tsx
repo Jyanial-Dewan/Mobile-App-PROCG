@@ -46,7 +46,7 @@ import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 
-const ITEMHEIGHT = 95;
+const ITEMHEIGHT = 105;
 const RenderMessageItem = ({
   item,
   userInfo,
@@ -165,7 +165,7 @@ const RenderMessageItem = ({
           style={[animatedHeight, {backgroundColor, borderRadius: 15}]}
           onLayout={e => {
             if (!loaded) {
-              scaleX.value = 95;
+              scaleX.value = ITEMHEIGHT;
               setLoaded(true);
             }
           }}>
@@ -245,10 +245,10 @@ const RenderMessageItem = ({
                   <CustomTextNew
                     txtStyle={styles.headText}
                     text={
-                      item.recivers.length > 0 && item.recivers[0]?.name
-                        ? item.recivers.length > 1
-                          ? `${item.recivers[0]?.name} ...`
-                          : item.recivers[0]?.name
+                      item?.recivers.length > 0 && item?.recivers[0]?.name
+                        ? item?.recivers.length > 1
+                          ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name.length > 20 ? '...' : ''}`
+                          : item.recivers[0].name
                         : '(no user)'
                     }
                   />
@@ -264,15 +264,15 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={item?.subject}
+                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
                 <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
-                    item?.body?.length > 40
-                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 40) + '...'
-                      : item?.body.replace(/\s+/g, ' ')
+                    item?.body?.length > 80
+                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
+                      : item?.body?.replace(/\s+/g, ' ')
                   }
                 />
               </View>
@@ -291,7 +291,7 @@ const DraftScreen = observer(() => {
   const {userInfo, messageStore, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
-
+  const [isModalShow, setIsModalShow] = useState(false);
   const {control, setValue} = useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
@@ -375,6 +375,7 @@ const DraftScreen = observer(() => {
   const handleCancelLongPress = () => {
     setIsLongPressed(false);
     setSelectedIds([]);
+    setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
@@ -450,13 +451,15 @@ const DraftScreen = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={true}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
         isLongPressed ? (
           <LongPressedHeader
+            from={route.name}
             handleCancelLongPress={handleCancelLongPress}
-            handleMultipleDelete={handleMultipleDelete}
+            handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
           <MainHeader routeName={routeName} style={{fontWeight: '700'}} />
@@ -495,6 +498,14 @@ const DraftScreen = observer(() => {
         onRefresh={handleRefresh}
       />
       <PlusButton />
+      <CustomDeleteModal
+        total={selectedIds.length}
+        isModalShow={isModalShow}
+        onCancel={handleCancelLongPress}
+        setIsModalShow={setIsModalShow}
+        onPressCallApi={handleMultipleDelete}
+        actionName="move to Recycle Bin"
+      />
     </ContainerNew>
   );
 });
@@ -514,8 +525,8 @@ const styles = StyleSheet.create({
     height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
     borderRadius: 14,
   },
   imageStyle: {

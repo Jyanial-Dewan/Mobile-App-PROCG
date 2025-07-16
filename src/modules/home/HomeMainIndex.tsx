@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Platform,
 } from 'react-native';
 import {Edge} from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
@@ -96,34 +97,54 @@ const HomeMainIndex = () => {
 
   //Post_Notification Permission
   useEffect(() => {
-    const requenstPermissionAndroid = async () => {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const token = await messaging().getToken();
-        fcmTokenSave({fcmToken: token});
-        // console.log('FCM Token:', token);
-        // getFCMToken();
+    const requestPermissionAndroid = async () => {
+      if (Platform.OS === 'android') {
+        // Handle for Android 8.1 or lower
+        if (Platform.Version < 28) {
+          // For Android 8 or lower, permission is automatically granted (no need for POST_NOTIFICATIONS)
+          const token = await messaging().getToken();
+          fcmTokenSave({fcmToken: token});
 
-        const tokenPayload = {
-          token: token,
-          username: userInfo?.user_name,
-        };
-        const tokenParams = {
-          url: api.RegisterToken,
-          data: tokenPayload,
-          method: 'post',
-          baseURL: url,
-          // isConsole: true,
-          // isConsoleParams: true,
-        };
-        await httpRequest(tokenParams, setIsLoading);
-      } else {
-        Alert.alert('Permission Denied');
+          const tokenPayload = {
+            token: token,
+            username: userInfo?.user_name,
+          };
+          const tokenParams = {
+            url: api.RegisterToken,
+            data: tokenPayload,
+            method: 'post',
+            baseURL: url,
+          };
+          await httpRequest(tokenParams, setIsLoading);
+        } else {
+          // For Android 9 and above, request POST_NOTIFICATIONS permission
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
+
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            const token = await messaging().getToken();
+            fcmTokenSave({fcmToken: token});
+
+            const tokenPayload = {
+              token: token,
+              username: userInfo?.user_name,
+            };
+            const tokenParams = {
+              url: api.RegisterToken,
+              data: tokenPayload,
+              method: 'post',
+              baseURL: url,
+            };
+            await httpRequest(tokenParams, setIsLoading);
+          } else {
+            Alert.alert('Permission Denied');
+          }
+        }
       }
     };
-    requenstPermissionAndroid();
+
+    requestPermissionAndroid();
   }, []);
 
   //Fetch Users
@@ -245,10 +266,11 @@ const HomeMainIndex = () => {
               size={25}
               style={{
                 position: 'absolute',
-                top: -10,
-                right: -10,
+                top: -15,
+                right: -12,
                 fontWeight: '700',
-                backgroundColor: COLORS.iconBGREDBadgeColor,
+                backgroundColor: COLORS.iconBGREDColor,
+                color: COLORS.white,
               }}>
               3{/* {messageStore.notificationMessages?.length} */}
             </Badge>

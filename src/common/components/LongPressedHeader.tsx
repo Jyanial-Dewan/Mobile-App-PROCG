@@ -24,7 +24,11 @@ const LongPressedHeader = ({
         onPress={handleCancelLongPress}
         child={<Feather name="x" size={24} color="black" />}
       />
-      {from === 'Recycle_Bin' ? (
+      <RoundedButton
+        onPress={handleShowModal || defaultHandler}
+        child={<Feather name="trash" size={24} color="black" />}
+      />
+      {/* {from === 'Recycle_Bin' ? (
         <RoundedButton
           onPress={handleShowModal || defaultHandler}
           child={<Feather name="trash" size={24} color="black" />}
@@ -34,7 +38,7 @@ const LongPressedHeader = ({
           onPress={handleMultipleDelete || defaultHandler}
           child={<Feather name="trash" size={24} color="black" />}
         />
-      )}
+      )} */}
     </View>
   );
 };

@@ -96,6 +96,38 @@ export function SocketContextProvider({children}: SocketContextProps) {
       devicesStore.addDevice(data);
     });
 
+    socket.on('restoreMessage', id => {
+      const message = messageStore.binMessages.find(msg => msg.id === id);
+      const deepClone = (obj: any) => {
+        return JSON.parse(JSON.stringify(obj));
+      };
+      try {
+        if (!message || !username) return;
+        const formattedData = {
+          ...message,
+          date: new Date(message.date).getTime(),
+        };
+        const newMessage = deepClone(formattedData);
+
+        if (formattedData.status === 'Draft') {
+          messageStore.addDraftMessage(newMessage);
+          messageStore.addTotalDraft();
+        } else {
+          if (formattedData.sender.name === username) {
+            messageStore.addSentMessage(newMessage);
+            messageStore.addTotalSent();
+          } else {
+            messageStore.addReceivedMessage(newMessage);
+            messageStore.addTotalReceived();
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        messageStore.removeBinMessage(id);
+      }
+    });
+
     return () => {
       socket?.off('receivedMessage');
       socket?.off('draftMessage');
@@ -104,6 +136,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('deletedMessage');
       socket?.off('draftMessageId');
       socket?.off('addDevice');
+      socket.off('restoreMessage');
     };
   }, [socket]);
 

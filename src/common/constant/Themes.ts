@@ -28,12 +28,12 @@ export const COLORS = {
   selectedColre: '#CEDEF2',
   inputTextColor: '#737373',
   textGreen: '#00AC0B',
-  grayBgColor: '#E1F0F8',
+  grayBgColor: '#c1e0d0',
 
-  badgeGreen: '#0BA503',
+  badgeGreen: '#16a34a',
   badgeRed: '#f13c42ff',
-  badgeYellow: '#A1C900',
-  badgeBlue: '#5E91FF',
+  badgeYellow: '#facc15',
+  badgeBlue: '#60a5fa',
 
   iconBGREDColor: '#FB1A20',
   iconBGREDBadgeColor: '#ff0008ab',

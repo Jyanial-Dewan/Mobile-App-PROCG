@@ -56,7 +56,7 @@ export interface RenderMessageItemProps {
   setIsLongPressed: React.Dispatch<React.SetStateAction<boolean>>;
   handleSingleDeleteMessage: (msg: any) => Promise<void>;
 }
-
+const ITEMHEIGHT = 105;
 const RenderMessageItem = ({
   item,
   userInfo,
@@ -175,7 +175,7 @@ const RenderMessageItem = ({
           style={[animatedHeight, {backgroundColor, borderRadius: 15}]}
           onLayout={e => {
             if (!loaded) {
-              scaleX.value = 95;
+              scaleX.value = ITEMHEIGHT;
               setLoaded(true);
             }
           }}>
@@ -254,7 +254,7 @@ const RenderMessageItem = ({
                   }}>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={item?.sender.name}
+                    text={`${item.sender.name.slice(0, 20)}${item.sender.name.length > 20 ? '...' : ''}`}
                   />
                   <View style={{flexDirection: 'row', gap: 5}}>
                     <CustomTextNew
@@ -268,14 +268,14 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={item?.subject}
+                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
                 <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
-                    item?.body?.length > 60
-                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 60) + '...'
+                    item?.body?.length > 80
+                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
                       : item?.body?.replace(/\s+/g, ' ')
                   }
                 />
@@ -299,6 +299,7 @@ const InboxScreen = observer(() => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(0);
   const notificationIds = messageStore.notificationMessages.map(msg => msg.id);
+  const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
@@ -399,6 +400,7 @@ const InboxScreen = observer(() => {
   const handleCancelLongPress = () => {
     setIsLongPressed(false);
     setSelectedIds([]);
+    setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
@@ -496,13 +498,15 @@ const InboxScreen = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={true}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
         isLongPressed ? (
           <LongPressedHeader
+            from={route.name}
             handleCancelLongPress={handleCancelLongPress}
-            handleMultipleDelete={handleMultipleDelete}
+            handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
           <MainHeader routeName="Inbox" style={{fontWeight: '700'}} />
@@ -542,6 +546,14 @@ const InboxScreen = observer(() => {
         refreshing={messageStore.refreshing}
         onRefresh={handleRefresh}
       />
+      <CustomDeleteModal
+        total={selectedIds.length}
+        isModalShow={isModalShow}
+        onCancel={handleCancelLongPress}
+        setIsModalShow={setIsModalShow}
+        onPressCallApi={handleMultipleDelete}
+        actionName="move to Recycle Bin"
+      />
     </ContainerNew>
   );
 });
@@ -554,11 +566,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   rowContainer: {
-    height: 95,
+    height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
     borderRadius: 14,
   },
   label: {

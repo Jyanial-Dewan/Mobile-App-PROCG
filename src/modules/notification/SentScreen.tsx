@@ -45,7 +45,7 @@ import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 
-const ITEMHEIGHT = 95;
+const ITEMHEIGHT = 105;
 
 const RenderMessageItem = ({
   item,
@@ -242,7 +242,7 @@ const RenderMessageItem = ({
                     txtStyle={styles.headText}
                     text={
                       item.recivers.length > 1
-                        ? `${item.recivers[0].name} ...`
+                        ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
                         : item.recivers[0].name
                     }
                   />
@@ -267,14 +267,14 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={item?.subject}
+                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
                 <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
-                    item?.body?.length > 60
-                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 60) + '...'
+                    item?.body?.length > 80
+                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
                       : item?.body?.replace(/\s+/g, ' ')
                   }
                 />
@@ -298,6 +298,7 @@ const SentScreen = observer(() => {
   const [hasMore, setHasMore] = useState(0);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
@@ -379,6 +380,7 @@ const SentScreen = observer(() => {
   const handleCancelLongPress = () => {
     setIsLongPressed(false);
     setSelectedIds([]);
+    setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
@@ -453,13 +455,15 @@ const SentScreen = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={true}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
         isLongPressed ? (
           <LongPressedHeader
+            from={route.name}
             handleCancelLongPress={handleCancelLongPress}
-            handleMultipleDelete={handleMultipleDelete}
+            handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
           <MainHeader routeName="Sent" style={{fontWeight: '700'}} />
@@ -498,6 +502,14 @@ const SentScreen = observer(() => {
             : null
         }
       />
+      <CustomDeleteModal
+        total={selectedIds.length}
+        isModalShow={isModalShow}
+        onCancel={handleCancelLongPress}
+        setIsModalShow={setIsModalShow}
+        onPressCallApi={handleMultipleDelete}
+        actionName="move to Recycle Bin"
+      />
     </ContainerNew>
   );
 });
@@ -510,10 +522,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   rowContainer: {
+    height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
     borderRadius: 14,
   },
   label: {
