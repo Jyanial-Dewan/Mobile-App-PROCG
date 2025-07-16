@@ -291,7 +291,7 @@ const DraftScreen = observer(() => {
   const {userInfo, messageStore, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
-
+  const [isModalShow, setIsModalShow] = useState(false);
   const {control, setValue} = useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
@@ -375,6 +375,7 @@ const DraftScreen = observer(() => {
   const handleCancelLongPress = () => {
     setIsLongPressed(false);
     setSelectedIds([]);
+    setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
@@ -450,13 +451,15 @@ const DraftScreen = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={true}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
         isLongPressed ? (
           <LongPressedHeader
+            from={route.name}
             handleCancelLongPress={handleCancelLongPress}
-            handleMultipleDelete={handleMultipleDelete}
+            handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
           <MainHeader routeName={routeName} style={{fontWeight: '700'}} />
@@ -495,6 +498,14 @@ const DraftScreen = observer(() => {
         onRefresh={handleRefresh}
       />
       <PlusButton />
+      <CustomDeleteModal
+        total={selectedIds.length}
+        isModalShow={isModalShow}
+        onCancel={handleCancelLongPress}
+        setIsModalShow={setIsModalShow}
+        onPressCallApi={handleMultipleDelete}
+        actionName="move to Recycle Bin"
+      />
     </ContainerNew>
   );
 });

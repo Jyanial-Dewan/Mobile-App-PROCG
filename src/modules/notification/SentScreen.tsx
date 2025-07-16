@@ -298,6 +298,7 @@ const SentScreen = observer(() => {
   const [hasMore, setHasMore] = useState(0);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
@@ -379,6 +380,7 @@ const SentScreen = observer(() => {
   const handleCancelLongPress = () => {
     setIsLongPressed(false);
     setSelectedIds([]);
+    setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
@@ -453,13 +455,15 @@ const SentScreen = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={true}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
         isLongPressed ? (
           <LongPressedHeader
+            from={route.name}
             handleCancelLongPress={handleCancelLongPress}
-            handleMultipleDelete={handleMultipleDelete}
+            handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
           <MainHeader routeName="Sent" style={{fontWeight: '700'}} />
@@ -497,6 +501,14 @@ const SentScreen = observer(() => {
             ? EmptyListItem
             : null
         }
+      />
+      <CustomDeleteModal
+        total={selectedIds.length}
+        isModalShow={isModalShow}
+        onCancel={handleCancelLongPress}
+        setIsModalShow={setIsModalShow}
+        onPressCallApi={handleMultipleDelete}
+        actionName="move to Recycle Bin"
       />
     </ContainerNew>
   );

@@ -299,6 +299,7 @@ const InboxScreen = observer(() => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(0);
   const notificationIds = messageStore.notificationMessages.map(msg => msg.id);
+  const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
@@ -399,6 +400,7 @@ const InboxScreen = observer(() => {
   const handleCancelLongPress = () => {
     setIsLongPressed(false);
     setSelectedIds([]);
+    setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
@@ -496,13 +498,15 @@ const InboxScreen = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={true}
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
         isLongPressed ? (
           <LongPressedHeader
+            from={route.name}
             handleCancelLongPress={handleCancelLongPress}
-            handleMultipleDelete={handleMultipleDelete}
+            handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
           <MainHeader routeName="Inbox" style={{fontWeight: '700'}} />
@@ -541,6 +545,14 @@ const InboxScreen = observer(() => {
         }
         refreshing={messageStore.refreshing}
         onRefresh={handleRefresh}
+      />
+      <CustomDeleteModal
+        total={selectedIds.length}
+        isModalShow={isModalShow}
+        onCancel={handleCancelLongPress}
+        setIsModalShow={setIsModalShow}
+        onPressCallApi={handleMultipleDelete}
+        actionName="move to Recycle Bin"
       />
     </ContainerNew>
   );
