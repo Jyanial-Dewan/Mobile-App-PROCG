@@ -37,6 +37,9 @@ import {
   SocketContextProvider,
   useSocketContext,
 } from './src/context/SocketContext';
+import useAsyncEffect from './src/common/packages/useAsyncEffect/useAsyncEffect';
+import {api} from './src/common/api/api';
+import {httpRequest} from './src/common/constant/httpRequest';
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', 'ViewPropTypes']);
 if (Text.defaultProps == null) {
@@ -160,6 +163,7 @@ const Main = observer(() => {
     connectSocket,
     logout,
     messageStore,
+    selectedUrl,
   } = useRootStore();
   const rootStore = useRootStore();
   const {socket, setUserName, addDevice} = useSocketContext();
@@ -275,6 +279,28 @@ const Main = observer(() => {
       addDevice(deviceInfoData);
     }
   }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
+
+  // For realtime sync messages
+  useEffect(() => {
+    (async () => {
+      const currentPage = 1;
+      const url = selectedUrl || ProcgURL;
+      const api_params = {
+        url: api.RecycleBinMessages + userInfo?.user_name + `/${currentPage}`,
+        baseURL: url,
+        isConsole: true,
+        isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, () => {});
+      if (res) {
+        const formattedRes = res.map((msg: any) => ({
+          ...msg,
+          date: new Date(msg.date),
+        }));
+        messageStore.saveBinMessages(formattedRes);
+      }
+    })();
+  }, [userInfo?.isLoggedIn]);
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
