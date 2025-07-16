@@ -53,9 +53,7 @@ interface RenderMessageItemProps {
   handlePress: (msgId: string, parentId: string) => Promise<void>;
   handleDeleteFromRecycleBin: (msg: any) => Promise<void>;
 }
-
-const ITEMHEIGHT = 95;
-
+const ITEMHEIGHT = 105;
 const RenderMessageItem = observer(
   ({
     item,
@@ -76,6 +74,7 @@ const RenderMessageItem = observer(
     const [openModal, setOpenModal] = useState(false);
     const url = selectedUrl || ProcgURL;
     const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+    const noUserFallback = [require('../../assets/prifileImages/person.png')];
 
     const openDeleteModal = () => {
       setOpenModal(true);
@@ -144,6 +143,17 @@ const RenderMessageItem = observer(
       ? 'transparent'
       : COLORS.primaryRed;
 
+    const findOrigin = (msg: any) => {
+      if (msg.status === 'Draft') {
+        return 'Drafts';
+      } else {
+        if (msg.sender.name === userInfo.user_name) {
+          return 'Sent';
+        } else {
+          return 'Inbox';
+        }
+      }
+    };
     return (
       <View>
         {openModal && (
@@ -214,12 +224,14 @@ const RenderMessageItem = observer(
                     <Image
                       style={styles.profileImage}
                       source={{
-                        uri: `${url}/${item.sender.profile_picture}`,
+                        uri: `${url}/${findOrigin(item) === 'Inbox' ? item?.sender?.profile_picture : item?.recivers[0]?.profile_picture}`,
                         headers: {
                           Authorization: `Bearer ${userInfo?.access_token}`,
                         },
                       }}
-                      fallback={fallbacks}
+                      fallback={
+                        item.recivers.length === 0 ? noUserFallback : fallbacks
+                      }
                     />
                   )}
                 </View>
@@ -238,7 +250,13 @@ const RenderMessageItem = observer(
                     }}>
                     <CustomTextNew
                       txtStyle={styles.headText}
-                      text={item?.sender.name}
+                      text={
+                        item?.recivers?.length === 0
+                          ? '(No User)'
+                          : findOrigin(item) === 'Inbox'
+                            ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
+                            : `${item?.sender.name.slice(0, 20)}${item.sender?.name.length > 20 ? '...' : ''}`
+                      }
                     />
                     <View style={{flexDirection: 'row', gap: 5}}>
                       <CustomTextNew
@@ -255,15 +273,15 @@ const RenderMessageItem = observer(
                   <CustomTextNew
                     txtStyle={styles.subText}
                     txtAlign="justify"
-                    text={item?.subject}
+                    text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                   />
                   <CustomTextNew
                     txtStyle={styles.bodyText}
                     txtAlign="justify"
                     text={
-                      item?.body?.length > 60
-                        ? item?.body?.replace(/\s+/g, ' ').slice(0, 60) + '...'
-                        : item?.body.replace(/\s+/g, ' ')
+                      item?.body?.length > 80
+                        ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
+                        : item?.body?.replace(/\s+/g, ' ')
                     }
                   />
                 </View>
@@ -548,12 +566,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   rowContainer: {
+    height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
     borderRadius: 14,
-    height: ITEMHEIGHT,
   },
   imageStyle: {
     borderRadius: 50,

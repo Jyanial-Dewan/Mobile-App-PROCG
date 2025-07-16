@@ -45,7 +45,7 @@ import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 
-const ITEMHEIGHT = 95;
+const ITEMHEIGHT = 105;
 
 const RenderMessageItem = ({
   item,
@@ -242,7 +242,7 @@ const RenderMessageItem = ({
                     txtStyle={styles.headText}
                     text={
                       item.recivers.length > 1
-                        ? `${item.recivers[0].name} ...`
+                        ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
                         : item.recivers[0].name
                     }
                   />
@@ -267,14 +267,14 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={item?.subject}
+                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
                 <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
-                    item?.body?.length > 60
-                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 60) + '...'
+                    item?.body?.length > 80
+                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
                       : item?.body?.replace(/\s+/g, ' ')
                   }
                 />
@@ -510,10 +510,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   rowContainer: {
+    height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
     borderRadius: 14,
   },
   label: {

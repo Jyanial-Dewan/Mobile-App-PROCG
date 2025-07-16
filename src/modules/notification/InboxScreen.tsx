@@ -56,7 +56,7 @@ export interface RenderMessageItemProps {
   setIsLongPressed: React.Dispatch<React.SetStateAction<boolean>>;
   handleSingleDeleteMessage: (msg: any) => Promise<void>;
 }
-
+const ITEMHEIGHT = 105;
 const RenderMessageItem = ({
   item,
   userInfo,
@@ -175,7 +175,7 @@ const RenderMessageItem = ({
           style={[animatedHeight, {backgroundColor, borderRadius: 15}]}
           onLayout={e => {
             if (!loaded) {
-              scaleX.value = 95;
+              scaleX.value = ITEMHEIGHT;
               setLoaded(true);
             }
           }}>
@@ -254,7 +254,7 @@ const RenderMessageItem = ({
                   }}>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={item?.sender.name}
+                    text={`${item.sender.name.slice(0, 20)}${item.sender.name.length > 20 ? '...' : ''}`}
                   />
                   <View style={{flexDirection: 'row', gap: 5}}>
                     <CustomTextNew
@@ -268,14 +268,14 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={item?.subject}
+                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
                 <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
-                    item?.body?.length > 60
-                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 60) + '...'
+                    item?.body?.length > 80
+                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
                       : item?.body?.replace(/\s+/g, ' ')
                   }
                 />
@@ -554,11 +554,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   rowContainer: {
-    height: 95,
+    height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
     borderRadius: 14,
   },
   label: {
