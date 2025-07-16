@@ -25,6 +25,7 @@ import MainHeader from '../../common/components/MainHeader';
 import SVGController from '../../common/components/SVGController';
 import CustomButtonNew from '../../common/components/CustomButton';
 import SearchBar from '../../common/components/SearchBar';
+import {convertDate} from '../../common/services/DateConverter';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 interface ActionItemsType {
@@ -38,7 +39,7 @@ const actionItemsData = [
   {
     id: 1,
     title: 'Action Item Title 1',
-    time: 'Tue, 22 Jul 2025',
+    time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -48,7 +49,7 @@ const actionItemsData = [
   {
     id: 2,
     title: 'Action Item Title 2',
-    time: 'Tue, 22 Jul 2025',
+    time: '2025-03-24 04:46:01.327',
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -58,7 +59,7 @@ const actionItemsData = [
   {
     id: 3,
     title: 'Action Item Title 3',
-    time: 'Tue, 22 Jul 2025',
+    time: '2025-07-04 10:05:13.657526',
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -126,7 +127,7 @@ const ActionItemMainIndex = () => {
               </View>
             </Row>
             <CustomTextNew
-              text={item.time}
+              text={convertDate(item.time)}
               style={{color: COLORS.textNewBold}}
             />
           </Column>

@@ -1,19 +1,16 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
 import {Edge} from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
-import CustomHeader from '../../common/components/CustomHeader';
 import CustomTextNew from '../../common/components/CustomText';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
 import {useRootStore} from '../../stores/rootStore';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {COLORS} from '../../common/constant/Themes';
 import Column from '../../common/components/Column';
 import CustomFlatList from '../../common/components/CustomFlatList';
@@ -26,7 +23,7 @@ import SVGController from '../../common/components/SVGController';
 import CustomButtonNew from '../../common/components/CustomButton';
 import SearchBar from '../../common/components/SearchBar';
 import {observer} from 'mobx-react-lite';
-import {DrawerScreenProp} from '../../navigations/drawer';
+import {convertDate} from '../../common/services/DateConverter';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 interface ActionItemsType {
@@ -40,7 +37,7 @@ const actionItemsData = [
   {
     id: 1,
     title: 'Alert Title 1',
-    time: 'Tue, 22 Jul 2025',
+    time: '2025-07-04 10:05:13.657526',
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -50,7 +47,7 @@ const actionItemsData = [
   {
     id: 2,
     title: 'Alert Title 2',
-    time: 'Tue, 22 Jul 2025',
+    time: '2025-03-24 04:46:01.327',
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -60,7 +57,7 @@ const actionItemsData = [
   {
     id: 3,
     title: 'Alert Title 3',
-    time: 'Tue, 22 Jul 2025',
+    time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -115,7 +112,10 @@ const Alerts = () => {
                   marginTop: 5,
                 }}
               />
-              <CustomTextNew text={item.time} txtColor={COLORS.textNewBold} />
+              <CustomTextNew
+                text={convertDate(item.time)}
+                txtColor={COLORS.textNewBold}
+              />
             </Row>
           </Row>
           <Column colStyle={styles.colStyle}>
