@@ -149,7 +149,7 @@ const RenderMessageItem = ({
     : COLORS.primaryRed;
 
   return (
-    <View>
+    <View key={item.id} style={{paddingVertical: 5}}>
       {openModal && (
         <CustomDeleteModal
           isModalShow={openModal}
@@ -165,7 +165,7 @@ const RenderMessageItem = ({
           style={[animatedHeight, {backgroundColor, borderRadius: 15}]}
           onLayout={e => {
             if (!loaded) {
-              scaleX.value = ITEMHEIGHT;
+              // scaleX.value = ITEMHEIGHT;
               setLoaded(true);
             }
           }}>
@@ -264,9 +264,10 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
+                  text={item?.subject}
+                  // text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
-                <CustomTextNew
+                {/* <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
@@ -274,7 +275,7 @@ const RenderMessageItem = ({
                       ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
                       : item?.body?.replace(/\s+/g, ' ')
                   }
-                />
+                /> */}
               </View>
             </TouchableOpacity>
           </Animated.View>
@@ -455,9 +456,10 @@ const DraftScreen = observer(() => {
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
-        isLongPressed ? (
+        isLongPressed && selectedIds.length ? (
           <LongPressedHeader
             from={route.name}
+            selectedIds={selectedIds}
             handleCancelLongPress={handleCancelLongPress}
             handleShowModal={() => setIsModalShow(true)}
           />
@@ -522,7 +524,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   rowContainer: {
-    height: ITEMHEIGHT,
+    // height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: 10,

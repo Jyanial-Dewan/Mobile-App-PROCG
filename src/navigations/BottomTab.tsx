@@ -116,7 +116,7 @@ const BottomTab = observer(() => {
                     top: -15,
                     right: -12,
                     fontWeight: '700',
-                    backgroundColor: COLORS.grayBgColor,
+                    backgroundColor: COLORS.highLight,
                     color: COLORS.black,
                   }}>
                   {messageStore.notificationMessages?.length}

@@ -2,9 +2,11 @@ import {StyleSheet, View} from 'react-native';
 import React from 'react';
 import RoundedButton from './RoundedButton';
 import Feather from 'react-native-vector-icons/Feather';
+import CustomTextNew from './CustomText';
 
 interface LongPressedHeaderProps {
   from?: string;
+  selectedIds: string[];
   handleCancelLongPress: () => void;
   handleMultipleDelete?: () => Promise<void>;
   handleShowModal?: () => void;
@@ -12,6 +14,7 @@ interface LongPressedHeaderProps {
 
 const LongPressedHeader = ({
   from,
+  selectedIds,
   handleCancelLongPress,
   handleShowModal,
   handleMultipleDelete,
@@ -23,6 +26,12 @@ const LongPressedHeader = ({
       <RoundedButton
         onPress={handleCancelLongPress}
         child={<Feather name="x" size={24} color="black" />}
+      />
+      <CustomTextNew
+        txtSize={16}
+        txtWeight="700"
+        txtColor="black"
+        text={`${selectedIds.length} selected`}
       />
       <RoundedButton
         onPress={handleShowModal || defaultHandler}

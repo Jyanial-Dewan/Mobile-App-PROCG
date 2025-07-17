@@ -56,7 +56,7 @@ export interface RenderMessageItemProps {
   setIsLongPressed: React.Dispatch<React.SetStateAction<boolean>>;
   handleSingleDeleteMessage: (msg: any) => Promise<void>;
 }
-const ITEMHEIGHT = 105;
+const ITEMHEIGHT = 90;
 const RenderMessageItem = ({
   item,
   userInfo,
@@ -159,7 +159,7 @@ const RenderMessageItem = ({
     : COLORS.primaryRed;
 
   return (
-    <View>
+    <View key={item.id} style={{paddingVertical: 5}}>
       {openModal && (
         <CustomDeleteModal
           isModalShow={openModal}
@@ -175,7 +175,7 @@ const RenderMessageItem = ({
           style={[animatedHeight, {backgroundColor, borderRadius: 15}]}
           onLayout={e => {
             if (!loaded) {
-              scaleX.value = ITEMHEIGHT;
+              // scaleX.value = ITEMHEIGHT;
               setLoaded(true);
             }
           }}>
@@ -187,7 +187,7 @@ const RenderMessageItem = ({
               animatedStyle,
               {
                 backgroundColor: selectedIds.includes(item?.id)
-                  ? 'transparent'
+                  ? COLORS.grayBgColor
                   : COLORS.white,
                 borderRadius: 14,
               },
@@ -200,7 +200,7 @@ const RenderMessageItem = ({
                   backgroundColor:
                     notificationIds?.includes(item.id) ||
                     selectedIds.includes(item?.id)
-                      ? COLORS.grayBgColor
+                      ? COLORS.highLight
                       : COLORS.white,
                 },
               ]}
@@ -268,17 +268,18 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
+                  // text={`${item?.subject.slice(0, 50)}${item?.subject?.length > 50 ? '...' : ''}`}
+                  text={item?.subject}
                 />
-                <CustomTextNew
+                {/* <CustomTextNew
                   txtStyle={styles.bodyText}
                   txtAlign="justify"
                   text={
-                    item?.body?.length > 80
-                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
+                    item?.body?.length > 50
+                      ? item?.body?.replace(/\s+/g, ' ').slice(0, 50) + '...'
                       : item?.body?.replace(/\s+/g, ' ')
                   }
-                />
+                /> */}
               </View>
             </TouchableOpacity>
           </Animated.View>
@@ -402,7 +403,11 @@ const InboxScreen = observer(() => {
     setSelectedIds([]);
     setIsModalShow(false);
   };
-
+  const removeNotificationMessage = (ids: string[]) => {
+    for (const id of ids) {
+      messageStore.removeNotificationMessage(id);
+    }
+  };
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
       url: api.DeleteMessage + msgId + `/${userInfo?.user_name}`,
@@ -502,9 +507,10 @@ const InboxScreen = observer(() => {
       isScrollView={false}
       backgroundColor={COLORS.lightBackground}
       header={
-        isLongPressed ? (
+        isLongPressed && selectedIds.length ? (
           <LongPressedHeader
             from={route.name}
+            selectedIds={selectedIds}
             handleCancelLongPress={handleCancelLongPress}
             handleShowModal={() => setIsModalShow(true)}
           />
@@ -566,7 +572,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   rowContainer: {
-    height: ITEMHEIGHT,
+    // height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: 10,
