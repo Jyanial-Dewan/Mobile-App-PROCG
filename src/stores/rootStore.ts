@@ -153,16 +153,7 @@ const secureStorage = {
   setItem,
   getItem,
   removeItem,
-  deviceInfoData: {
-    id: null,
-    user_id: null,
-    os: null,
-    browser_name: 'App',
-    device_type: null,
-    browser_version: '1.0',
-    user_agent: null,
-    location: null,
-  },
+  deviceInfoData: {},
   selectedProfile: '',
   messageStore: {
     receivedMessages: [],

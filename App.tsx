@@ -285,11 +285,12 @@ const Main = observer(() => {
     (async () => {
       const currentPage = 1;
       const url = selectedUrl || ProcgURL;
+      if (!userInfo?.user_name) return;
       const api_params = {
         url: api.RecycleBinMessages + userInfo?.user_name + `/${currentPage}`,
         baseURL: url,
-        isConsole: true,
-        isConsoleParams: true,
+        // isConsole: true,
+        // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, () => {});
       if (res) {
