@@ -212,6 +212,7 @@ const NewMessage = () => {
   };
   return (
     <ContainerNew
+      isRefresh={false}
       isKeyboardAware={true}
       isScrollView={false}
       header={<MainHeader routeName={name} />}

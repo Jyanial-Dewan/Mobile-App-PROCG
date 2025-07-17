@@ -21,7 +21,7 @@ export const COLORS = {
   lightGray: '#B6C1CF', //lightgray
   darkGray: '#6C6C6E',
   primaryBtn: '#3786E6',
-  highLight: '#00AC0B26',
+  highLight: '#79a37c26',
   notifcationIconBorder: '#D8E5F8',
   lightBackground: '#F9FAFB',
   borderColor: '#D3DCE7',

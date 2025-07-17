@@ -49,6 +49,7 @@ interface RenderMessageItemProps {
   item: any;
   userInfo: any;
   selectedIds: string[];
+  notificationIds?: string[];
   handleLongPress: (id: string) => void;
   handlePress: (msgId: string, parentId: string) => Promise<void>;
   handleDeleteFromRecycleBin: (msg: any) => Promise<void>;
@@ -59,6 +60,7 @@ const RenderMessageItem = observer(
     item,
     userInfo,
     selectedIds,
+    notificationIds,
     handleLongPress,
     handlePress,
     handleDeleteFromRecycleBin,
@@ -155,7 +157,7 @@ const RenderMessageItem = observer(
       }
     };
     return (
-      <View>
+      <View style={{paddingVertical: 5}}>
         {openModal && (
           <CustomDeleteModal
             isModalShow={openModal}
@@ -171,7 +173,7 @@ const RenderMessageItem = observer(
             style={[animatedHeight, {backgroundColor, borderRadius: 15}]}
             onLayout={e => {
               if (!loaded) {
-                scaleX.value = ITEMHEIGHT;
+                // scaleX.value = ITEMHEIGHT;
                 setLoaded(true);
               }
             }}>
@@ -183,7 +185,7 @@ const RenderMessageItem = observer(
                 animatedStyle,
                 {
                   backgroundColor: selectedIds.includes(item?.id)
-                    ? 'transparent'
+                    ? COLORS.highLight
                     : COLORS.white,
                   borderRadius: 14,
                 },
@@ -193,9 +195,11 @@ const RenderMessageItem = observer(
                 style={[
                   styles.rowContainer,
                   {
-                    backgroundColor: selectedIds.includes(item?.id)
-                      ? COLORS.grayBgColor
-                      : COLORS.white,
+                    backgroundColor:
+                      notificationIds?.includes(item.id) ||
+                      selectedIds.includes(item?.id)
+                        ? COLORS.highLight
+                        : COLORS.white,
                   },
                 ]}
                 onLongPress={() => handleLongPress(item?.id)}
@@ -261,11 +265,7 @@ const RenderMessageItem = observer(
                     <View style={{flexDirection: 'row', gap: 5}}>
                       <CustomTextNew
                         txtStyle={[styles.dateText, {color: COLORS.black}]}
-                        text={datePart}
-                      />
-                      <CustomTextNew
-                        txtStyle={styles.dateText}
-                        text={timePart}
+                        text={item.date.toLocaleString()}
                       />
                     </View>
                   </View>
@@ -273,9 +273,10 @@ const RenderMessageItem = observer(
                   <CustomTextNew
                     txtStyle={styles.subText}
                     txtAlign="justify"
-                    text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
+                    text={item?.subject}
+                    // text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                   />
-                  <CustomTextNew
+                  {/* <CustomTextNew
                     txtStyle={styles.bodyText}
                     txtAlign="justify"
                     text={
@@ -283,7 +284,7 @@ const RenderMessageItem = observer(
                         ? item?.body?.replace(/\s+/g, ' ').slice(0, 80) + '...'
                         : item?.body?.replace(/\s+/g, ' ')
                     }
-                  />
+                  /> */}
                 </View>
               </TouchableOpacity>
             </Animated.View>
@@ -310,7 +311,7 @@ const RecycleBin = observer(() => {
   const toaster = useToast();
   const {control, setValue} = useForm();
   const url = selectedUrl || ProcgURL;
-
+  const notificationIds = messageStore.notificationMessages.map(msg => msg.id);
   useFocusEffect(
     useCallback(() => {
       setValue('routeName', {label: 'Recycle Bin'});
@@ -380,8 +381,8 @@ const RecycleBin = observer(() => {
 
   const handleCancelLongPress = () => {
     setIsModalShow(false);
-    setIsLongPressed(false);
-    setSelectedIds([]);
+    // setIsLongPressed(false);
+    // setSelectedIds([]);
   };
 
   const handleMultipleDelete = async () => {
@@ -500,9 +501,10 @@ const RecycleBin = observer(() => {
       backgroundColor={COLORS.lightBackground}
       isScrollView={false}
       header={
-        isLongPressed ? (
+        isLongPressed && selectedIds.length ? (
           <LongPressedHeader
             from={route.name}
+            selectedIds={selectedIds}
             handleCancelLongPress={handleCancelLongPress}
             handleShowModal={() => setIsModalShow(true)}
           />
@@ -521,6 +523,7 @@ const RecycleBin = observer(() => {
             item={item}
             userInfo={userInfo}
             selectedIds={selectedIds}
+            notificationIds={notificationIds}
             handlePress={handlePress}
             handleLongPress={handleLongPress}
             handleDeleteFromRecycleBin={handleDeleteFromRecycleBin}
@@ -566,7 +569,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   rowContainer: {
-    height: ITEMHEIGHT,
+    // height: ITEMHEIGHT,
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: 10,
