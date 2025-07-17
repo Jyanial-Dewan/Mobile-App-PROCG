@@ -157,7 +157,7 @@ const RenderMessageItem = observer(
       }
     };
     return (
-      <View key={item.id} style={{paddingVertical: 5}}>
+      <View style={{paddingVertical: 5}}>
         {openModal && (
           <CustomDeleteModal
             isModalShow={openModal}
@@ -265,11 +265,7 @@ const RenderMessageItem = observer(
                     <View style={{flexDirection: 'row', gap: 5}}>
                       <CustomTextNew
                         txtStyle={[styles.dateText, {color: COLORS.black}]}
-                        text={datePart}
-                      />
-                      <CustomTextNew
-                        txtStyle={styles.dateText}
-                        text={timePart}
+                        text={item.date.toLocaleString()}
                       />
                     </View>
                   </View>
@@ -385,8 +381,8 @@ const RecycleBin = observer(() => {
 
   const handleCancelLongPress = () => {
     setIsModalShow(false);
-    setIsLongPressed(false);
-    setSelectedIds([]);
+    // setIsLongPressed(false);
+    // setSelectedIds([]);
   };
 
   const handleMultipleDelete = async () => {

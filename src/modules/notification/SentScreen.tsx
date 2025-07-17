@@ -147,7 +147,7 @@ const RenderMessageItem = ({
     ? 'transparent'
     : COLORS.primaryRed;
   return (
-    <View key={item.id} style={{paddingVertical: 5}}>
+    <View style={{paddingVertical: 5}}>
       {openModal && (
         <CustomDeleteModal
           isModalShow={openModal}
@@ -249,9 +249,8 @@ const RenderMessageItem = ({
                   <View style={{flexDirection: 'row', gap: 5}}>
                     <CustomTextNew
                       txtStyle={[styles.dateText, {color: COLORS.black}]}
-                      text={datePart}
+                      text={item.date.toLocaleString()}
                     />
-                    <CustomTextNew txtStyle={styles.dateText} text={timePart} />
                   </View>
                 </View>
                 {/* <View
@@ -379,8 +378,8 @@ const SentScreen = observer(() => {
   };
 
   const handleCancelLongPress = () => {
-    setIsLongPressed(false);
-    setSelectedIds([]);
+    // setIsLongPressed(false);
+    // setSelectedIds([]);
     setIsModalShow(false);
   };
 
