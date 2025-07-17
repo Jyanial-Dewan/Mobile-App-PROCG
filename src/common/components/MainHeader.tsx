@@ -1,4 +1,11 @@
-import {StyleProp, StyleSheet, Text, TextStyle, View} from 'react-native';
+import {
+  Keyboard,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+} from 'react-native';
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import RoundedButton from './RoundedButton';
@@ -12,10 +19,14 @@ interface HeaderProps {
 
 const Header = ({routeName, last, style}: HeaderProps) => {
   const navigation = useNavigation();
+  const goBack = () => {
+    navigation.goBack();
+    Keyboard.dismiss();
+  };
   return (
     <View style={styles.container}>
       <RoundedButton
-        onPress={() => navigation.goBack()}
+        onPress={goBack}
         child={<SVGController name="Arrow-Left" color="#41596B" />}
       />
       <Text
