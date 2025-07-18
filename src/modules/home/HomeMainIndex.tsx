@@ -191,14 +191,22 @@ const HomeMainIndex = () => {
         return null;
       }
       const api_params = {
-        url: api.getDevices,
+        url: `${api.getDevices}/${userInfo?.user_id}`,
         baseURL: url,
         headers: {Authorization: `Bearer ${userInfo?.access_token}`},
         isConsole: true,
         isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      devicesStore.setDevices(res);
+
+      const formattedWithUsername = res.map((item: any) => {
+        return {
+          ...item,
+          user: userInfo?.user_name,
+        };
+      });
+
+      devicesStore.setDevices(formattedWithUsername);
     },
     [isFocused],
   );

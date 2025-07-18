@@ -173,6 +173,7 @@ const secureStorage = {
   viewRequestStore: {
     requests: [],
   },
+  devicesStore: {devices: []},
 };
 
 export const [RootStoreProvider, useRootStore] = createPersistentStore(
