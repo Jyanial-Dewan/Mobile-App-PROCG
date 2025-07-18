@@ -116,8 +116,8 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       data: payload,
       method: 'post',
       baseURL: ProcgURL,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
     const res = await httpRequest(api_params, setIsLoading);
     console.log(res.access_token, 'login');
@@ -140,8 +140,8 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         data: deviceInfoPayload,
         method: 'post',
         baseURL: ProcgURL,
-        isConsole: true,
-        isConsoleParams: true,
+        // isConsole: true,
+        // isConsoleParams: true,
       };
       axios.defaults.baseURL = selectedUrl || ProcgURL;
       axios.defaults.headers.common['Authorization'] =

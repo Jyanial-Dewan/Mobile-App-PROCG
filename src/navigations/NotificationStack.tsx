@@ -8,7 +8,6 @@ import SentScreen from '../modules/notification/SentScreen';
 import InboxScreen from '../modules/notification/InboxScreen';
 import DraftScreen from '../modules/notification/DraftScreen';
 import RecycleBin from '../modules/notification/RecycleBin';
-import RecycleBinDetail from '../modules/notification/RecycleBinDetail';
 const {Navigator, Screen} = createNativeStackNavigator<any>();
 
 export interface NavigationStackParamList {

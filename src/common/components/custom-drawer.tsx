@@ -1,10 +1,10 @@
-import {useIsFocused, useNavigation} from '@react-navigation/core';
+import {useIsFocused} from '@react-navigation/core';
 import {
   DrawerContentComponentProps,
   useDrawerStatus,
 } from '@react-navigation/drawer';
 import {observer} from 'mobx-react-lite';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, Image} from 'react-native';
 import {useToast} from './CustomToast';
 import FixedContainer from './fixed-container';
@@ -24,12 +24,9 @@ import CustomButtonNew from './CustomButton';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {api} from '../api/api';
 import useAsyncEffect from '../packages/useAsyncEffect/useAsyncEffect';
-import {UserType} from '../../stores/usersStore';
-import {DeviceModel} from '../../types/device/device';
 
-const CustomDrawer = observer<DrawerContentComponentProps>(props => {
+const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
   const toaster = useToast();
   const isFocused = useIsFocused();
   const refRBSheet = useRef<RBSheet>(null);
@@ -37,12 +34,9 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
 
   const {userInfo, logout, deviceInfoData, fcmToken, selectedUrl} =
     useRootStore();
-  const {socket, inactiveDevice} = useSocketContext();
+  const {inactiveDevice} = useSocketContext();
   const storage = new MMKV();
   const url = selectedUrl || ProcgURL;
-  // const [profilePhoto, setProfilePhoto] = useState<Profile>({
-  //   uri: url + '/' + userInfo?.profile_picture.original,
-  // });
   const [profilePhoto, setProfilePhoto] = useState(
     `${url}/${userInfo?.profile_picture.original}`,
   );
@@ -67,20 +61,6 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
   );
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
-  // const res = async () => {
-  //   const res = await api.put(
-  //     `/devices/inactive-device/${token.user_id}/${data.id}`,
-  //     {
-  //       ...data,
-  //       is_active: 0,
-  //     },
-  //   );
-
-  //   if (res.status === 200) {
-  //     console.log(res.data, 'res.data');
-  //     inactiveDevice([res.data]);
-  //   }
-  // };
   const handleSignOut = async () => {
     // socket?.disconnect();
     const payload = {
@@ -92,8 +72,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
       data: payload,
       method: 'put',
       baseURL: url,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
 
     const tokenPayload = {
@@ -105,28 +85,9 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
       data: tokenPayload,
       method: 'post',
       baseURL: url,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-    // const inactivedeviceInfoData: DeviceModel[] = [
-    //   {
-    //     id: response.id,
-    //     user_id: response.user_id,
-    //     device_type: response.device_type,
-    //     browser_name: 'App',
-    //     browser_version: '1.0',
-    //     os: response.os,
-    //     user_agent: response.user_agent,
-    //     added_at: response.added_at,
-    //     is_active: 1,
-    //     ip_address: response.ip_address,
-    //     location: response.location || 'Unknown (Location off)',
-    //     user: res.user_name,
-    //   },
-    // ];
-    // inactiveDevice(deviceInfoData);
-    // res();
-    navigation.navigate('Login');
     await httpRequest(api_params, setIsLoading);
 
     inactiveDevice({
@@ -138,7 +99,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(props => {
     await FastImage.clearDiskCache();
     await FastImage.clearMemoryCache();
     storage.clearAll();
-    logout(); // Ensure logout clears user state
+    logout();
+    navigation.navigate('Login');
   };
 
   const handleOpenSheet = () => {

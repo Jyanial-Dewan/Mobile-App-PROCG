@@ -1,17 +1,10 @@
 import {
   createDrawerNavigator,
-  DrawerNavigationProp,
   DrawerScreenProps,
 } from '@react-navigation/drawer';
-import {
-  CompositeNavigationProp,
-  CompositeScreenProps,
-  NavigatorScreenParams,
-  RouteProp,
-} from '@react-navigation/native';
+import {CompositeScreenProps} from '@react-navigation/native';
 import React, {useContext} from 'react';
 import {StyleSheet} from 'react-native';
-import {NativeStackNavigationProp} from 'react-native-screens/native-stack';
 import BottomTab from '../navigations/BottomTab';
 import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
@@ -26,9 +19,11 @@ import ReplyScreen from '../modules/reply/ReplyScree';
 import ViewRequestsScreen from '../modules/view-requests/ViewRequestsScreen';
 import RunARequestScreen from '../modules/run-a-request/RunARequestScreen';
 import Alerts from '../modules/Alerts/Alerts';
+import Login from '../auth/LoginScreen';
 
 export type DrawerScreensParams = {
   Alerts: undefined;
+  Login: undefined;
 };
 
 export type DrawerScreens = keyof DrawerScreensParams;
@@ -38,7 +33,7 @@ export type DrawerScreenProp<T extends DrawerScreens> = CompositeScreenProps<
   NativeStackScreenProps<RootStackScreensParms>
 >;
 
-const {Navigator, Screen} = createDrawerNavigator();
+const {Navigator, Screen} = createDrawerNavigator<RootStackScreensParms>();
 
 const Drawer = () => {
   return (
@@ -62,8 +57,8 @@ const Drawer = () => {
       <Screen name="Reply" component={ReplyScreen} />
       <Screen name="View_Requests" component={ViewRequestsScreen} />
       <Screen name="Run_a_Request" component={RunARequestScreen} />
-      {/* Add more screens as needed */}
       <Screen name="Alerts" component={Alerts} />
+      <Screen name="Login" component={Login} />
     </Navigator>
   );
 };
