@@ -100,6 +100,9 @@ const RootStore = types
       self.deviceInfoData = deviceInfo;
       secureStorage.setItem('deviceInfo', deviceInfo);
     },
+    pushNotificaton(status: string) {
+      secureStorage.setItem('pushNotificaton', status);
+    },
 
     logout() {
       self.userInfo = undefined;
@@ -149,7 +152,7 @@ const getItem = (key: string) => {
 };
 const removeItem = (key: string) => mmkv.delete(key);
 
-const secureStorage = {
+export const secureStorage = {
   setItem,
   getItem,
   removeItem,

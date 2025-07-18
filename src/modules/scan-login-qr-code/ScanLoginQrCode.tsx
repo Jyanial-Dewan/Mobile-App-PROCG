@@ -53,7 +53,7 @@ const ScanLoginQrCode = observer(() => {
       };
 
       const res = await httpRequest(verifyTokenParams, setIsVerifying);
-      console.log(res.access_token, 'login');
+      // console.log(res.access_token, 'login');
       if (res?.access_token) {
         const deviceInfoPayload = {
           user_id: res.user_id,

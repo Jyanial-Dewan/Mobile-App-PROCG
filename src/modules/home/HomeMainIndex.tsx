@@ -14,13 +14,15 @@ import {
   View,
   Image,
   Platform,
+  Modal,
+  Pressable,
 } from 'react-native';
 import {Edge} from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
 import {COLORS} from '../../common/constant/Index';
 import {httpRequest} from '../../common/constant/httpRequest';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {useRootStore} from '../../stores/rootStore';
+import {secureStorage, useRootStore} from '../../stores/rootStore';
 import {api} from '../../common/api/api';
 import {ProcgURL} from '../../../App';
 import messaging from '@react-native-firebase/messaging';
@@ -34,6 +36,7 @@ import axios from 'axios';
 import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
 import {Badge} from 'react-native-paper';
 import CustomTextNew from '~/common/components/CustomText';
+import {DrawerNavigationHelpers} from '@react-navigation/drawer/lib/typescript/src/types';
 
 const edges: Edge[] = ['right', 'left'];
 const wait = (timeout: any) => {
@@ -52,26 +55,20 @@ const HomeMainIndex = () => {
     selectedUrl,
     menuStore,
     devicesStore,
+    pushNotificaton,
   } = useRootStore();
   const navigation = useNavigation<NavigationProp<any>>();
+  const drawerNav = useNavigation<DrawerNavigationHelpers>();
   const drawerStatus = useDrawerStatus();
   const {socket} = useSocketContext();
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(false);
-  // const url = selectedUrl || ProcgURL;
-  // const [profilePhoto, setProfilePhoto] = useState<Profile>({
-  //   uri: `${url}/${userInfo?.profile_picture.original}`,
-  // });
-  // console.log(url + '/' + userInfo?.profile_picture.original, 'original');
-
+  const resPushNotificaton = secureStorage.getItem('pushNotificaton');
   const url = selectedUrl || ProcgURL;
   const [profilePhoto, setProfilePhoto] = useState(
     `${url}/${userInfo?.profile_picture.original}`,
   );
   const [imageError, setImageError] = useState(false);
-  console.log(imageError, '57');
-
-  console.log(profilePhoto, 'home');
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
 
@@ -84,68 +81,16 @@ const HomeMainIndex = () => {
       const api_params = {
         url: api.Users + `/` + Number(userInfo?.user_id),
         baseURL: url,
-        isConsole: true,
-        isConsoleParams: true,
+        // isConsole: true,
+        // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      console.log(res);
+      // console.log(res);
       setProfilePhoto(`${url}/${res.profile_picture.original}`);
     },
 
     [isFocused, drawerStatus],
   );
-
-  //Post_Notification Permission
-  useEffect(() => {
-    const requestPermissionAndroid = async () => {
-      if (Platform.OS === 'android') {
-        // Handle for Android 8.1 or lower
-        if (Platform.Version < 28) {
-          // For Android 8 or lower, permission is automatically granted (no need for POST_NOTIFICATIONS)
-          const token = await messaging().getToken();
-          fcmTokenSave({fcmToken: token});
-
-          const tokenPayload = {
-            token: token,
-            username: userInfo?.user_name,
-          };
-          const tokenParams = {
-            url: api.RegisterToken,
-            data: tokenPayload,
-            method: 'post',
-            baseURL: url,
-          };
-          await httpRequest(tokenParams, setIsLoading);
-        } else {
-          // For Android 9 and above, request POST_NOTIFICATIONS permission
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-          );
-
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            const token = await messaging().getToken();
-            fcmTokenSave({fcmToken: token});
-
-            const tokenPayload = {
-              token: token,
-              username: userInfo?.user_name,
-            };
-            const tokenParams = {
-              url: api.RegisterToken,
-              data: tokenPayload,
-              method: 'post',
-              baseURL: url,
-            };
-            await httpRequest(tokenParams, setIsLoading);
-          } else {
-            Alert.alert('Permission Denied');
-          }
-        }
-      }
-    };
-
-    requestPermissionAndroid();
-  }, []);
 
   //Fetch Users
   useAsyncEffect(
@@ -184,6 +129,7 @@ const HomeMainIndex = () => {
     },
     [isFocused],
   );
+
   //Fetch Devices
   useAsyncEffect(
     async isMounted => {
@@ -227,11 +173,85 @@ const HomeMainIndex = () => {
     };
   }, [socket]);
 
+  //Post_Notification Permission
+  useEffect(() => {
+    const showAlert = () =>
+      Alert.alert(
+        'Push Notifications',
+        'Allow PRO-CG to send you notifications?',
+        [
+          {
+            text: 'Ask me later',
+            onPress: () => {
+              // console.log('Ask me later pressed');
+              pushNotificaton('askMeLater');
+            },
+          },
+          {
+            text: 'Cancel',
+            onPress: () => {
+              // console.log('Cancel Pressed');
+              pushNotificaton('cancel');
+            },
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              // console.log('OK Pressed');
+              allowPushNotification();
+              pushNotificaton('ok');
+            },
+          },
+        ],
+      );
+
+    const allowPushNotification = async () => {
+      const token = await messaging().getToken();
+      fcmTokenSave({fcmToken: token});
+
+      const tokenPayload = {
+        token: token,
+        username: userInfo?.user_name,
+      };
+      const tokenParams = {
+        url: api.RegisterToken,
+        data: tokenPayload,
+        method: 'post',
+        baseURL: url,
+      };
+      await httpRequest(tokenParams, setIsLoading);
+    };
+    const requestPermissionAndroid = async () => {
+      if (Platform.OS === 'android') {
+        // Handle for Android 8.1 or lower
+        if (Platform.Version < 28) {
+          // For Android 8.1 or lower, permission is automatically granted (no need for POST_NOTIFICATIONS)
+          if (!resPushNotificaton || resPushNotificaton === 'askMeLater')
+            showAlert();
+        } else {
+          // For Android 9 and above, request POST_NOTIFICATIONS permission
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
+
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            allowPushNotification();
+          } else {
+            Alert.alert('Permission Denied');
+          }
+        }
+      }
+    };
+
+    requestPermissionAndroid();
+  }, []);
+
   return (
     <ContainerNew style={styles.container}>
       <View style={styles.topContainer}>
         <TouchableOpacity
-          onPress={navigation.toggleDrawer}
+          onPress={drawerNav.toggleDrawer}
           style={{flexDirection: 'row', gap: 4, alignItems: 'center'}}>
           {/* <Image
             style={styles.profileImage}
