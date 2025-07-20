@@ -165,6 +165,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           user: res.user_name,
         });
         // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
+        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
         toaster.show({message: 'Login Successfully', type: 'success'});
       }
     } else if (res === undefined || res === 401) {

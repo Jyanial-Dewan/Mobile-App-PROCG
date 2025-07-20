@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 import {
   LinkingOptions,
   NavigationContainer,
@@ -154,7 +154,6 @@ axios.interceptors.response.use(
 );
 
 const Main = observer(() => {
-  // const {navigate} = useNavigation()
   const {
     hydrate,
     deviceInfoData,
@@ -166,7 +165,7 @@ const Main = observer(() => {
     selectedUrl,
   } = useRootStore();
   const rootStore = useRootStore();
-  const {socket, setUserName, addDevice} = useSocketContext();
+  const {socket, addDevice} = useSocketContext();
   const [isDark] = useIsDarkTheme();
 
   // Handle background messages
@@ -190,10 +189,6 @@ const Main = observer(() => {
     messageStore.addTotalReceived();
     // onDisplayNotification(remoteMessage);
   });
-
-  useEffect(() => {
-    setUserName(userInfo?.user_name);
-  }, [userInfo?.user_name]);
 
   const theme = useMemo(() => {
     if (isDark) {
@@ -279,7 +274,7 @@ const Main = observer(() => {
     if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
       addDevice(deviceInfoData);
     }
-  }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
+  }, [userInfo?.isLoggedIn]);
 
   //Inactive Device via Socket
   useEffect(() => {
@@ -319,6 +314,7 @@ const Main = observer(() => {
     })();
   }, [userInfo?.isLoggedIn]);
 
+  //console.log('check reder App...............................');
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <PaperProvider theme={theme}>

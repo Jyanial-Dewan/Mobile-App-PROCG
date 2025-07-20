@@ -97,6 +97,8 @@ const ScanLoginQrCode = observer(() => {
             user: res.user_name,
           });
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
+          userInfoSave(res);
+          // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
           toaster.show({message: 'Login Successfully', type: 'success'});
         }
       } else if (res === undefined || res === 401) {
