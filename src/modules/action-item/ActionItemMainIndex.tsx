@@ -44,7 +44,7 @@ const actionItemsData = [
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     icon: 'Circle-Check-Big',
-    status: 'Completed',
+    status: 'Status: Completed',
   },
   {
     id: 2,
@@ -54,7 +54,7 @@ const actionItemsData = [
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     icon: 'Circle-Check',
-    status: 'In Progress',
+    status: 'Status: In Progress',
   },
   {
     id: 3,
@@ -64,7 +64,7 @@ const actionItemsData = [
     description:
       'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     icon: 'Circle',
-    status: 'New',
+    status: 'Status: New',
   },
 ];
 const ActionItemMainIndex = () => {
@@ -113,14 +113,14 @@ const ActionItemMainIndex = () => {
               <View
                 style={{
                   backgroundColor:
-                    item.status === 'Completed'
+                    item.status === 'Status: Completed'
                       ? COLORS.badgeGreen
-                      : item.status === 'In Progress'
+                      : item.status === 'Status: In Progress'
                         ? COLORS.badgeYellow
                         : COLORS.badgeBlue,
                   padding: 5,
                   borderRadius: 5,
-                  width: 90,
+                  width: 135,
                   alignItems: 'center',
                 }}>
                 <CustomTextNew text={item.status} txtColor={COLORS.white} />

@@ -13,10 +13,11 @@ import CustomButtonNew from '../../common/components/CustomButton';
 import {api} from '../..//common/api/api';
 import {ProcgURL} from '../../../App';
 import {httpRequest} from '../../common/constant/httpRequest';
+import {useSocketContext} from '../../context/SocketContext';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
-const InfoRow = ({label, value}) => (
+const InfoRow = ({label, value}: any) => (
   <View style={styles.row}>
     <CustomTextNew text={label} txtStyle={styles.label} />
     <CustomTextNew text={value || 'N/A'} txtStyle={styles.value} />
@@ -26,9 +27,9 @@ const InfoRow = ({label, value}) => (
 const ProfileScreen = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const {userInfo, logout, deviceInfoData, socket, fcmToken} = useRootStore();
+  const {userInfo, logout, deviceInfoData, fcmToken} = useRootStore();
   console.log(deviceInfoData, 'profile');
-
+  const {socket} = useSocketContext();
   const [isLoading, setIsLoading] = useState(false);
 
   useAsyncEffect(
@@ -68,7 +69,7 @@ const ProfileScreen = () => {
     };
 
     logout(); // Ensure logout clears user state
-    navigation.navigate('Login');
+    // navigation.navigate('Login');
     await httpRequest(api_params, setIsLoading);
     await httpRequest(tokenParams, setIsLoading);
   };
@@ -82,7 +83,7 @@ const ProfileScreen = () => {
       style={styles.container}>
       <View style={styles.content}>
         <InfoRow label="Name:" value={userInfo?.user_name} />
-        <InfoRow label="Email:" value={userInfo?.email} />
+        {/* <InfoRow label="Email:" value={userInfo?.email} /> */}
         <InfoRow label="User ID:" value={userInfo?.user_id?.toString()} />
 
         <CustomButtonNew btnText="Sign Out" onBtnPress={handleSignOut} />

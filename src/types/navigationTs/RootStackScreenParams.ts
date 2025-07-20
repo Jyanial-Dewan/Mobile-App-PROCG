@@ -21,4 +21,8 @@ export type RootStackScreensParms = {
   Reply: {_id: string};
   Drafts_Detail: {_id: string};
   Recycle_Bin_Detail: {_id: string};
+  BottomTab: undefined;
+  View_Requests: undefined;
+  Run_a_Request: undefined;
+  Alerts: undefined;
 };

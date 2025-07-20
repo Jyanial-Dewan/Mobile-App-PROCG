@@ -26,11 +26,11 @@ export const DevicesStore = types
     devices: types.array(DeviceModel),
   })
   .actions(self => ({
-    setDevices(data: SnapshotIn<typeof DeviceModel>[]) {
+    setDevices(data: Array<DevicesStoreSnapshotType>) {
       const validDevices = data.map(device => DeviceModel.create(device));
       self.devices.replace(validDevices);
     },
-    addDevice(data: SnapshotIn<typeof DeviceModel>) {
+    addDevice(data: DevicesStoreSnapshotType) {
       const previousDevice = self.devices.find(
         item => item.id === data.id && item.is_active === data.is_active,
       );
@@ -42,7 +42,7 @@ export const DevicesStore = types
       }
     },
 
-    inactiveDevice(data: SnapshotIn<typeof DeviceModel>) {
+    inactiveDevice(data: DevicesStoreSnapshotType) {
       const device = self.devices.find(device => device.id === data.id);
       if (device) {
         device.is_active = 0;
@@ -58,5 +58,5 @@ export const DevicesStore = types
     },
   }));
 
-export type DevicesStoreType = Instance<typeof DevicesStore>;
-export type DevicesStoreSnapshotType = SnapshotOut<typeof DevicesStore>;
+export type DevicesStoreType = Instance<typeof DeviceModel>;
+export type DevicesStoreSnapshotType = SnapshotOut<typeof DeviceModel>;

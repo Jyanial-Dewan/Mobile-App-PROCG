@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 import {
   LinkingOptions,
   NavigationContainer,
@@ -154,7 +154,6 @@ axios.interceptors.response.use(
 );
 
 const Main = observer(() => {
-  // const {navigate} = useNavigation()
   const {
     hydrate,
     deviceInfoData,
@@ -274,11 +273,27 @@ const Main = observer(() => {
     getDeviceInfo();
   }, []);
 
+  //Add Device via Socket
   useEffect(() => {
     if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
       addDevice(deviceInfoData);
     }
   }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
+
+  //Inactive Device via Socket
+  useEffect(() => {
+    socket?.on('inactiveDevice', data => {
+      console.log(data, 'inactiveDevice ---------------------------');
+      if (deviceInfoData && deviceInfoData.id === data.id) {
+        logout();
+        socket.disconnect();
+      }
+    });
+
+    return () => {
+      socket?.off('inactiveDevice');
+    };
+  }, [socket]);
 
   // For realtime sync messages
   useEffect(() => {
@@ -303,6 +318,7 @@ const Main = observer(() => {
     })();
   }, [userInfo?.isLoggedIn]);
 
+  //console.log('check reder App...............................');
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <PaperProvider theme={theme}>

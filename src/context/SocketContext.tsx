@@ -17,7 +17,7 @@ interface SocketContextProps {
 
 interface SocketContext {
   socket: Socket;
-  setUserName: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+  setUserName: (username: string | null) => void;
   addDevice: (device: DeviceModel) => void;
   inactiveDevice: (deviceInfoData: {data: DeviceModel[]; user: string}) => void;
 }
@@ -29,8 +29,7 @@ export function useSocketContext() {
 
 export function SocketContextProvider({children}: SocketContextProps) {
   const {userInfo, messageStore, devicesStore} = useRootStore();
-  const [username, setUserName] = useState<string | null>();
-
+  const [username, setUserName] = useState<string | null>(null);
   // Memoize the socket connection so that it's created only once
   const socket = useMemo(() => {
     // console.log(username, 'socket');
@@ -136,7 +135,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('deletedMessage');
       socket?.off('draftMessageId');
       socket?.off('addDevice');
-      socket.off('restoreMessage');
+      socket?.off('restoreMessage');
     };
   }, [socket]);
 

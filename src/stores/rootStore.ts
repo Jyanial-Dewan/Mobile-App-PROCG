@@ -100,11 +100,14 @@ const RootStore = types
       self.deviceInfoData = deviceInfo;
       secureStorage.setItem('deviceInfo', deviceInfo);
     },
+    pushNotificaton(status: string) {
+      secureStorage.setItem('pushNotificaton', status);
+    },
 
     logout() {
       self.userInfo = undefined;
       self.fcmToken = undefined;
-      secureStorage.removeItem('deviceInfo');
+      secureStorage.clearAll();
       applySnapshot(self.messageStore, {
         totalReceived: 0,
         totalSent: 0,
@@ -148,11 +151,13 @@ const getItem = (key: string) => {
   return null;
 };
 const removeItem = (key: string) => mmkv.delete(key);
+const clearAll = () => mmkv.clearAll();
 
-const secureStorage = {
+export const secureStorage = {
   setItem,
   getItem,
   removeItem,
+  clearAll,
   deviceInfoData: {},
   selectedProfile: '',
   messageStore: {
@@ -173,6 +178,7 @@ const secureStorage = {
   viewRequestStore: {
     requests: [],
   },
+  devicesStore: {devices: []},
 };
 
 export const [RootStoreProvider, useRootStore] = createPersistentStore(
