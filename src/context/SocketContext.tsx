@@ -17,7 +17,6 @@ interface SocketContextProps {
 
 interface SocketContext {
   socket: Socket;
-  setUserName: React.Dispatch<React.SetStateAction<string | null | undefined>>;
   addDevice: (device: DeviceModel) => void;
   inactiveDevice: (deviceInfoData: {data: DeviceModel[]; user: string}) => void;
 }
@@ -29,7 +28,6 @@ export function useSocketContext() {
 
 export function SocketContextProvider({children}: SocketContextProps) {
   const {userInfo, messageStore, devicesStore} = useRootStore();
-  const [username, setUserName] = useState<string | null>();
 
   // Memoize the socket connection so that it's created only once
   const socket = useMemo(() => {
@@ -37,11 +35,11 @@ export function SocketContextProvider({children}: SocketContextProps) {
     return io('wss://procg.viscorp.app', {
       path: '/socket.io/',
       query: {
-        key: username,
+        key: userInfo?.user_name,
       },
       transports: ['websocket'],
     });
-  }, [username]);
+  }, [userInfo?.user_name]);
 
   useEffect(() => {
     socket.connect();
@@ -102,7 +100,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
         return JSON.parse(JSON.stringify(obj));
       };
       try {
-        if (!message || !username) return;
+        if (!message || !userInfo?.user_name) return;
         const formattedData = {
           ...message,
           date: new Date(message.date).getTime(),
@@ -113,7 +111,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
           messageStore.addDraftMessage(newMessage);
           messageStore.addTotalDraft();
         } else {
-          if (formattedData.sender.name === username) {
+          if (formattedData.sender.name === userInfo.user_name) {
             messageStore.addSentMessage(newMessage);
             messageStore.addTotalSent();
           } else {
@@ -154,7 +152,6 @@ export function SocketContextProvider({children}: SocketContextProps) {
     <SocketContext.Provider
       value={{
         socket,
-        setUserName,
         addDevice,
         inactiveDevice,
       }}>
