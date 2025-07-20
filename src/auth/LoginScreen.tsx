@@ -144,10 +144,11 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       };
       axios.defaults.baseURL = selectedUrl || ProcgURL;
       axios.defaults.headers.common['Authorization'] =
-        `Bearer ${res?.access_token}`;
+        `Bearer ${res.access_token}`;
       userInfoSave(res);
       // navigation.replace('HomeScreen');
       const response = await httpRequest(deviceInfoApi_params, setIsLoading);
+
       if (response) {
         deviceInfoSave({
           id: response.id,
