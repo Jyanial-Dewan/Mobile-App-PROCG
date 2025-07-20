@@ -164,7 +164,7 @@ const HomeMainIndex = () => {
       socket.disconnect();
       if (deviceInfoData && deviceInfoData.id === data.id) {
         logout();
-        navigation.navigate('Login');
+        // navigation.navigate('Login');
       }
     });
 
@@ -223,6 +223,7 @@ const HomeMainIndex = () => {
       await httpRequest(tokenParams, setIsLoading);
     };
     const requestPermissionAndroid = async () => {
+      //console.log('render time home-------------------');
       if (Platform.OS === 'android') {
         // Handle for Android 8.1 or lower
         if (Platform.Version < 28) {
