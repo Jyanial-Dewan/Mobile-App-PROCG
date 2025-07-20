@@ -98,6 +98,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
     await FastImage.clearMemoryCache();
     logout();
     // navigation.reset({index: 0, routes: [{name: 'Login'}]});
+    // navigation.reset({index: 0, routes: [{name: 'Login'}]});
   };
 
   const handleOpenSheet = () => {

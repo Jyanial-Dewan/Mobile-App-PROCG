@@ -208,6 +208,7 @@ const HomeMainIndex = () => {
     };
     const requestPermissionAndroid = async () => {
       //console.log('render time home-------------------');
+      //console.log('render time home-------------------');
       if (Platform.OS === 'android') {
         // Handle for Android 8.1 or lower
         if (Platform.Version < 28) {

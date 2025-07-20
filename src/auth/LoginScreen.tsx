@@ -144,7 +144,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       };
       axios.defaults.baseURL = selectedUrl || ProcgURL;
       axios.defaults.headers.common['Authorization'] =
-        `Bearer ${res?.access_token}`;
+        `Bearer ${res.access_token}`;
       userInfoSave(res);
       // navigation.replace('HomeScreen');
       const response = await httpRequest(deviceInfoApi_params, setIsLoading);
@@ -163,6 +163,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           location: response.location || 'Unknown (Location off)',
           user: res.user_name,
         });
+        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
         // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
         toaster.show({message: 'Login Successfully', type: 'success'});
       }
