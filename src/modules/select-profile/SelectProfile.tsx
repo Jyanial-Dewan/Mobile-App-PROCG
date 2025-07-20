@@ -24,7 +24,7 @@ const SelectProfile = () => {
 
   const handlePressDone = () => {
     setSelectedProfile(profileString);
-    navigate('Login');
+    // navigate('Login');
   };
   return (
     <ContainerNew

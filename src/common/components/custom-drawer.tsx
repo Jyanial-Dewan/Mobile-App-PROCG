@@ -31,7 +31,6 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   const isFocused = useIsFocused();
   const refRBSheet = useRef<RBSheet>(null);
   const drawerStatus = useDrawerStatus();
-
   const {userInfo, logout, deviceInfoData, fcmToken, selectedUrl} =
     useRootStore();
   const {inactiveDevice} = useSocketContext();
@@ -62,7 +61,6 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
   const handleSignOut = async () => {
-    // socket?.disconnect();
     const payload = {
       is_active: 0,
     };
@@ -98,9 +96,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
     await httpRequest(tokenParams, setIsLoading);
     await FastImage.clearDiskCache();
     await FastImage.clearMemoryCache();
-    storage.clearAll();
     logout();
-    navigation.navigate('Login');
+    // navigation.reset({index: 0, routes: [{name: 'Login'}]});
   };
 
   const handleOpenSheet = () => {

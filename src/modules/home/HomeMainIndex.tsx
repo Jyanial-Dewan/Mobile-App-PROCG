@@ -157,22 +157,6 @@ const HomeMainIndex = () => {
     [isFocused],
   );
 
-  //Socket Connection
-  useEffect(() => {
-    socket?.on('inactiveDevice', data => {
-      console.log(data, 'inactiveDevice');
-      socket.disconnect();
-      if (deviceInfoData && deviceInfoData.id === data.id) {
-        logout();
-        navigation.navigate('Login');
-      }
-    });
-
-    return () => {
-      socket?.off('inactiveDevice');
-    };
-  }, [socket]);
-
   //Post_Notification Permission
   useEffect(() => {
     const showAlert = () =>
@@ -223,6 +207,7 @@ const HomeMainIndex = () => {
       await httpRequest(tokenParams, setIsLoading);
     };
     const requestPermissionAndroid = async () => {
+      //console.log('render time home-------------------');
       if (Platform.OS === 'android') {
         // Handle for Android 8.1 or lower
         if (Platform.Version < 28) {

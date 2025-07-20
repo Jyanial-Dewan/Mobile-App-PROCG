@@ -107,7 +107,7 @@ const RootStore = types
     logout() {
       self.userInfo = undefined;
       self.fcmToken = undefined;
-      secureStorage.removeItem('deviceInfo');
+      secureStorage.clearAll();
       applySnapshot(self.messageStore, {
         totalReceived: 0,
         totalSent: 0,
@@ -151,11 +151,13 @@ const getItem = (key: string) => {
   return null;
 };
 const removeItem = (key: string) => mmkv.delete(key);
+const clearAll = () => mmkv.clearAll();
 
 export const secureStorage = {
   setItem,
   getItem,
   removeItem,
+  clearAll,
   deviceInfoData: {},
   selectedProfile: '',
   messageStore: {

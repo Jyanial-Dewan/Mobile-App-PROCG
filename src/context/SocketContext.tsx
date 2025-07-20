@@ -136,7 +136,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('deletedMessage');
       socket?.off('draftMessageId');
       socket?.off('addDevice');
-      socket.off('restoreMessage');
+      socket?.off('restoreMessage');
     };
   }, [socket]);
 

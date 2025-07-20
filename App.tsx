@@ -274,11 +274,27 @@ const Main = observer(() => {
     getDeviceInfo();
   }, []);
 
+  //Add Device via Socket
   useEffect(() => {
     if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
       addDevice(deviceInfoData);
     }
   }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
+
+  //Inactive Device via Socket
+  useEffect(() => {
+    socket?.on('inactiveDevice', data => {
+      console.log(data, 'inactiveDevice ---------------------------');
+      if (deviceInfoData && deviceInfoData.id === data.id) {
+        logout();
+        socket.disconnect();
+      }
+    });
+
+    return () => {
+      socket?.off('inactiveDevice');
+    };
+  }, [socket]);
 
   // For realtime sync messages
   useEffect(() => {

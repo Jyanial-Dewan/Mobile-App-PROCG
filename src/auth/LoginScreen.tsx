@@ -46,7 +46,6 @@ interface PayloadType {
 const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
-
   const {
     userInfoSave,
     deviceInfoData,
@@ -164,7 +163,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           location: response.location || 'Unknown (Location off)',
           user: res.user_name,
         });
-        navigation.push('Drawer');
+        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
         toaster.show({message: 'Login Successfully', type: 'success'});
       }
     } else if (res === undefined || res === 401) {

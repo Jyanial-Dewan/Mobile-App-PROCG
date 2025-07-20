@@ -25,8 +25,6 @@ const ScanLoginQrCode = observer(() => {
   const [isModalShow, setIsModalShow] = useState(false);
   const {userInfoSave, deviceInfoData, deviceInfoSave, selectedUrl} =
     useRootStore();
-  const {navigate} =
-    useNavigation<NativeStackNavigationProp<RootStackScreensParms>>();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
 
@@ -79,7 +77,6 @@ const ScanLoginQrCode = observer(() => {
         axios.defaults.baseURL = selectedUrl || ProcgURL;
         axios.defaults.headers.common['Authorization'] =
           `Bearer ${res?.access_token}`;
-        userInfoSave(res);
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
 
@@ -98,7 +95,8 @@ const ScanLoginQrCode = observer(() => {
             location: response.location || 'Unknown (Location off)',
             user: res.user_name,
           });
-          navigate('Drawer');
+          userInfoSave(res);
+          // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
           toaster.show({message: 'Login Successfully', type: 'success'});
         }
       } else if (res === undefined || res === 401) {
