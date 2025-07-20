@@ -17,6 +17,7 @@ interface SocketContextProps {
 
 interface SocketContext {
   socket: Socket;
+  setUserName: (username: string | null) => void;
   addDevice: (device: DeviceModel) => void;
   inactiveDevice: (deviceInfoData: {data: DeviceModel[]; user: string}) => void;
 }
@@ -28,18 +29,18 @@ export function useSocketContext() {
 
 export function SocketContextProvider({children}: SocketContextProps) {
   const {userInfo, messageStore, devicesStore} = useRootStore();
-
+  const [username, setUserName] = useState<string | null>(null);
   // Memoize the socket connection so that it's created only once
   const socket = useMemo(() => {
     // console.log(username, 'socket');
     return io('wss://procg.viscorp.app', {
       path: '/socket.io/',
       query: {
-        key: userInfo?.user_name,
+        key: username,
       },
       transports: ['websocket'],
     });
-  }, [userInfo?.user_name]);
+  }, [username]);
 
   useEffect(() => {
     socket.connect();
@@ -100,7 +101,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
         return JSON.parse(JSON.stringify(obj));
       };
       try {
-        if (!message || !userInfo?.user_name) return;
+        if (!message || !username) return;
         const formattedData = {
           ...message,
           date: new Date(message.date).getTime(),
@@ -111,7 +112,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
           messageStore.addDraftMessage(newMessage);
           messageStore.addTotalDraft();
         } else {
-          if (formattedData.sender.name === userInfo.user_name) {
+          if (formattedData.sender.name === username) {
             messageStore.addSentMessage(newMessage);
             messageStore.addTotalSent();
           } else {
@@ -152,6 +153,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
     <SocketContext.Provider
       value={{
         socket,
+        setUserName,
         addDevice,
         inactiveDevice,
       }}>

@@ -165,7 +165,7 @@ const Main = observer(() => {
     selectedUrl,
   } = useRootStore();
   const rootStore = useRootStore();
-  const {socket, addDevice} = useSocketContext();
+  const {socket, setUserName, addDevice} = useSocketContext();
   const [isDark] = useIsDarkTheme();
 
   // Handle background messages
@@ -189,6 +189,10 @@ const Main = observer(() => {
     messageStore.addTotalReceived();
     // onDisplayNotification(remoteMessage);
   });
+
+  useEffect(() => {
+    setUserName(userInfo?.user_name);
+  }, [userInfo?.user_name]);
 
   const theme = useMemo(() => {
     if (isDark) {
@@ -274,7 +278,7 @@ const Main = observer(() => {
     if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
       addDevice(deviceInfoData);
     }
-  }, [userInfo?.isLoggedIn]);
+  }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
 
   //Inactive Device via Socket
   useEffect(() => {
