@@ -38,31 +38,31 @@ interface ActionItemsType {
 const actionItemsData = [
   {
     id: 1,
-    title: 'Action Item Title 1',
+    title: 'Delete Item',
     time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data.',
     icon: 'Circle-Check-Big',
     status: 'Status: Completed',
   },
   {
     id: 2,
-    title: 'Action Item Title 2',
+    title: 'Create Item',
     time: '2025-03-24 04:46:01.327',
     subject: 'lorem ipsum dolor',
     description:
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'This action allows the user to create a new entity within the app, which could be anything from a task, project, note, document, or item. This is generally the first step in the process of managing data within an app. Users are often presented with a form or modal window to input relevant details, such as the title, description, due date, and tags, depending on the context. Creating new items is essential for apps that focus on content creation, task management, or project tracking.',
     icon: 'Circle-Check',
     status: 'Status: In Progress',
   },
   {
     id: 3,
-    title: 'Action Item Title 3',
+    title: 'Edit Item',
     time: '2025-07-04 10:05:13.657526',
     subject: 'lorem ipsum dolor',
     description:
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'Editing an item allows the user to modify the details of a previously created entity. For example, a user might want to update the due date of a task, change a project’s name, or add more information to a note. This action typically opens the original form or a detailed page containing the existing data, which the user can adjust. After making the necessary changes, the user can save the updated information, which will replace the original version.',
     icon: 'Circle',
     status: 'Status: New',
   },
@@ -110,34 +110,34 @@ const ActionItemMainIndex = () => {
                 // txtColor={COLORS.black}
                 style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
               />
-              <View
-                style={{
-                  backgroundColor:
-                    item.status === 'Status: Completed'
-                      ? COLORS.badgeGreen
-                      : item.status === 'Status: In Progress'
-                        ? COLORS.badgeYellow
-                        : COLORS.badgeBlue,
-                  padding: 5,
-                  borderRadius: 5,
-                  width: 135,
-                  alignItems: 'center',
-                }}>
-                <CustomTextNew text={item.status} txtColor={COLORS.white} />
-              </View>
+              <CustomTextNew
+                text={convertDate(item.time)}
+                style={{color: COLORS.textNewBold}}
+              />
             </Row>
-            <CustomTextNew
-              text={convertDate(item.time)}
-              style={{color: COLORS.textNewBold}}
-            />
+            <View
+              style={{
+                backgroundColor:
+                  item.status === 'Status: Completed'
+                    ? COLORS.badgeGreen
+                    : item.status === 'Status: In Progress'
+                      ? COLORS.badgeYellow
+                      : COLORS.badgeBlue,
+                padding: 5,
+                borderRadius: 5,
+                width: 135,
+                alignItems: 'center',
+              }}>
+              <CustomTextNew text={item.status} txtColor={COLORS.white} />
+            </View>
           </Column>
         </Row>
       </Row>
       <Column colStyle={styles.colStyle}>
         <CustomTextNew
-          text={`${item.description.slice(0, 180)} ${item.description.length > 100 ? '...' : ''}`}
-          txtColor={COLORS.textColor}
-          txtSize={12}
+          text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
+          txtColor={COLORS.blackish}
+          txtSize={14}
         />
       </Column>
       {/* Button here */}

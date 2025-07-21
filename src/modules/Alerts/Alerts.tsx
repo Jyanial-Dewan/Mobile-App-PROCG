@@ -36,31 +36,31 @@ interface ActionItemsType {
 const actionItemsData = [
   {
     id: 1,
-    title: 'Alert Title 1',
+    title: 'Error Alert',
     time: '2025-07-04 10:05:13.657526',
     subject: 'lorem ipsum dolor',
     description:
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'An error alert is shown when something goes wrong in the application, usually due to incorrect user input, failed network requests, or unexpected server errors. It’s essential that error alerts are clear, concise, and specific about what went wrong, providing helpful information for the user to resolve the issue, such as which field is invalid or what action they can take next.',
     icon: 'Alert-Low',
     status: 'High',
   },
   {
     id: 2,
-    title: 'Alert Title 2',
+    title: 'Success Alert',
     time: '2025-03-24 04:46:01.327',
     subject: 'lorem ipsum dolor',
     description:
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'A success alert indicates that an operation was completed successfully. This is often used after a user has completed a task, such as saving changes, submitting a form, or successfully processing a payment. Success alerts should be positive, reassuring, and can often include a summary of what was accomplished (e.g., "Your profile has been updated").',
     icon: 'Alert-Low',
     status: 'Normal',
   },
   {
     id: 3,
-    title: 'Alert Title 3',
+    title: 'Warning Alert',
     time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'A warning alert is used to inform users about a potential issue or action that they should be cautious about. It does not necessarily indicate that something has failed, but rather that the user should be aware of a condition that may require attention or could cause problems if ignored. Warning alerts typically use neutral or amber colors (like yellow or orange) to convey the need for awareness.',
     icon: 'Alert-Low',
     status: 'Low',
   },
@@ -120,9 +120,9 @@ const Alerts = () => {
           </Row>
           <Column colStyle={styles.colStyle}>
             <CustomTextNew
-              text={`${item.description.slice(0, 180)} ${item.description.length > 100 ? '...' : ''}`}
-              txtColor={COLORS.textColor}
-              txtSize={12}
+              text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
+              txtColor={COLORS.blackish}
+              txtSize={14}
             />
             <TouchableOpacity
               onPress={() => {
@@ -137,7 +137,7 @@ const Alerts = () => {
             </TouchableOpacity>
           </Column>
           {/* Button here */}
-          <Row justify="space-between">
+          <Row justify="flex-end">
             <CustomButtonNew
               disabled={false}
               btnText={'Button'}
