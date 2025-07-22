@@ -44,7 +44,9 @@ const actionItemsData = [
     description:
       'Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data.',
     icon: 'Circle-Check-Big',
-    status: 'Status: Completed',
+    status: 'Completed',
+    bgColor: '#bbf7d0',
+    txtColor: COLORS.black,
   },
   {
     id: 2,
@@ -54,7 +56,9 @@ const actionItemsData = [
     description:
       'This action allows the user to create a new entity within the app, which could be anything from a task, project, note, document, or item. This is generally the first step in the process of managing data within an app. Users are often presented with a form or modal window to input relevant details, such as the title, description, due date, and tags, depending on the context. Creating new items is essential for apps that focus on content creation, task management, or project tracking.',
     icon: 'Circle-Check',
-    status: 'Status: In Progress',
+    status: 'In Progress',
+    bgColor: '#fef08a',
+    txtColor: COLORS.black,
   },
   {
     id: 3,
@@ -64,7 +68,9 @@ const actionItemsData = [
     description:
       'Editing an item allows the user to modify the details of a previously created entity. For example, a user might want to update the due date of a task, change a project’s name, or add more information to a note. This action typically opens the original form or a detailed page containing the existing data, which the user can adjust. After making the necessary changes, the user can save the updated information, which will replace the original version.',
     icon: 'Circle',
-    status: 'Status: New',
+    status: 'New',
+    bgColor: '#fed7aa',
+    txtColor: COLORS.black,
   },
 ];
 const ActionItemMainIndex = () => {
@@ -99,8 +105,8 @@ const ActionItemMainIndex = () => {
     <View style={styles.itemContainer}>
       <Row justify="space-between" align="center">
         <Row rowWidth="90%" align="center" rowStyle={{marginBottom: 5, gap: 5}}>
-          <View style={styles.iconContainer}>
-            <SVGController name={item.icon} color={COLORS.white} />
+          <View style={[styles.iconContainer, {backgroundColor: item.bgColor}]}>
+            <SVGController name={item.icon} color={item.txtColor} />
           </View>
 
           <Column>
@@ -115,20 +121,16 @@ const ActionItemMainIndex = () => {
                 style={{color: COLORS.textNewBold}}
               />
             </Row>
-            <View
-              style={{
-                backgroundColor:
-                  item.status === 'Status: Completed'
-                    ? COLORS.badgeGreen
-                    : item.status === 'Status: In Progress'
-                      ? COLORS.badgeYellow
-                      : COLORS.badgeBlue,
-                padding: 5,
-                borderRadius: 5,
-                width: 135,
-                alignItems: 'center',
-              }}>
-              <CustomTextNew text={item.status} txtColor={COLORS.white} />
+            <View style={{flexDirection: 'row'}}>
+              <View
+                style={{
+                  backgroundColor: item.bgColor,
+                  paddingHorizontal: 3,
+                  borderRadius: 5,
+                  alignItems: 'center',
+                }}>
+                <CustomTextNew text={item.status} txtColor={item.txtColor} />
+              </View>
             </View>
           </Column>
         </Row>

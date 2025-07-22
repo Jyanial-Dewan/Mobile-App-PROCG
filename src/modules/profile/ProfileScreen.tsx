@@ -14,6 +14,7 @@ import {api} from '../..//common/api/api';
 import {ProcgURL} from '../../../App';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {useSocketContext} from '../../context/SocketContext';
+import MainHeader from '../../common/components/MainHeader';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -77,9 +78,7 @@ const ProfileScreen = () => {
   return (
     <ContainerNew
       edges={edges}
-      header={
-        <CustomHeader title="Profile" onBackPress={() => navigation.goBack()} />
-      }
+      header={<MainHeader routeName="Profile" style={{fontWeight: '700'}} />}
       style={styles.container}>
       <View style={styles.content}>
         <InfoRow label="Name:" value={userInfo?.user_name} />

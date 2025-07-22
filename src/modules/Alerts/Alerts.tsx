@@ -137,7 +137,7 @@ const Alerts = () => {
             </TouchableOpacity>
           </Column>
           {/* Button here */}
-          <Row justify="flex-end">
+          <Row justify="flex-start">
             <CustomButtonNew
               disabled={false}
               btnText={'Button'}
