@@ -24,6 +24,7 @@ import CustomButtonNew from '../../common/components/CustomButton';
 import SearchBar from '../../common/components/SearchBar';
 import {observer} from 'mobx-react-lite';
 import {convertDate} from '../../common/services/DateConverter';
+import ViewDetailsModal from '../../common/components/ViewDetailsModal';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 interface ActionItemsType {
@@ -76,6 +77,10 @@ const Alerts = () => {
   const [search, setSearch] = useState('');
   const [noResult, setNoResult] = useState(false);
   const height = useWindowDimensions().height;
+  const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState({
+    id: 0,
+    visible: false,
+  });
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
@@ -126,8 +131,7 @@ const Alerts = () => {
             />
             <TouchableOpacity
               onPress={() => {
-                // Handle item press
-                console.log('Item pressed:', item.title);
+                setViewDetailsModalVisible({id: item.id, visible: true});
               }}>
               <CustomTextNew
                 text="View Details"
@@ -136,6 +140,16 @@ const Alerts = () => {
               />
             </TouchableOpacity>
           </Column>
+          {/* View Details Modal */}
+          <ViewDetailsModal
+            data={item.description}
+            isVisible={
+              viewDetailsModalVisible.id === item.id &&
+              viewDetailsModalVisible.visible
+            }
+            setIsVisible={setViewDetailsModalVisible}
+          />
+          {/* End View Details Modal */}
           {/* Button here */}
           <Row justify="flex-start">
             <CustomButtonNew

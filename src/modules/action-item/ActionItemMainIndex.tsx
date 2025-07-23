@@ -1,9 +1,13 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  Modal,
+  ScrollView,
   StyleSheet,
   Text,
+  TouchableNativeFeedback,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -26,6 +30,7 @@ import SVGController from '../../common/components/SVGController';
 import CustomButtonNew from '../../common/components/CustomButton';
 import SearchBar from '../../common/components/SearchBar';
 import {convertDate} from '../../common/services/DateConverter';
+import ViewDetailsModal from '../../common/components/ViewDetailsModal';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 interface ActionItemsType {
@@ -42,7 +47,7 @@ const actionItemsData = [
     time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
-      'Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data.',
+      'Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data. Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data. Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data.',
     icon: 'Circle-Check-Big',
     status: 'Completed',
     bgColor: '#bbf7d0',
@@ -82,6 +87,10 @@ const ActionItemMainIndex = () => {
   const [search, setSearch] = useState('');
   const [noResult, setNoResult] = useState(false);
   const height = useWindowDimensions().height;
+  const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState({
+    id: 0,
+    visible: false,
+  });
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
@@ -110,28 +119,28 @@ const ActionItemMainIndex = () => {
           </View>
 
           <Column>
+            <CustomTextNew
+              text={item.title}
+              // txtColor={COLORS.black}
+              style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
+            />
             <Row align="center" justify="space-between">
-              <CustomTextNew
-                text={item.title}
-                // txtColor={COLORS.black}
-                style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
-              />
+              <View style={{flexDirection: 'row'}}>
+                <View
+                  style={{
+                    backgroundColor: item.bgColor,
+                    paddingHorizontal: 3,
+                    borderRadius: 5,
+                    alignItems: 'center',
+                  }}>
+                  <CustomTextNew text={item.status} txtColor={item.txtColor} />
+                </View>
+              </View>
               <CustomTextNew
                 text={convertDate(item.time)}
                 style={{color: COLORS.textNewBold}}
               />
             </Row>
-            <View style={{flexDirection: 'row'}}>
-              <View
-                style={{
-                  backgroundColor: item.bgColor,
-                  paddingHorizontal: 3,
-                  borderRadius: 5,
-                  alignItems: 'center',
-                }}>
-                <CustomTextNew text={item.status} txtColor={item.txtColor} />
-              </View>
-            </View>
           </Column>
         </Row>
       </Row>
@@ -141,7 +150,26 @@ const ActionItemMainIndex = () => {
           txtColor={COLORS.blackish}
           txtSize={14}
         />
+        <TouchableOpacity
+          onPress={() => {
+            setViewDetailsModalVisible({id: item.id, visible: true});
+          }}>
+          <CustomTextNew
+            text="View Details"
+            style={{fontWeight: 'bold', color: COLORS.primary}}
+          />
+        </TouchableOpacity>
       </Column>
+      {/* View Details Modal */}
+      <ViewDetailsModal
+        data={item.description}
+        isVisible={
+          viewDetailsModalVisible.id === item.id &&
+          viewDetailsModalVisible.visible
+        }
+        setIsVisible={setViewDetailsModalVisible}
+      />
+      {/* End View Details Modal */}
       {/* Button here */}
       <Row justify="space-between">
         <CustomButtonNew
@@ -290,5 +318,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.newGray,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: COLORS.lightBackground,
+    width: '90%',
+    height: '85%',
+    padding: 6,
+    borderRadius: 8,
   },
 });
