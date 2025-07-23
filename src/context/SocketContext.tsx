@@ -43,9 +43,13 @@ export function SocketContextProvider({children}: SocketContextProps) {
   }, [username]);
 
   useEffect(() => {
+    if (!username) {
+      console.log('No username set, skipping socket connection');
+      return;
+    }
     socket.connect();
     socket.on('connect', () => {
-      console.log('Connected to WebSocket', socket.id);
+      console.log('Connected to WebSocket', socket.id, username);
     });
 
     socket?.on('receivedMessage', data => {
@@ -137,7 +141,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('addDevice');
       socket?.off('restoreMessage');
     };
-  }, [socket]);
+  }, [socket, username]);
 
   const addDevice = (device: DeviceModel) => {
     socket?.emit('addDevice', device);
@@ -148,7 +152,6 @@ export function SocketContextProvider({children}: SocketContextProps) {
   }) => {
     socket?.emit('inactiveDevice', deviceInfoData);
   };
-
   return (
     <SocketContext.Provider
       value={{
