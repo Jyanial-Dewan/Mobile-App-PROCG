@@ -1,8 +1,10 @@
-// @ts-nocheck
+//  @ts-nocheck
 import messaging from '@react-native-firebase/messaging';
-import NavigationService from '../navigation/NavigationService';
-import notifee, { AndroidImportance } from '@notifee/react-native';
-import { Platform } from 'react-native';
+// import NavigationService from '../navigation/NavigationService';
+import notifee, {AndroidImportance} from '@notifee/react-native';
+import {Platform} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {NotificationDetailsNavigationProp} from '../../navigations/NotificationStack';
 
 //=================== taking permission from user ======================
 export async function requestUserPermission() {
@@ -18,9 +20,9 @@ export async function requestUserPermission() {
 }
 //=================== taking permission from user ======================
 
-async function onDisplayNotification(data) {
+async function onDisplayNotification(data: any) {
   // Request permissions (required for iOS)
-
+  console.log(data, 'data in notifee service===========================');
   if (Platform.OS == 'ios') {
     await notifee.requestPermission();
   }
@@ -56,23 +58,25 @@ async function getFcmToken() {
 //============== token generation for specific device ==============
 
 export async function notificationListner() {
+  const navigation = useNavigation<NotificationDetailsNavigationProp>();
   //===================== Foreground state messages(when user using app open stage)===========================
-  const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-    console.log('A new FCM message arrived!', remoteMessage);
+  const unsubscribe = messaging().onMessage(async remoteMessage => {
+    console.log('A new FCM message arrived!===================', remoteMessage);
 
     //============= showing notification on notifee ===============
     onDisplayNotification(remoteMessage);
   });
   //===================== Foreground state messages(when user using app open stage)===========================
 
-  messaging().onNotificationOpenedApp((remoteMessage) => {
+  messaging().onNotificationOpenedApp(remoteMessage => {
     console.log(
       'Notification caused app to open from background state:',
-      remoteMessage.notification
+      remoteMessage.notification,
     );
-    setTimeout(() => {
-      NavigationService.navigate('Menu');
-    }, 1200);
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Inbox'}],
+    });
 
     // navigation to  specific screen
     // if (!!remoteMessage?.data && remoteMessage?.data?.redirect_to == "Menu") {
@@ -85,9 +89,12 @@ export async function notificationListner() {
   // Check whether an initial notification is available
   messaging()
     .getInitialNotification()
-    .then((remoteMessage) => {
+    .then(remoteMessage => {
       if (remoteMessage) {
-        console.log('Notification caused app to open from quit state:', remoteMessage.notification);
+        console.log(
+          'Notification caused app to open from quit state:',
+          remoteMessage.notification,
+        );
       }
     });
 
