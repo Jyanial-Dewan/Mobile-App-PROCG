@@ -43,38 +43,38 @@ interface ActionItemsType {
 const actionItemsData = [
   {
     id: 1,
-    title: 'Delete Item',
+    title: 'Lorem ipsum lorem ipsum lorem lorem lorem 1',
     time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
-      'Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data. Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data. Deleting an item removes it from the system, effectively erasing the data associated with that item. Most applications provide this functionality with some form of confirmation step to prevent accidental deletion. This action is commonly found alongside a "trash" or "recycle bin" feature, which temporarily holds deleted items before they are permanently erased. Deletion is usually irreversible, so confirmation prompts are essential to avoid losing valuable data.',
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'Circle-Check-Big',
     status: 'Completed',
-    bgColor: '#bbf7d0',
+    bgColor: '#dcfce7',
     txtColor: COLORS.black,
   },
   {
     id: 2,
-    title: 'Create Item',
+    title: 'Lorem ipsum lorem ipsum lorem lorem lorem 2',
     time: '2025-03-24 04:46:01.327',
     subject: 'lorem ipsum dolor',
     description:
-      'This action allows the user to create a new entity within the app, which could be anything from a task, project, note, document, or item. This is generally the first step in the process of managing data within an app. Users are often presented with a form or modal window to input relevant details, such as the title, description, due date, and tags, depending on the context. Creating new items is essential for apps that focus on content creation, task management, or project tracking.',
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'Circle-Check',
     status: 'In Progress',
-    bgColor: '#fef08a',
+    bgColor: '#fef9c3',
     txtColor: COLORS.black,
   },
   {
     id: 3,
-    title: 'Edit Item',
+    title: 'Lorem ipsum lorem ipsum lorem lorem lorem 3',
     time: '2025-07-04 10:05:13.657526',
     subject: 'lorem ipsum dolor',
     description:
-      'Editing an item allows the user to modify the details of a previously created entity. For example, a user might want to update the due date of a task, change a project’s name, or add more information to a note. This action typically opens the original form or a detailed page containing the existing data, which the user can adjust. After making the necessary changes, the user can save the updated information, which will replace the original version.',
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'Circle',
     status: 'New',
-    bgColor: '#fed7aa',
+    bgColor: '#ffedd5',
     txtColor: COLORS.black,
   },
 ];
