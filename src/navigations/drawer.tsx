@@ -20,10 +20,12 @@ import ViewRequestsScreen from '../modules/view-requests/ViewRequestsScreen';
 import RunARequestScreen from '../modules/run-a-request/RunARequestScreen';
 import Alerts from '../modules/Alerts/Alerts';
 import Login from '../auth/LoginScreen';
+import Security from '../modules/security/Security';
 
 export type DrawerScreensParams = {
   Alerts: undefined;
   Login: undefined;
+  Security: undefined;
 };
 
 export type DrawerScreens = keyof DrawerScreensParams;
@@ -59,6 +61,7 @@ const Drawer = () => {
       <Screen name="Run_a_Request" component={RunARequestScreen} />
       <Screen name="Alerts" component={Alerts} />
       <Screen name="Login" component={Login} />
+      <Screen name="Security" component={Security} />
     </Navigator>
   );
 };

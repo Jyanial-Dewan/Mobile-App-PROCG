@@ -13,6 +13,16 @@ export const DeviceInfoStore = types.model('DeviceInfoStore', {
   user: types.maybeNull(types.string),
   ip_address: types.maybeNull(types.string),
   location: types.maybeNull(types.string),
+  signon_audit: types.maybeNull(
+    types.array(
+      types.model({
+        signon_id: types.maybeNull(types.string),
+        login: types.maybeNull(types.string),
+        logout: types.maybeNull(types.string),
+      }),
+    ),
+  ),
+  signon_id: types.maybeNull(types.string),
 });
 
 export type DeviceInfoStoreType = Instance<typeof DeviceInfoStore>;

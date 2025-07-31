@@ -36,7 +36,7 @@ import CustomInvalidModal from '../common/components/CustomInvalidModal';
 import CustomTextNew from '../common/components/CustomText';
 import Row from '../common/components/Row';
 import {Checkbox} from 'react-native-paper';
-import {useSocketContext} from '../context/SocketContext';
+import {v4 as uuidv4} from 'uuid';
 
 interface PayloadType {
   email: string;
@@ -44,6 +44,7 @@ interface PayloadType {
 }
 
 const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
+  const signon_id = uuidv4();
   const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const {
@@ -119,7 +120,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       // isConsoleParams: true,
     };
     const res = await httpRequest(api_params, setIsLoading);
-    console.log(res.access_token, 'login');
+    // console.log(res.access_token, 'login');
     if (res?.access_token) {
       const deviceInfoPayload = {
         user_id: res.user_id,
@@ -132,6 +133,11 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           is_active: 1,
           ip_address: deviceInfoData?.ip_address,
           location: deviceInfoData?.location || 'Unknown (Location off)',
+        },
+        signon_audit: {
+          signon_id,
+          login: new Date(),
+          logout: '',
         },
       };
       const deviceInfoApi_params = {
@@ -163,6 +169,8 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           ip_address: response.ip_address,
           location: response.location || 'Unknown (Location off)',
           user: res.user_name,
+          signon_audit: response.signon_audit,
+          signon_id: signon_id,
         });
         // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
         // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});

@@ -24,9 +24,11 @@ import CustomButtonNew from './CustomButton';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {api} from '../api/api';
 import useAsyncEffect from '../packages/useAsyncEffect/useAsyncEffect';
+import CustomLoading from './CustomLoading';
 
 const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLogout, setIsLogout] = useState(false);
   const toaster = useToast();
   const isFocused = useIsFocused();
   const refRBSheet = useRef<RBSheet>(null);
@@ -60,7 +62,9 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   );
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
+
   const handleSignOut = async () => {
+    setIsLogout(true);
     const payload = {
       is_active: 0,
     };
@@ -97,6 +101,11 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
     await FastImage.clearDiskCache();
     await FastImage.clearMemoryCache();
     logout();
+    setIsLogout(false);
+    // toaster.show({
+    //   type: 'success',
+    //   message: 'You have been logged out successfully',
+    // });
     // navigation.reset({index: 0, routes: [{name: 'Login'}]});
   };
 
@@ -108,9 +117,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
     refRBSheet.current?.close();
   };
 
-  {
-    /* Take photo using camera */
-  }
+  // Take photo using camera
   const onTakePhoto = async () => {
     try {
       const image = await ImageCropPicker.openCamera({
@@ -130,8 +137,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
           type: image.mime,
         },
         baseURL: url,
-        isConsole: true,
-        isConsoleParams: true,
+        // isConsole: true,
+        // isConsoleParams: true,
       };
 
       const res = await httpRequest(profile_params, setIsLoading);
@@ -166,8 +173,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
           type: image.mime,
         },
         baseURL: url,
-        isConsole: true,
-        isConsoleParams: true,
+        // isConsole: true,
+        // isConsoleParams: true,
       };
 
       const res = await httpRequest(profile_params, setIsLoading);
@@ -179,6 +186,11 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
       console.error('Image picker error:', error);
     }
   };
+
+  if (isLogout) {
+    // Show loading screen while logging out
+    return <CustomLoading />;
+  }
 
   return (
     <FixedContainer style={styles.drawer} edges={['top', 'bottom', 'left']}>
@@ -248,7 +260,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Security')}>
           <View style={styles.lineContainer}>
             <SVGController name="Security" />
             <Text style={{fontSize: 13, color: COLORS.newGray}}>Security</Text>
