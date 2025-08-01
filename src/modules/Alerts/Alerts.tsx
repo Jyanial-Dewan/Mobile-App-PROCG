@@ -37,31 +37,31 @@ interface ActionItemsType {
 const actionItemsData = [
   {
     id: 1,
-    title: 'Error Alert',
+    title: 'Alert 1',
     time: '2025-07-04 10:05:13.657526',
     subject: 'lorem ipsum dolor',
     description:
-      'An error alert is shown when something goes wrong in the application, usually due to incorrect user input, failed network requests, or unexpected server errors. It’s essential that error alerts are clear, concise, and specific about what went wrong, providing helpful information for the user to resolve the issue, such as which field is invalid or what action they can take next.',
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'Alert-Low',
     status: 'High',
   },
   {
     id: 2,
-    title: 'Success Alert',
+    title: 'Alert 2',
     time: '2025-03-24 04:46:01.327',
     subject: 'lorem ipsum dolor',
     description:
-      'A success alert indicates that an operation was completed successfully. This is often used after a user has completed a task, such as saving changes, submitting a form, or successfully processing a payment. Success alerts should be positive, reassuring, and can often include a summary of what was accomplished (e.g., "Your profile has been updated").',
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'Alert-Low',
     status: 'Normal',
   },
   {
     id: 3,
-    title: 'Warning Alert',
+    title: 'Alert 3',
     time: '2025-07-16 04:43:06.245',
     subject: 'lorem ipsum dolor',
     description:
-      'A warning alert is used to inform users about a potential issue or action that they should be cautious about. It does not necessarily indicate that something has failed, but rather that the user should be aware of a condition that may require attention or could cause problems if ignored. Warning alerts typically use neutral or amber colors (like yellow or orange) to convey the need for awareness.',
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'Alert-Low',
     status: 'Low',
   },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     color: COLORS.green,
   },
   linkText: {
-    color: COLORS.iconBGREDColor,
+    color: COLORS.blue,
     fontSize: 15,
     fontWeight: 'bold',
   },

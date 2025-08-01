@@ -25,4 +25,5 @@ export type RootStackScreensParms = {
   View_Requests: undefined;
   Run_a_Request: undefined;
   Alerts: undefined;
+  Security: undefined;
 };
