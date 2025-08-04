@@ -23,7 +23,7 @@ import DefaultTheme from './src/themes/defaultTheme';
 import {withoutEncryptionApi} from './src/common/api/withoutEncrytApi';
 import {ToastProvider} from './src/common/components/CustomToast';
 import BootSplash from 'react-native-bootsplash';
-import {procgURLL, secretKeyy, secureStorageKeyy} from '@env';
+import {procgURLL, msgBroker, secretKeyy, secureStorageKeyy} from '@env';
 import DeviceInfo from 'react-native-device-info';
 import Geolocation from 'react-native-geolocation-service';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -51,6 +51,7 @@ if (TextInput.defaultProps == null) {
   TextInput.defaultProps.allowFontScaling = false;
 }
 export const ProcgURL = procgURLL;
+export const MsgBroker = msgBroker;
 export const secretKey = secretKeyy;
 export const secureStorageKey = secureStorageKeyy;
 
@@ -58,7 +59,7 @@ const linking: LinkingOptions<any> = {
   prefixes: [
     /* your linking prefixes */
     'PROCG://',
-    'https://procg.viscorp.app',
+    'https://procg.datafluent.team',
   ],
   config: {
     /* configuration for matching screens with paths */
@@ -271,14 +272,14 @@ const Main = observer(() => {
     };
 
     getDeviceInfo();
-  }, []);
+  }, [userInfo?.isLoggedIn, deviceInfoData.is_active]);
 
   //Add Device via Socket
   useEffect(() => {
-    if (userInfo?.isLoggedIn && deviceInfoData?.is_active === 1) {
+    if (userInfo?.isLoggedIn && deviceInfoData.id !== 0) {
       addDevice(deviceInfoData);
     }
-  }, [socket, userInfo?.isLoggedIn, deviceInfoData?.is_active]);
+  }, [socket, userInfo?.isLoggedIn, deviceInfoData.id]);
 
   //Inactive Device via Socket
   useEffect(() => {

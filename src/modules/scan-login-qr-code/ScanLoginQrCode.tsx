@@ -18,8 +18,10 @@ import {COLORS} from '../../common/constant/Themes';
 import {useToast} from '../../common/components/CustomToast';
 import CustomInvalidModal from '../../common/components/CustomInvalidModal';
 import {clearAllStorage} from '../../common/services/clearStorage';
+import {v4 as uuidv4} from 'uuid';
 
 const ScanLoginQrCode = observer(() => {
+  const signon_id = uuidv4();
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isModalShow, setIsModalShow] = useState(false);
@@ -51,11 +53,12 @@ const ScanLoginQrCode = observer(() => {
       };
 
       const res = await httpRequest(verifyTokenParams, setIsVerifying);
-      // console.log(res.access_token, 'login');
+      console.log(res, 'login');
       if (res?.access_token) {
         const deviceInfoPayload = {
           user_id: res.user_id,
           deviceInfo: {
+            id: 0,
             device_type: deviceInfoData?.device_type,
             browser_name: 'App',
             browser_version: '1.0',
@@ -65,14 +68,19 @@ const ScanLoginQrCode = observer(() => {
             ip_address: deviceInfoData?.ip_address,
             location: deviceInfoData?.location || 'Unknown (Location off)',
           },
+          signon_audit: {
+            signon_id,
+            login: new Date(),
+            logout: '',
+          },
         };
         const deviceInfoApi_params = {
           url: api.AddDeviceInfo,
           data: deviceInfoPayload,
           method: 'post',
           baseURL: ProcgURL,
-          isConsole: true,
-          isConsoleParams: true,
+          // isConsole: true,
+          // isConsoleParams: true,
         };
         axios.defaults.baseURL = selectedUrl || ProcgURL;
         axios.defaults.headers.common['Authorization'] =
@@ -80,24 +88,24 @@ const ScanLoginQrCode = observer(() => {
         userInfoSave(res);
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
-
         if (response) {
           deviceInfoSave({
             id: response.id,
             user_id: response.user_id,
             device_type: response.device_type,
-            browser_name: 'App',
-            browser_version: '1.0',
+            browser_name: response.browser_name,
+            browser_version: response.browser_version,
             os: response.os,
             user_agent: response.user_agent,
             added_at: response.added_at,
-            is_active: 1,
+            is_active: response.is_active,
             ip_address: response.ip_address,
-            location: response.location || 'Unknown (Location off)',
+            location: response.location,
             user: res.user_name,
+            signon_audit: response.signon_audit,
+            signon_id,
           });
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
-          userInfoSave(res);
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
           toaster.show({message: 'Login Successfully', type: 'success'});
         }

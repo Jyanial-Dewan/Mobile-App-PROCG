@@ -19,7 +19,7 @@ const RootStore = types
     hydrated: false,
     userInfo: types.maybe(UserInfoStore),
     usersStore: UsersStore,
-    deviceInfoData: types.maybe(DeviceInfoStore),
+    deviceInfoData: DeviceInfoStore,
     urls: types.array(types.string),
     selectedUrl: types.maybeNull(types.string),
     profiles: types.array(types.string),
@@ -117,6 +117,10 @@ const RootStore = types
       applySnapshot(self.viewRequestStore, {
         requests: [],
       });
+      applySnapshot(self.devicesStore, {
+        devices: [],
+      });
+      applySnapshot(self.deviceInfoData, {});
     },
     fcmTokenSave(fcmToken: FcmTokenType) {
       self.fcmToken = fcmToken;
