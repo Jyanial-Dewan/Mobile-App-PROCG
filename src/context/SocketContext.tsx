@@ -10,6 +10,7 @@ import React, {
 import {io, Socket} from 'socket.io-client';
 import {useRootStore} from '../stores/rootStore';
 import {DeviceModel} from '../types/device/device';
+import {MsgBroker} from '../../App';
 
 interface SocketContextProps {
   children: ReactNode;
@@ -28,19 +29,21 @@ export function useSocketContext() {
 }
 
 export function SocketContextProvider({children}: SocketContextProps) {
-  const {userInfo, messageStore, devicesStore} = useRootStore();
+  const {userInfo, deviceInfoData, messageStore, devicesStore} = useRootStore();
   const [username, setUserName] = useState<string | null>(null);
   // Memoize the socket connection so that it's created only once
   const socket = useMemo(() => {
     // console.log(username, 'socket');
-    return io('wss://procg.viscorp.app', {
+    // return io('wss://procg.datafluent.team', {
+    return io(MsgBroker, {
       path: '/socket.io/',
       query: {
         key: username,
+        device_id: deviceInfoData.id,
       },
       transports: ['websocket'],
     });
-  }, [username]);
+  }, [username, deviceInfoData.id]);
 
   useEffect(() => {
     if (!username) {

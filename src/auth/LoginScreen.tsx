@@ -125,6 +125,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       const deviceInfoPayload = {
         user_id: res.user_id,
         deviceInfo: {
+          id: 0,
           device_type: deviceInfoData?.device_type,
           browser_name: 'App',
           browser_version: '1.0',
@@ -160,17 +161,17 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           id: response.id,
           user_id: response.user_id,
           device_type: response.device_type,
-          browser_name: 'App',
-          browser_version: '1.0',
+          browser_name: response.browser_name,
+          browser_version: response.browser_version,
           os: response.os,
           user_agent: response.user_agent,
           added_at: response.added_at,
-          is_active: 1,
+          is_active: response.is_active,
           ip_address: response.ip_address,
-          location: response.location || 'Unknown (Location off)',
+          location: response.location,
           user: res.user_name,
           signon_audit: response.signon_audit,
-          signon_id: signon_id,
+          signon_id,
         });
         // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
         // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
