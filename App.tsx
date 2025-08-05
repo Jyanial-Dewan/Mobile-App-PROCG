@@ -279,7 +279,7 @@ const Main = observer(() => {
     if (userInfo?.isLoggedIn && deviceInfoData.id !== 0) {
       addDevice(deviceInfoData);
     }
-  }, [socket, userInfo?.isLoggedIn, deviceInfoData.id]);
+  }, [userInfo?.isLoggedIn, deviceInfoData.id]);
 
   //Inactive Device via Socket
   useEffect(() => {

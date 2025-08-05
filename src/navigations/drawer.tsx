@@ -3,7 +3,7 @@ import {
   DrawerScreenProps,
 } from '@react-navigation/drawer';
 import {CompositeScreenProps} from '@react-navigation/native';
-import React, {useContext} from 'react';
+import React, {useState} from 'react';
 import {StyleSheet} from 'react-native';
 import BottomTab from '../navigations/BottomTab';
 import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
@@ -21,6 +21,8 @@ import RunARequestScreen from '../modules/run-a-request/RunARequestScreen';
 import Alerts from '../modules/Alerts/Alerts';
 import Login from '../auth/LoginScreen';
 import Security from '../modules/security/Security';
+import {refresh} from '@react-native-community/netinfo';
+import {useToast} from '../common/components/CustomToast';
 
 export type DrawerScreensParams = {
   Alerts: undefined;
@@ -38,6 +40,19 @@ export type DrawerScreenProp<T extends DrawerScreens> = CompositeScreenProps<
 const {Navigator, Screen} = createDrawerNavigator<RootStackScreensParms>();
 
 const Drawer = () => {
+  const toaster = useToast();
+  const [hasNoInternet, setHasNoInternet] = useState(true);
+  refresh().then(state => {
+    if (state.isConnected) {
+      if (!hasNoInternet) {
+        setHasNoInternet(true);
+        toaster.show({message: 'Connected to internet', type: 'success'});
+      }
+    } else {
+      setHasNoInternet(false);
+      toaster.show({message: 'No internet connection', type: 'error'});
+    }
+  });
   return (
     <Navigator
       drawerContent={props => <CustomDrawer {...props} />}
