@@ -90,10 +90,9 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
       // isConsole: true,
       // isConsoleParams: true,
     };
-    await httpRequest(api_params, setIsLoading);
-
+    const res = await httpRequest(api_params, setIsLoading);
     inactiveDevice({
-      data: deviceInfoData ? [{...deviceInfoData, is_active: 0}] : [],
+      data: [res],
       user: userInfo?.user_name || '',
     });
 

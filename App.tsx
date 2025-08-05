@@ -284,7 +284,7 @@ const Main = observer(() => {
   //Inactive Device via Socket
   useEffect(() => {
     socket?.on('inactiveDevice', data => {
-      console.log(data, 'inactiveDevice ---------------------------');
+      // console.log(data, 'inactiveDevice ---------------------------');
       if (deviceInfoData && deviceInfoData.id === data.id) {
         logout();
         socket.disconnect();
