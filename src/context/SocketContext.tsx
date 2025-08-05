@@ -11,6 +11,7 @@ import {io, Socket} from 'socket.io-client';
 import {useRootStore} from '../stores/rootStore';
 import {DeviceModel} from '../types/device/device';
 import {MsgBroker} from '../../App';
+import {useNetInfo} from '@react-native-community/netinfo';
 
 interface SocketContextProps {
   children: ReactNode;
@@ -31,6 +32,8 @@ export function useSocketContext() {
 export function SocketContextProvider({children}: SocketContextProps) {
   const {userInfo, deviceInfoData, messageStore, devicesStore} = useRootStore();
   const [username, setUserName] = useState<string | null>(null);
+  const hasInternet = useNetInfo().isConnected;
+
   // Memoize the socket connection so that it's created only once
   const socket = useMemo(() => {
     // console.log(username, 'socket');
@@ -50,7 +53,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       console.log('No username set, skipping socket connection');
       return;
     }
-    socket.connect();
+    if (hasInternet) socket.connect();
     socket.on('connect', () => {
       console.log('Connected to WebSocket', socket.id, username);
     });
