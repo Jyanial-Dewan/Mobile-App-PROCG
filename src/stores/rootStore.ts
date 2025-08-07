@@ -10,6 +10,7 @@ import {MenuStore} from './mobileMenuStore';
 import {FcmTokenStore, FcmTokenType} from '../stores/fcmToken-store';
 import {viewRequestStore} from './viewRequestStore';
 import {DevicesStore} from './linkedDevicesStore';
+import {AlertsStore} from './alertsStore';
 
 const RootStore = types
   .model('RootStore', {
@@ -29,6 +30,7 @@ const RootStore = types
     menuStore: types.optional(MenuStore, {menu: []}),
     viewRequestStore: viewRequestStore,
     devicesStore: types.optional(DevicesStore, {devices: []}),
+    alertsStore: AlertsStore,
   })
 
   .actions(self => ({
@@ -183,6 +185,7 @@ export const secureStorage = {
     requests: [],
   },
   devicesStore: {devices: []},
+  alertsStore: {alerts: [], notificationAlerts: [], notificationAlertsCount: 0},
 };
 
 export const [RootStoreProvider, useRootStore] = createPersistentStore(

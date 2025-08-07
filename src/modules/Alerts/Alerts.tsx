@@ -25,6 +25,9 @@ import SearchBar from '../../common/components/SearchBar';
 import {observer} from 'mobx-react-lite';
 import {convertDate} from '../../common/services/DateConverter';
 import ViewDetailsModal from '../../common/components/ViewDetailsModal';
+import {api} from '../../common/api/api';
+import {ProcgURL} from '../../../App';
+import {httpRequest} from '../../common/constant/httpRequest';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 interface ActionItemsType {
@@ -70,13 +73,17 @@ const actionItemsData = [
 /*************  ✨ Windsurf Command 🌟  *************/
 const Alerts = () => {
   const isFocused = useIsFocused();
-  const {userInfo} = useRootStore();
+  const {userInfo, selectedUrl, alertsStore} = useRootStore();
   const navigation = useNavigation();
   const refRBSheet = useRef<RBSheet>(null);
   const [data, setData] = useState<ActionItemsType[]>([]);
   const [search, setSearch] = useState('');
   const [noResult, setNoResult] = useState(false);
   const height = useWindowDimensions().height;
+  const [isLoading, setIsLoading] = useState(false);
+  const url = selectedUrl || ProcgURL;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState({
     id: 0,
     visible: false,
@@ -87,6 +94,21 @@ const Alerts = () => {
         return null;
       }
       //api call here
+      setIsLoading(true);
+      const api_params = {
+        url:
+          api.GetAlerts +
+          `/${userInfo?.user_id}` +
+          `/${currentPage}` +
+          `/${limit}`,
+        baseURL: url,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      if (res) {
+        alertsStore.saveAlerts(res);
+      }
       setData(actionItemsData);
       console.log(userInfo);
     },

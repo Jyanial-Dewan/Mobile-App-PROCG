@@ -34,6 +34,8 @@ const withoutEncryptionApi = [
   api.getDevices,
   // api.addDevice,
   api.inactiveDevice,
+  api.GetAlerts,
+  api.UpdateAlert,
 ];
 
 export {withoutEncryptionApi};
