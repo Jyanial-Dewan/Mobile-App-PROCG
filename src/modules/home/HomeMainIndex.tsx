@@ -56,6 +56,7 @@ const HomeMainIndex = () => {
     menuStore,
     devicesStore,
     pushNotificaton,
+    alertsStore,
   } = useRootStore();
   const navigation = useNavigation<NavigationProp<any>>();
   const drawerNav = useNavigation<DrawerNavigationHelpers>();
@@ -285,7 +286,7 @@ const HomeMainIndex = () => {
                 backgroundColor: COLORS.iconBGREDColor,
                 color: COLORS.white,
               }}>
-              3{/* {messageStore.notificationMessages?.length} */}
+              {alertsStore.notificationAlertsCount}
             </Badge>
             {/* )} */}
           </View>

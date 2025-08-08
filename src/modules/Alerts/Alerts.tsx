@@ -114,6 +114,26 @@ const Alerts = () => {
     },
     [isFocused],
   );
+  useAsyncEffect(
+    async isMounted => {
+      if (!isMounted()) {
+        return null;
+      }
+      //api call here
+      setIsLoading(true);
+      const api_params = {
+        url: api.GetNotificationAlerts + `/${userInfo?.user_id}`,
+        baseURL: url,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      if (res) {
+        alertsStore.saveNotificationAlerts(res);
+      }
+    },
+    [isFocused],
+  );
 
   const renderItem = ({item}: any) => (
     <View style={styles.itemContainer}>
@@ -125,13 +145,13 @@ const Alerts = () => {
             backgroundColor: COLORS.iconBGREDColor,
             alignSelf: 'flex-start',
           }}>
-          <SVGController name={item.icon} color={COLORS.white} />
+          <SVGController name="Alert-Low" color={COLORS.white} />
         </View>
         <Column colWidth="90%">
           <Row justify="space-between" align="center">
             <Row align="center" justify="space-between">
               <CustomTextNew
-                text={item.title}
+                text={item.alert_name}
                 style={{
                   fontSize: 15,
                   fontWeight: 'bold',
@@ -140,7 +160,7 @@ const Alerts = () => {
                 }}
               />
               <CustomTextNew
-                text={convertDate(item.time)}
+                text={convertDate(item.last_update_date)}
                 txtColor={COLORS.textNewBold}
               />
             </Row>
@@ -217,7 +237,7 @@ const Alerts = () => {
       header={<MainHeader routeName="Alerts" style={{fontWeight: '700'}} />}>
       <SearchBar placeholder="Search" value={search} onChangeText={setSearch} />
       <CustomFlatList
-        data={data}
+        data={alertsStore.alerts}
         RenderItems={renderItem}
         // isLoading={isLoading}
         // currentPage={currentPage}

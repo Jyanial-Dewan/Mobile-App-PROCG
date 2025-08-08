@@ -24,20 +24,12 @@ export const AlertsStore = types
   .actions(self => ({
     saveAlerts(alerts: Array<AlertStoreSnapshotType>) {
       const alertsData = alerts.map(alert => AlertModel.create(alert));
-      const notificationAlertsData = alerts
-        .map(alert => {
-          return !alert.readers.length ? AlertModel.create(alert) : null;
-        })
-        .filter(alert => alert !== null);
-      console.log(
-        alertsData,
-        notificationAlertsData,
-        'wwwwwwwwwwwwwwwwwwwwwwww',
-      );
-      // Replace the arrays
       self.alerts.replace(alertsData);
-      self.notificationAlerts.replace(notificationAlertsData);
-      self.notificationAlertsCount = notificationAlertsData.length;
+    },
+    saveNotificationAlerts(alerts: Array<AlertStoreSnapshotType>) {
+      const alertsData = alerts.map(alert => AlertModel.create(alert));
+      self.notificationAlerts.replace(alertsData);
+      self.notificationAlertsCount = alertsData.length;
     },
     addAlert(alert: AlertStoreSnapshotType) {
       const alertData = AlertModel.create(alert);

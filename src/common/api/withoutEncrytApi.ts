@@ -36,6 +36,7 @@ const withoutEncryptionApi = [
   api.inactiveDevice,
   api.GetAlerts,
   api.UpdateAlert,
+  api.GetNotificationAlerts,
 ];
 
 export {withoutEncryptionApi};
