@@ -20,8 +20,12 @@ export const AlertsStore = types
     alerts: types.array(AlertModel),
     notificationAlerts: types.array(AlertModel),
     notificationAlertsCount: types.number,
+    refreshing: types.optional(types.boolean, false),
   })
   .actions(self => ({
+    setRefreshing(value: boolean) {
+      self.refreshing = value;
+    },
     saveAlerts(alerts: Array<AlertStoreSnapshotType>) {
       const alertsData = alerts.map(alert => AlertModel.create(alert));
       self.alerts.replace(alertsData);
