@@ -276,7 +276,7 @@ const HomeMainIndex = () => {
 
             {/* {messageStore.notificationMessages.length > 0 && ( */}
             <Badge
-              visible={true}
+              visible={alertsStore.notificationAlertsCount > 0}
               size={25}
               style={{
                 position: 'absolute',

@@ -1,4 +1,4 @@
-import {Instance, SnapshotOut, types} from 'mobx-state-tree';
+import {getSnapshot, Instance, SnapshotOut, types} from 'mobx-state-tree';
 
 export const AlertModel = types.model('alertModel', {
   user_id: types.number,
@@ -40,13 +40,40 @@ export const AlertsStore = types
       self.alerts.unshift(alertData);
     },
     readAlert(alert_id: number) {
-      const alertToRemove = self.notificationAlerts.find(
+      const notificationAlertItem = self.notificationAlerts.find(
         alert => alert.alert_id === alert_id,
       );
-      if (alertToRemove) {
-        self.notificationAlerts.remove(alertToRemove);
+      if (notificationAlertItem) {
+        getSnapshot(notificationAlertItem);
+        self.notificationAlerts.remove(notificationAlertItem);
+        self.notificationAlertsCount--;
       }
     },
+
+    // readAlert(alert: AlertStoreSnapshotType) {
+    //   const alertItem = self.notificationAlerts.find(
+    //     item => item.alert_id === alert.alert_id,
+    //   );
+    //   if (alertItem) {
+    //     self.notificationAlerts.remove(alertItem);
+    //     self.notificationAlertsCount--;
+
+    //     // remove reader from alerts
+
+    //     self.alerts.forEach(item => {
+    //       if (item.alert_id === alert.alert_id) {
+    //         // Log for debugging
+    //         // console.log('before readers:', item.readers);
+
+    //         // Check if user_id exists in the readers and remove it
+    //         const index = item.readers.indexOf(alert.user_id);
+    //         if (index !== -1) {
+    //           item.readers.splice(index, 1);
+    //         }
+    //       }
+    //     });
+    //   }
+    // },
   }));
 
 export type AlertsStoreType = Instance<typeof AlertModel>;

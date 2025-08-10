@@ -1,5 +1,5 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import Row from '../../common/components/Row';
 import SVGController from '../../common/components/SVGController';
 import {COLORS} from '../../common/constant/Themes';
@@ -8,19 +8,50 @@ import CustomTextNew from '../../common/components/CustomText';
 import {convertDate} from '../../common/services/DateConverter';
 import CustomButtonNew from '../../common/components/CustomButton';
 import {AlertStoreSnapshotType} from '../../stores/alertsStore';
+import {useRootStore} from '../../stores/rootStore';
+import {api} from '../../common/api/api';
+import {httpRequest} from '../../common/constant/httpRequest';
+import {observer} from 'mobx-react-lite';
 interface Props {
   item: AlertStoreSnapshotType;
   refSheet: any;
   setSelectedItem: (item: AlertStoreSnapshotType) => void;
 }
 
-const RenderItems = ({item, refSheet, setSelectedItem}: any) => {
-  const onOpenSheet = (item: any) => {
+const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
+  const {userInfo, alertsStore} = useRootStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const notificationIds = alertsStore.notificationAlerts.map(
+    item => item.alert_id,
+  );
+  const onOpenSheet = (item: AlertStoreSnapshotType) => {
     refSheet.current?.open();
     setSelectedItem(item);
+    if (notificationIds.includes(item.alert_id)) {
+      alertRead();
+      alertsStore.readAlert(item.alert_id);
+    }
+  };
+  const alertRead = async () => {
+    const api_params = {
+      url: api.UpdateAlert + `/${userInfo?.user_id}` + `/${item.alert_id}`,
+      baseURL: url,
+      method: 'put',
+      // isConsole: true,
+      // isConsoleParams: true,
+    };
+    await httpRequest(api_params, setIsLoading);
   };
   return (
-    <View style={styles.itemContainer}>
+    <View
+      style={[
+        styles.itemContainer,
+        {
+          backgroundColor: notificationIds.includes(item.alert_id)
+            ? COLORS.grayBgColor
+            : COLORS.white,
+        },
+      ]}>
       <Row justify="space-between" rowStyle={{gap: 10}}>
         <View
           style={{

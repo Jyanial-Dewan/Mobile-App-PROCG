@@ -22,8 +22,30 @@ const {Navigator, Screen} = createMaterialBottomTabNavigator<any>();
 const BottomTab = observer(() => {
   const isFocused = useIsFocused();
   const {bottom} = useSafeAreaInsets();
-  const {userInfo, messageStore} = useRootStore();
+  const {userInfo, alertsStore, messageStore} = useRootStore();
   const [isLoading, setIsLoading] = useState(false);
+
+  useAsyncEffect(
+    async isMounted => {
+      if (!isMounted()) {
+        return null;
+      }
+      //api call here
+      setIsLoading(true);
+      const api_params = {
+        url: api.GetNotificationAlerts + `/${userInfo?.user_id}`,
+        baseURL: ProcgURL,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      if (res) {
+        alertsStore.saveNotificationAlerts(res);
+        alertsStore.setRefreshing(false);
+      }
+    },
+    [isFocused, alertsStore.refreshing],
+  );
 
   useAsyncEffect(
     async isMounted => {

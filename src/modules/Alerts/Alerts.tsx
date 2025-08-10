@@ -30,6 +30,7 @@ import {ProcgURL} from '../../../App';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {AlertStoreSnapshotType} from '../../stores/alertsStore';
 import RenderItems from './RenderItems';
+import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -73,35 +74,13 @@ const Alerts = () => {
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        setHasMore(res.length);
-        setData(res);
-        alertsStore.saveAlerts(res);
+        setHasMore(res.items.length);
+        setData(res.items);
+        alertsStore.saveAlerts(res.items);
         alertsStore.setRefreshing(false);
       }
     },
-    [isFocused, currentPage, alertsStore.refreshing],
-  );
-  useAsyncEffect(
-    async isMounted => {
-      if (!isMounted()) {
-        return null;
-      }
-      //api call here
-      setIsLoading(true);
-      const api_params = {
-        url: api.GetNotificationAlerts + `/${userInfo?.user_id}`,
-        baseURL: url,
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-      const res = await httpRequest(api_params, setIsLoading);
-      if (res) {
-        setHasMore(res.length);
-        alertsStore.saveNotificationAlerts(res);
-        alertsStore.setRefreshing(false);
-      }
-    },
-    [isFocused, currentPage, alertsStore.refreshing],
+    [isFocused, currentPage, alertsStore.refreshing, alertsStore.alerts],
   );
   useEffect(() => {
     const searchActionItems = () => {
@@ -135,11 +114,12 @@ const Alerts = () => {
       backgroundColor={COLORS.lightBackground}
       header={<MainHeader routeName="Alerts" style={{fontWeight: '700'}} />}>
       <SearchBar placeholder="Search" value={search} onChangeText={setSearch} />
-      <CustomFlatList
-        key={data.length}
-        data={data}
+      <CustomFlatListThree
+        data={alertsStore.alerts}
+        keyExtractor={(item: AlertStoreSnapshotType) => item.alert_id}
         RenderItems={({item}: any) => (
           <RenderItems
+            url={url}
             item={item}
             refSheet={refRBSheet}
             setSelectedItem={setSelectedItem}
