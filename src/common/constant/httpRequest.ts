@@ -31,7 +31,7 @@ export const httpRequest = async (params: any, cb: any) => {
       : params?.baseURL || defualt_baseURL,
     headers: {
       ...axios.defaults.headers,
-
+      Authorization: `Bearer ${params?.access_token}`,
       'Content-Type': params?.mediaFile
         ? 'multipart/form-data'
         : axios.defaults.headers['Content-Type'],
