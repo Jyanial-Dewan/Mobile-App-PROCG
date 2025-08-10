@@ -11,6 +11,7 @@ import {FcmTokenStore, FcmTokenType} from '../stores/fcmToken-store';
 import {viewRequestStore} from './viewRequestStore';
 import {DevicesStore} from './linkedDevicesStore';
 import {AlertsStore} from './alertsStore';
+import {ActionItemsStore} from './actionItems';
 
 const RootStore = types
   .model('RootStore', {
@@ -31,6 +32,7 @@ const RootStore = types
     viewRequestStore: viewRequestStore,
     devicesStore: types.optional(DevicesStore, {devices: []}),
     alertsStore: AlertsStore,
+    actionItems: ActionItemsStore,
   })
 
   .actions(self => ({
@@ -185,7 +187,12 @@ export const secureStorage = {
     requests: [],
   },
   devicesStore: {devices: []},
-  alertsStore: {alerts: [], notificationAlerts: [], notificationAlertsCount: 0},
+  alertsStore: {
+    alerts: [],
+    notificationAlerts: [],
+    notificationAlertsCount: 0,
+  },
+  actionItems: {actionItems: []},
 };
 
 export const [RootStoreProvider, useRootStore] = createPersistentStore(

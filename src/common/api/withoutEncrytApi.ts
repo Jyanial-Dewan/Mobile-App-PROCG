@@ -37,6 +37,7 @@ const withoutEncryptionApi = [
   api.GetAlerts,
   api.UpdateAlert,
   api.GetNotificationAlerts,
+  api.GetActionItems,
 ];
 
 export {withoutEncryptionApi};

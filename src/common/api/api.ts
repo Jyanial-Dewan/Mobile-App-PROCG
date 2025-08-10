@@ -36,4 +36,5 @@ export const api = {
   GetAlerts: '/alerts/view',
   GetNotificationAlerts: '/alerts/view/total',
   UpdateAlert: '/alerts',
+  GetActionItems: '/def_action_items_v',
 };
