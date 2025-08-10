@@ -23,7 +23,13 @@ import DefaultTheme from './src/themes/defaultTheme';
 import {withoutEncryptionApi} from './src/common/api/withoutEncrytApi';
 import {ToastProvider} from './src/common/components/CustomToast';
 import BootSplash from 'react-native-bootsplash';
-import {procgURLL, msgBroker, secretKeyy, secureStorageKeyy} from '@env';
+import {
+  procgURLL,
+  procgURLL2,
+  msgBroker,
+  secretKeyy,
+  secureStorageKeyy,
+} from '@env';
 import DeviceInfo from 'react-native-device-info';
 import Geolocation from 'react-native-geolocation-service';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -51,6 +57,7 @@ if (TextInput.defaultProps == null) {
   TextInput.defaultProps.allowFontScaling = false;
 }
 export const ProcgURL = procgURLL;
+export const ProcgURL2 = procgURLL2;
 export const MsgBroker = msgBroker;
 export const secretKey = secretKeyy;
 export const secureStorageKey = secureStorageKeyy;
