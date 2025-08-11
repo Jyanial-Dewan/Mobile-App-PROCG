@@ -34,7 +34,6 @@ import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
-/*************  ✨ Windsurf Command 🌟  *************/
 const Alerts = () => {
   const isFocused = useIsFocused();
   const {userInfo, selectedUrl, alertsStore} = useRootStore();

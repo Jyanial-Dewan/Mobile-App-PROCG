@@ -23,7 +23,7 @@ export const ActionItemsStore = types
       self.refreshing = value;
     },
 
-    saveActionItems(items: ActionItemsStoreType[]) {
+    saveActionItems(items: ActionItemsStoreSnapshotType[]) {
       const alertsData = items.map(item => ActionItemsModel.create(item));
       self.actionItems.replace(alertsData);
     },

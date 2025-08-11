@@ -35,7 +35,8 @@ import {httpRequest} from '../../common/constant/httpRequest';
 import {ProcgURL2} from '../../../App';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import RenderItems from './RenderItems';
-import {ActionItemsStoreType} from '../../stores/actionItems';
+import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
+import {observer} from 'mobx-react-lite';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -44,7 +45,7 @@ const ActionItemMainIndex = () => {
   const navigation = useNavigation();
   const {userInfo, actionItems} = useRootStore();
   const refRBSheet = useRef<RBSheet>(null);
-  const [data, setData] = useState<ActionItemsStoreType[]>([]);
+  const [data, setData] = useState<ActionItemsStoreSnapshotType[]>([]);
   const [search, setSearch] = useState('');
   const [noResult, setNoResult] = useState(false);
   const height = useWindowDimensions().height;
@@ -58,7 +59,7 @@ const ActionItemMainIndex = () => {
   const url = ProcgURL2;
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
-    ActionItemsStoreType | undefined
+    ActionItemsStoreSnapshotType | undefined
   >(undefined);
   useAsyncEffect(
     async isMounted => {
@@ -131,7 +132,9 @@ const ActionItemMainIndex = () => {
       />
       <CustomFlatListThree
         data={data}
-        keyExtractor={(item: ActionItemsStoreType) => item.action_item_id}
+        keyExtractor={(item: ActionItemsStoreSnapshotType) =>
+          item.action_item_id
+        }
         RenderItems={({item}: any) => (
           <RenderItems
             item={item}
@@ -177,7 +180,7 @@ const ActionItemMainIndex = () => {
   );
 };
 
-export default ActionItemMainIndex;
+export default observer(ActionItemMainIndex);
 
 const styles = StyleSheet.create({
   container: {
