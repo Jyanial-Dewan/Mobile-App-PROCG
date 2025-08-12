@@ -173,8 +173,9 @@ const Main = observer(() => {
     selectedUrl,
   } = useRootStore();
   const rootStore = useRootStore();
-  const {socket, setUserName, addDevice} = useSocketContext();
+  const {socket, setUserId, addDevice} = useSocketContext();
   const [isDark] = useIsDarkTheme();
+  const limit = 50;
 
   // Handle background messages
   messaging().setBackgroundMessageHandler(async remoteMessage => {
@@ -199,8 +200,8 @@ const Main = observer(() => {
   });
 
   useEffect(() => {
-    setUserName(userInfo?.user_name);
-  }, [userInfo?.user_name]);
+    setUserId(userInfo?.user_id);
+  }, [userInfo?.user_id]);
 
   const theme = useMemo(() => {
     if (isDark) {
@@ -308,9 +309,13 @@ const Main = observer(() => {
     (async () => {
       const currentPage = 1;
       const url = selectedUrl || ProcgURL;
-      if (!userInfo?.user_name) return;
+      if (!userInfo?.user_id) return;
       const api_params = {
-        url: api.RecycleBinMessages + userInfo?.user_name + `/${currentPage}`,
+        url:
+          api.RecycleBinMessages +
+          userInfo?.user_id +
+          `/${currentPage}` +
+          `/${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,

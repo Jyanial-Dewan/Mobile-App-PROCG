@@ -19,7 +19,7 @@ interface SocketContextProps {
 
 interface SocketContext {
   socket: Socket;
-  setUserName: (username: string | null) => void;
+  setUserId: (userId: number | null) => void;
   addDevice: (device: DeviceModel) => void;
   inactiveDevice: (deviceInfoData: {data: DeviceModel[]; user: string}) => void;
 }
@@ -31,7 +31,7 @@ export function useSocketContext() {
 
 export function SocketContextProvider({children}: SocketContextProps) {
   const {userInfo, deviceInfoData, messageStore, devicesStore} = useRootStore();
-  const [username, setUserName] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const hasInternet = useNetInfo().isConnected;
 
   // Memoize the socket connection so that it's created only once
@@ -41,21 +41,21 @@ export function SocketContextProvider({children}: SocketContextProps) {
     return io(MsgBroker, {
       path: '/socket.io/',
       query: {
-        key: username,
+        key: userId,
         device_id: deviceInfoData.id,
       },
       transports: ['websocket'],
     });
-  }, [username, deviceInfoData.id]);
+  }, [userId, deviceInfoData.id]);
 
   useEffect(() => {
-    if (!username) {
+    if (!userId) {
       console.log('No username set, skipping socket connection');
       return;
     }
     if (hasInternet) socket.connect();
     socket.on('connect', () => {
-      console.log('Connected to WebSocket', socket.id, username);
+      console.log('Connected to WebSocket', socket.id, userId);
     });
 
     socket?.on('receivedMessage', data => {
@@ -86,16 +86,28 @@ export function SocketContextProvider({children}: SocketContextProps) {
 
     socket?.on('deletedMessage', id => {
       // Message is not in the bin → Move it to the bin
-      if (messageStore.receivedMessages.some(msg => msg.id === id)) {
+      if (
+        messageStore.receivedMessages.some(msg => msg.notification_id === id)
+      ) {
         messageStore.removeReceivedMessage(id);
-      } else if (messageStore.notificationMessages.some(msg => msg.id === id)) {
+      } else if (
+        messageStore.notificationMessages.some(
+          msg => msg.notification_id === id,
+        )
+      ) {
         messageStore.removeNotificationMessage(id);
-      } else if (messageStore.sentMessages.some(msg => msg.id === id)) {
+      } else if (
+        messageStore.sentMessages.some(msg => msg.notification_id === id)
+      ) {
         console.log('App tsx', id);
         messageStore.removeSentMessage(id);
-      } else if (messageStore.draftMessages.some(msg => msg.id === id)) {
+      } else if (
+        messageStore.draftMessages.some(msg => msg.notification_id === id)
+      ) {
         messageStore.removeDraftMessage(id);
-      } else if (messageStore.binMessages.some(msg => msg.id === id)) {
+      } else if (
+        messageStore.binMessages.some(msg => msg.notification_id === id)
+      ) {
         messageStore.removeBinMessage(id);
       }
     });
@@ -106,15 +118,17 @@ export function SocketContextProvider({children}: SocketContextProps) {
     });
 
     socket.on('restoreMessage', id => {
-      const message = messageStore.binMessages.find(msg => msg.id === id);
+      const message = messageStore.binMessages.find(
+        msg => msg.notification_id === id,
+      );
       const deepClone = (obj: any) => {
         return JSON.parse(JSON.stringify(obj));
       };
       try {
-        if (!message || !username) return;
+        if (!message || !userId) return;
         const formattedData = {
           ...message,
-          date: new Date(message.date).getTime(),
+          creation_date: new Date(message.creation_date),
         };
         const newMessage = deepClone(formattedData);
 
@@ -122,7 +136,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
           messageStore.addDraftMessage(newMessage);
           messageStore.addTotalDraft();
         } else {
-          if (formattedData.sender.name === username) {
+          if (formattedData.sender === userId) {
             messageStore.addSentMessage(newMessage);
             messageStore.addTotalSent();
           } else {
@@ -147,7 +161,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('addDevice');
       socket?.off('restoreMessage');
     };
-  }, [socket, username]);
+  }, [socket, userId]);
 
   const addDevice = (device: DeviceModel) => {
     socket?.emit('addDevice', device);
@@ -162,7 +176,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
     <SocketContext.Provider
       value={{
         socket,
-        setUserName,
+        setUserId,
         addDevice,
         inactiveDevice,
       }}>

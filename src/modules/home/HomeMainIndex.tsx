@@ -69,6 +69,7 @@ const HomeMainIndex = () => {
   const [profilePhoto, setProfilePhoto] = useState(
     `${url}/${userInfo?.profile_picture.original}`,
   );
+
   const [imageError, setImageError] = useState(false);
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
@@ -197,7 +198,7 @@ const HomeMainIndex = () => {
 
       const tokenPayload = {
         token: token,
-        username: userInfo?.user_name,
+        userId: userInfo?.user_id,
       };
       const tokenParams = {
         url: api.RegisterToken,

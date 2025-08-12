@@ -20,27 +20,28 @@ import Receivers from '../../common/components/Receivers';
 import {useSocketContext} from '../../context/SocketContext';
 import Autolink from 'react-native-autolink';
 import {ActivityIndicator} from 'react-native-paper';
-
-interface User {
-  name: string;
-  profile_picture: string;
-}
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../../common/utility/notifications.utility';
+import {MessageSnapshotType} from '../../stores/messageStore';
+import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
 const NotificationDetails = observer(() => {
   const isFocused = useIsFocused();
-  const {userInfo, selectedUrl} = useRootStore();
+  const {usersStore, userInfo, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const toaster = useToast();
   const route = useRoute();
 
   const {_id} = route.params as {_id: string};
   const navigation = useNavigation();
-  const [totalMessages, setTotalMessages] = useState<any[]>([]);
+  const [totalMessages, setTotalMessages] = useState<MessageSnapshotType[]>([]);
   // const [totalInvolvedUsers, setTotalInvolvedUsers] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [recivers, setRecivers] = useState<User[]>([]);
+  const [recivers, setRecivers] = useState<number[] | undefined>(undefined);
   const [parrentMessage, setParrentMessage] = useState<any>();
 
   const url = selectedUrl || ProcgURL;
@@ -53,7 +54,7 @@ const NotificationDetails = observer(() => {
         return null;
       }
       const reply_params = {
-        url: api.ReplyMessages + _id + `/${userInfo?.user_name}`,
+        url: api.ReplyMessages + _id + `/${userInfo?.user_id}`,
         baseURL: ProcgURL,
         // isConsole: true,
         // isConsoleParams: true,
@@ -115,14 +116,18 @@ const NotificationDetails = observer(() => {
   //   }
   // };
 
-  const handleReceivers = (id: string) => {
+  const handleReceivers = (notificationId: string) => {
     setShowModal(true);
-    const filterMessage = totalMessages.find(msg => msg.id === id);
-    setRecivers(filterMessage.recivers.slice(1));
+    const filterMessage = totalMessages.find(
+      msg => msg.notification_id === notificationId,
+    );
+    setRecivers(filterMessage?.involved_users);
   };
-
-  const renderItem = ({item}: any) => {
-    const {datePart, timePart} = formateDateTime(item?.date);
+  interface Props {
+    item: MessageSnapshotType;
+  }
+  const renderItem = ({item}: Props) => {
+    const {datePart, timePart} = formateDateTime(item?.creation_date as any);
     return (
       <View style={[styles.rowContainer]}>
         {/* Image Section */}
@@ -142,7 +147,7 @@ const NotificationDetails = observer(() => {
               borderRadius: 50,
             }}
             source={{
-              uri: `${url}/${item.sender.profile_picture}`,
+              uri: `${url}/${renderProfilePicture(item.sender, usersStore.users)}`,
               headers: {
                 Authorization: `Bearer ${userInfo?.access_token}`,
               },
@@ -164,7 +169,7 @@ const NotificationDetails = observer(() => {
             <View>
               <CustomTextNew
                 txtStyle={styles.headText}
-                text={item?.sender.name}
+                text={renderSlicedUsername(item.sender, usersStore.users, 20)}
               />
               <View style={{flexDirection: 'row', gap: 4}}>
                 <CustomTextNew
@@ -173,13 +178,16 @@ const NotificationDetails = observer(() => {
                   txtWeight={'500'}
                   text={
                     'to ' +
-                    (item.recivers.length > 1
-                      ? `${item.recivers[0].name}`
-                      : item.recivers[0].name)
+                    renderSlicedUsername(
+                      item.recipients[0],
+                      usersStore.users,
+                      20,
+                    )
                   }
                 />
-                {item.recivers.length > 1 && (
-                  <TouchableOpacity onPress={() => handleReceivers(item.id)}>
+                {item.recipients.length > 1 && (
+                  <TouchableOpacity
+                    onPress={() => handleReceivers(item.notification_id)}>
                     <CustomTextNew
                       txtSize={14}
                       txtColor={COLORS.inputTextColor}
@@ -200,16 +208,11 @@ const NotificationDetails = observer(() => {
           </View>
           {/* Body Section */}
           <Autolink
-            text={item.body}
+            text={item.notification_body}
             style={styles.bodyText}
             mention="instagram"
             textProps={{selectionColor: 'blue'}}
           />
-          {/* <CustomTextNew
-            txtStyle={styles.bodyText}
-            txtAlign="justify"
-            text={item?.body}
-          /> */}
           <View style={styles.itemListWrapper} />
         </View>
         <Receivers
@@ -239,8 +242,11 @@ const NotificationDetails = observer(() => {
           />
           <View style={styles.itemListWrapper} />
 
-          <CustomFlatList
+          <CustomFlatListThree
             data={totalMessages}
+            keyExtractor={(item: MessageSnapshotType, index: number) =>
+              item.notification_id + index
+            }
             RenderItems={renderItem}
             isLoading={isLoading}
           />

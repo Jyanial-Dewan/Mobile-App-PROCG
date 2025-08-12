@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import ContainerNew from '../../common/components/Container';
 import MainHeader from '../../common/components/MainHeader';
@@ -18,35 +18,34 @@ import CustomTextNew from '../../common/components/CustomText';
 import {formateDateTime} from '../../common/services/dateFormater';
 import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
+import {MessageSnapshotType} from '../../stores/messageStore';
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../../common/utility/notifications.utility';
+import Receivers from '../../common/components/Receivers';
 
 const RecycleBinDetail = observer(() => {
   const isFocused = useIsFocused();
-  const {userInfo, selectedUrl} = useRootStore();
+  const {usersStore, userInfo, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
-  const [parrentMessage, setParrentMessage] = useState<any>({
-    id: '',
-    sender: '',
-    recivers: [],
-    subject: '',
-    body: '',
-    date: new Date(),
-    status: '',
-    parentid: '',
-    involvedusers: [],
-    readers: [],
-    holders: [],
-    recyclebin: [],
-  });
-  const [totalInvolvedUsers, setTotalInvolvedUsers] = useState<string[]>([]);
+  const [parrentMessage, setParrentMessage] = useState<
+    MessageSnapshotType | undefined
+  >(undefined);
+  const [totalInvolvedUsers, setTotalInvolvedUsers] = useState<number[]>([]);
   const route = useRoute();
   const toaster = useToast();
   const routeName = route.name;
   const {_id} = route.params as {_id: string};
-  const {datePart, timePart} = formateDateTime(parrentMessage?.date);
+  const {datePart, timePart} = formateDateTime(
+    parrentMessage?.creation_date as any,
+  );
+  const [showModal, setShowModal] = useState(false);
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const noUserFallback = [require('../../assets/prifileImages/person.png')];
   //Fetch SingleMessage
   useAsyncEffect(
     async isMounted => {
@@ -59,10 +58,14 @@ const RecycleBinDetail = observer(() => {
         // isConsole: true,
         // isConsoleParams: true,
       };
-      const res = await httpRequest(api_params, setIsLoading);
+      const res: MessageSnapshotType = await httpRequest(
+        api_params,
+        setIsLoading,
+      );
+
       if (res) {
         setParrentMessage(res);
-        setTotalInvolvedUsers(res.involvedusers);
+        setTotalInvolvedUsers(res.involved_users);
       }
     },
     [isFocused, _id],
@@ -70,7 +73,7 @@ const RecycleBinDetail = observer(() => {
 
   const handleDeleteFromRecycleBin = async (msg: any) => {
     const putParams = {
-      url: api.DeleteFromRecycle + msg.id + `/${userInfo?.user_name}`,
+      url: api.DeleteFromRecycle + msg.id + `/${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       isConsole: true,
@@ -91,7 +94,7 @@ const RecycleBinDetail = observer(() => {
         if (response) {
           socket?.emit('deleteMessage', {
             id: msg.id,
-            user: userInfo?.user_name,
+            user: userInfo?.user_id,
           });
           toaster.show({
             message: 'Message has been deleted.',
@@ -107,7 +110,7 @@ const RecycleBinDetail = observer(() => {
           if (response) {
             socket?.emit('deleteMessage', {
               id: msg.id,
-              user: userInfo?.user_name,
+              user: userInfo?.user_id,
             });
             toaster.show({
               message: 'Message has been deleted.',
@@ -122,7 +125,7 @@ const RecycleBinDetail = observer(() => {
           if (response) {
             socket?.emit('deleteMessage', {
               id: msg.id,
-              user: userInfo?.user_name,
+              user: userInfo?.user_id,
             });
             toaster.show({
               message: 'Message has been deleted.',
@@ -140,6 +143,13 @@ const RecycleBinDetail = observer(() => {
       }
     }
   };
+  // const handleReceivers = (notificationId: string) => {
+  //   setShowModal(true);
+  //   const filterMessage = parrentMessage?.find(
+  //     msg => msg.notification_id === notificationId,
+  //   );
+  //   setRecivers(filterMessage?.involved_users);
+  // };
 
   //   const handleDelete = async (msg: Message) => {
   //     try {
@@ -180,7 +190,17 @@ const RecycleBinDetail = observer(() => {
   //       console.log('Error deleting message.');
   //     }
   //   };
-
+  const findOrigin = (msg: MessageSnapshotType) => {
+    if (msg?.status === 'DRAFT') {
+      return 'Draft';
+    } else {
+      if (msg?.sender === userInfo?.user_id) {
+        return 'Sent';
+      } else {
+        return 'Inbox';
+      }
+    }
+  };
   return (
     <ContainerNew
       style={styles.container}
@@ -211,12 +231,16 @@ const RecycleBinDetail = observer(() => {
               <Image
                 style={styles.profileImage}
                 source={{
-                  uri: `${url}/${parrentMessage.sender.profile_picture}`,
-                  headers: {
-                    Authorization: `Bearer ${userInfo?.access_token}`,
-                  },
+                  uri: `${url}/${findOrigin(parrentMessage!) === 'Inbox' ? renderProfilePicture(parrentMessage?.sender, usersStore.users) : renderProfilePicture(parrentMessage?.recipients[0], usersStore.users)}`,
+                  // headers: {
+                  //   Authorization: `Bearer ${userInfo?.access_token}`,
+                  // },
                 }}
-                fallback={fallbacks}
+                fallback={
+                  parrentMessage?.recipients.length === 0
+                    ? noUserFallback
+                    : fallbacks
+                }
               />
             </View>
 
@@ -234,21 +258,53 @@ const RecycleBinDetail = observer(() => {
                 <View>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={parrentMessage?.sender.name}
+                    text={renderSlicedUsername(
+                      parrentMessage?.recipients[0],
+                      usersStore.users,
+                      20,
+                    )}
                   />
-                  <CustomTextNew
-                    txtSize={13}
-                    txtColor={COLORS.inputTextColor}
-                    txtWeight={'500'}
-                    text={
-                      parrentMessage.recivers.length === 0
-                        ? '(no user)'
-                        : 'to ' +
-                          (parrentMessage?.recivers.length > 1
-                            ? `${parrentMessage?.recivers[0]?.name} ...`
-                            : parrentMessage?.recivers[0]?.name)
-                    }
-                  />
+                  <View style={{flexDirection: 'row', gap: 4}}>
+                    <CustomTextNew
+                      txtSize={13}
+                      txtColor={COLORS.inputTextColor}
+                      txtWeight={'500'}
+                      text={
+                        parrentMessage?.recipients.length === 0
+                          ? '(no user)'
+                          : 'to ' +
+                            (parrentMessage?.recipients.length! > 1
+                              ? `${renderSlicedUsername(
+                                  parrentMessage?.sender,
+                                  usersStore.users,
+                                  20,
+                                )}`
+                              : renderSlicedUsername(
+                                  parrentMessage?.recipients[0],
+                                  usersStore.users,
+                                  20,
+                                ))
+                      }
+                      // text={
+                      //   parrentMessage.recivers.length === 0
+                      //     ? '(no user)'
+                      //     : 'to ' +
+                      //       (parrentMessage?.recivers.length > 1
+                      //         ? `${parrentMessage?.recivers[0]?.name} ...`
+                      //         : parrentMessage?.recivers[0]?.name)
+                      // }
+                    />
+                    {parrentMessage?.recipients.length! > 1 && (
+                      <TouchableOpacity onPress={() => setShowModal(true)}>
+                        <CustomTextNew
+                          txtSize={14}
+                          txtColor={COLORS.inputTextColor}
+                          txtWeight={'500'}
+                          text={'...'}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
                 <View style={{flexDirection: 'row', gap: 5}}>
                   <CustomTextNew
@@ -262,10 +318,17 @@ const RecycleBinDetail = observer(() => {
               <CustomTextNew
                 txtStyle={styles.bodyText}
                 txtAlign="justify"
-                text={parrentMessage?.body}
+                text={parrentMessage?.notification_body}
               />
               <View style={styles.itemListWrapper} />
             </View>
+          </View>
+          <View>
+            <Receivers
+              showModal={showModal}
+              setShowModal={setShowModal}
+              recivers={parrentMessage?.recipients}
+            />
           </View>
         </>
       )}

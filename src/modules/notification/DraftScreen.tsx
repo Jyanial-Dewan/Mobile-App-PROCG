@@ -45,6 +45,12 @@ import {RenderMessageItemProps} from './InboxScreen';
 import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../../common/utility/notifications.utility';
+import CustomFlatListThree from '../../common/components/CustomFlatListThree';
+import {MessageSnapshotType} from '../../stores/messageStore';
 
 const ITEMHEIGHT = 105;
 const RenderMessageItem = ({
@@ -64,8 +70,8 @@ const RenderMessageItem = ({
   const marginY = useSharedValue(5);
   const hasExecuted = useRef(false);
   const [loaded, setLoaded] = useState(false);
-  const {datePart, timePart} = formateDateTime(item.date);
-  const {selectedUrl} = useRootStore();
+  const {datePart, timePart} = formateDateTime(item.creation_date as any);
+  const {usersStore, selectedUrl} = useRootStore();
   const [openModal, setOpenModal] = useState(false);
 
   const url = selectedUrl || ProcgURL;
@@ -84,7 +90,7 @@ const RenderMessageItem = ({
   };
 
   const handleDelete = () => {
-    handleSingleDeleteMessage(item.id);
+    handleSingleDeleteMessage(item.notification_id);
     marginY.value = withTiming(0);
     scaleX.value = withTiming(0);
   };
@@ -144,7 +150,7 @@ const RenderMessageItem = ({
 
   const animatedHeight = !loaded ? {} : height;
 
-  const backgroundColor = selectedIds.includes(item.id)
+  const backgroundColor = selectedIds.includes(item.notification_id)
     ? 'transparent'
     : COLORS.primaryRed;
 
@@ -176,7 +182,7 @@ const RenderMessageItem = ({
             style={[
               animatedStyle,
               {
-                backgroundColor: selectedIds.includes(item?.id)
+                backgroundColor: selectedIds.includes(item?.notification_id)
                   ? 'transparent'
                   : COLORS.white,
                 borderRadius: 14,
@@ -187,13 +193,15 @@ const RenderMessageItem = ({
               style={[
                 styles.rowContainer,
                 {
-                  backgroundColor: selectedIds.includes(item.id)
+                  backgroundColor: selectedIds.includes(item.notification_id)
                     ? COLORS.grayBgColor
                     : COLORS.white,
                 },
               ]}
-              onLongPress={() => handleLongPress(item.id)}
-              onPress={() => handlePress(item.id, item.parentid)}>
+              onLongPress={() => handleLongPress(item.notification_id)}
+              onPress={() =>
+                handlePress(item.notification_id, item.parent_notification_id)
+              }>
               {/* Image Section */}
               <View
                 style={[
@@ -203,7 +211,7 @@ const RenderMessageItem = ({
                     backgroundColor: COLORS.white,
                   },
                 ]}>
-                {selectedIds.includes(item.id) ? (
+                {selectedIds.includes(item.notification_id) ? (
                   <View
                     style={{
                       height: 40,
@@ -218,13 +226,14 @@ const RenderMessageItem = ({
                   <Image
                     style={styles.profileImage}
                     source={{
-                      uri: `${url}/${item.recivers[0]?.profile_picture}`,
-                      headers: {
-                        Authorization: `Bearer ${userInfo?.access_token}`,
-                      },
+                      // uri: `${url}/${item.recivers[0]?.profile_picture}`,
+                      uri: `${url}/${renderProfilePicture(item.recipients[0], usersStore.users)}`,
+                      // headers: {
+                      //   Authorization: `Bearer ${userInfo?.access_token}`,
+                      // },
                     }}
                     fallback={
-                      item.recivers.length === 0 ? noUserFallback : fallbacks
+                      item.recipients.length === 0 ? noUserFallback : fallbacks
                     }
                   />
                 )}
@@ -245,17 +254,26 @@ const RenderMessageItem = ({
                   <CustomTextNew
                     txtStyle={styles.headText}
                     text={
-                      item?.recivers.length > 0 && item?.recivers[0]?.name
-                        ? item?.recivers.length > 1
-                          ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name.length > 20 ? '...' : ''}`
-                          : item.recivers[0].name
+                      item?.recipients.length > 0
+                        ? `${renderSlicedUsername(
+                            item.recipients[0],
+                            usersStore.users,
+                            20,
+                          )}${item.recipients.length > 1 ? ', ...' : ''}`
                         : '(no user)'
                     }
+                    // text={
+                    //   item?.recivers.length > 0 && item?.recivers[0]?.name
+                    //     ? item?.recivers.length > 1
+                    //       ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name.length > 20 ? '...' : ''}`
+                    //       : item.recivers[0].name
+                    //     : '(no user)'
+                    // }
                   />
                   <View style={{flexDirection: 'row', gap: 5}}>
                     <CustomTextNew
                       txtStyle={[styles.dateText, {color: COLORS.black}]}
-                      text={item.date.toLocaleString()}
+                      text={item.creation_date.toLocaleString()}
                     />
                   </View>
                 </View>
@@ -301,6 +319,7 @@ const DraftScreen = observer(() => {
   const routeName = route.name;
   const [hasMore, setHasMore] = useState(0);
   const url = selectedUrl || ProcgURL;
+  const limit = 50;
 
   useFocusEffect(
     useCallback(() => {
@@ -315,7 +334,11 @@ const DraftScreen = observer(() => {
       }
 
       const api_params = {
-        url: api.DraftMessages + userInfo?.user_name + `/${currentPage}`,
+        url:
+          api.DraftMessages +
+          userInfo?.user_id +
+          `/${currentPage}` +
+          `/${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
@@ -323,13 +346,12 @@ const DraftScreen = observer(() => {
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
         setHasMore(res.length);
-        const formattedRes = res.map((msg: any) => ({
+        const formattedRes = res.map((msg: MessageSnapshotType) => ({
           ...msg,
-          date: new Date(msg.date),
+          creation_date: new Date(msg.creation_date),
         }));
-
         messageStore.saveDraftMessages(formattedRes);
-        setIsLoading(false);
+        messageStore.setRefreshing(false);
       }
       if (res.length < 5) {
         setIsLoading(false);
@@ -370,29 +392,30 @@ const DraftScreen = observer(() => {
   const handleDisSelect = (id: string) => {
     const newSelected = selectedIds.filter(item => item !== id);
     setSelectedIds(newSelected);
+    if (newSelected.length === 0 || !newSelected) setIsLongPressed(false);
   };
 
   const handleCancelLongPress = () => {
-    // setIsLongPressed(false);
-    // setSelectedIds([]);
+    setIsLongPressed(false);
+    setSelectedIds([]);
     setIsModalShow(false);
   };
 
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
-      url: api.DeleteMessage + msgId + `/${userInfo?.user_name}`,
+      url: api.DeleteMessage + msgId + `/${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
-      isConsole: true,
+      // isConsole: true,
       // isConsoleParams: true,
     };
     try {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
-      socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_name});
+      socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_id});
       if (response) {
         toaster.show({
-          message: 'Message has been moved to recyclebin.',
+          message: response.message,
           type: 'success',
         });
       }
@@ -405,11 +428,11 @@ const DraftScreen = observer(() => {
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleToRecycleBin + userInfo?.user_name,
+      url: api.MoveMultipleToRecycleBin + userInfo?.user_id,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
-      isConsole: true,
+      // isConsole: true,
       // isConsoleParams: true,
     };
     try {
@@ -417,7 +440,11 @@ const DraftScreen = observer(() => {
       if (response) {
         socket?.emit('multipleDelete', {
           ids: selectedIds,
-          user: userInfo?.user_name,
+          user: userInfo?.user_id,
+        });
+        toaster.show({
+          message: response.message,
+          type: 'success',
         });
         setIsLongPressed(false);
         setSelectedIds([]);
@@ -468,9 +495,11 @@ const DraftScreen = observer(() => {
       }
       style={styles.container}>
       <MessageGroups />
-      <CustomFlatList
-        // key={messageStore.draftMessages.length}
+      <CustomFlatListThree
         data={messageStore.draftMessages}
+        keyExtractor={(item: MessageSnapshotType, index: number) =>
+          item.notification_id + index
+        }
         RenderItems={({item}: any) => (
           <RenderMessageItem
             item={item}

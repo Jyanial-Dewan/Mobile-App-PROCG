@@ -62,7 +62,17 @@ const RenderItems = ({item, refSheet, setSelectedItem}: any) => {
                     borderRadius: 5,
                     alignItems: 'center',
                   }}>
-                  <CustomTextNew text={item.status} txtColor={COLORS.black} />
+                  <CustomTextNew
+                    text={item.status
+                      .toLowerCase()
+                      .split(' ')
+                      .map(
+                        (word: string) =>
+                          word.charAt(0).toUpperCase() + word.slice(1),
+                      )
+                      .join(' ')}
+                    txtColor={COLORS.black}
+                  />
                 </View>
               </View>
               <CustomTextNew

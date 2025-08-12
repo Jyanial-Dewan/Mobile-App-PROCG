@@ -47,7 +47,7 @@ const CustomFlatListThree: React.FC<Props> = ({
   };
   const onEndReached = () => {
     // data?.length >= currentPage * 30 && setCurrentPage((prev: any) => prev + 1);
-    if (hasMore === undefined || hasMore < 5) {
+    if (hasMore === undefined || hasMore < 10) {
       return;
     }
     if (!isLoading && hasMore) {

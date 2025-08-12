@@ -17,6 +17,7 @@ import {useIsFocused} from '@react-navigation/native';
 import {api} from '../common/api/api';
 import {observer} from 'mobx-react-lite';
 import SVGController from '../common/components/SVGController';
+import {MessageSnapshotType} from '../stores/messageStore';
 
 const {Navigator, Screen} = createMaterialBottomTabNavigator<any>();
 const BottomTab = observer(() => {
@@ -53,18 +54,17 @@ const BottomTab = observer(() => {
         return null;
       }
       const api_params = {
-        url: api.Notifications + userInfo?.user_name,
+        url: api.Notifications + userInfo?.user_id,
         baseURL: ProcgURL,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        const formattedRes = res.map((msg: any) => ({
+        const formattedRes = res.map((msg: MessageSnapshotType) => ({
           ...msg,
-          date: new Date(msg.date),
+          creation_date: new Date(msg.creation_date),
         }));
-
         messageStore.saveNotificationMessages(formattedRes);
       }
     },

@@ -44,9 +44,15 @@ import Animated from 'react-native-reanimated';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
+import {MessageSnapshotType} from '~/stores/messageStore';
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../../common/utility/notifications.utility';
+import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
 interface RenderMessageItemProps {
-  item: any;
+  item: MessageSnapshotType;
   userInfo: any;
   selectedIds: string[];
   notificationIds?: string[];
@@ -71,8 +77,8 @@ const RenderMessageItem = observer(
     const scaleX = useSharedValue(0);
     const marginY = useSharedValue(5);
     const [loaded, setLoaded] = useState(false);
-    const {datePart, timePart} = formateDateTime(item.date);
-    const {selectedUrl} = useRootStore();
+    const {datePart, timePart} = formateDateTime(item.creation_date as any);
+    const {usersStore, selectedUrl} = useRootStore();
     const [openModal, setOpenModal] = useState(false);
     const url = selectedUrl || ProcgURL;
     const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
@@ -141,15 +147,15 @@ const RenderMessageItem = observer(
 
     const animatedHeight = !loaded ? {} : height;
 
-    const backgroundColor = selectedIds.includes(item.id)
+    const backgroundColor = selectedIds.includes(item.notification_id)
       ? 'transparent'
       : COLORS.primaryRed;
 
-    const findOrigin = (msg: any) => {
-      if (msg.status === 'Draft') {
-        return 'Drafts';
+    const findOrigin = (msg: MessageSnapshotType) => {
+      if (msg?.status === 'DRAFT') {
+        return 'Draft';
       } else {
-        if (msg.sender.name === userInfo.user_name) {
+        if (msg?.sender === userInfo.user_id) {
           return 'Sent';
         } else {
           return 'Inbox';
@@ -184,7 +190,7 @@ const RenderMessageItem = observer(
               style={[
                 animatedStyle,
                 {
-                  backgroundColor: selectedIds.includes(item?.id)
+                  backgroundColor: selectedIds.includes(item?.notification_id)
                     ? COLORS.highLight
                     : COLORS.white,
                   borderRadius: 14,
@@ -196,14 +202,16 @@ const RenderMessageItem = observer(
                   styles.rowContainer,
                   {
                     backgroundColor:
-                      notificationIds?.includes(item.id) ||
-                      selectedIds.includes(item?.id)
+                      notificationIds?.includes(item.notification_id) ||
+                      selectedIds.includes(item?.notification_id)
                         ? COLORS.highLight
                         : COLORS.white,
                   },
                 ]}
-                onLongPress={() => handleLongPress(item?.id)}
-                onPress={() => handlePress(item?.id, item?.parentid)}>
+                onLongPress={() => handleLongPress(item?.notification_id)}
+                onPress={() =>
+                  handlePress(item?.notification_id, item?.notification_id)
+                }>
                 {/* Image Section */}
                 <View
                   style={[
@@ -213,7 +221,7 @@ const RenderMessageItem = observer(
                       backgroundColor: COLORS.white,
                     },
                   ]}>
-                  {selectedIds.includes(item.id) ? (
+                  {selectedIds.includes(item.notification_id) ? (
                     <View
                       style={{
                         height: 40,
@@ -228,13 +236,16 @@ const RenderMessageItem = observer(
                     <Image
                       style={styles.profileImage}
                       source={{
-                        uri: `${url}/${findOrigin(item) === 'Inbox' ? item?.sender?.profile_picture : item?.recivers[0]?.profile_picture}`,
-                        headers: {
-                          Authorization: `Bearer ${userInfo?.access_token}`,
-                        },
+                        // uri: `${url}/${findOrigin(item) === 'Inbox' ? item?.sender?.profile_picture : item?.recivers[0]?.profile_picture}`,
+                        uri: `${url}/${findOrigin(item) === 'Inbox' ? renderProfilePicture(item.sender, usersStore.users) : renderProfilePicture(item.recipients[0], usersStore.users)}`,
+                        // headers: {
+                        //   Authorization: `Bearer ${userInfo?.access_token}`,
+                        // },
                       }}
                       fallback={
-                        item.recivers.length === 0 ? noUserFallback : fallbacks
+                        item.recipients.length === 0
+                          ? noUserFallback
+                          : fallbacks
                       }
                     />
                   )}
@@ -255,17 +266,30 @@ const RenderMessageItem = observer(
                     <CustomTextNew
                       txtStyle={styles.headText}
                       text={
-                        item?.recivers?.length === 0
+                        item?.recipients?.length === 0
                           ? '(No User)'
                           : findOrigin(item) === 'Inbox'
-                            ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
-                            : `${item?.sender.name.slice(0, 20)}${item.sender?.name.length > 20 ? '...' : ''}`
+                            ? renderSlicedUsername(
+                                item.recipients[0],
+                                usersStore.users,
+                                20,
+                              )
+                            : renderSlicedUsername(
+                                item.sender,
+                                usersStore.users,
+                                20,
+                              )
+                        // item?.recivers?.length === 0
+                        //   ? '(No User)'
+                        //   : findOrigin(item) === 'Inbox'
+                        //     ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
+                        //     : `${item?.sender.name.slice(0, 20)}${item.sender?.name.length > 20 ? '...' : ''}`
                       }
                     />
                     <View style={{flexDirection: 'row', gap: 5}}>
                       <CustomTextNew
                         txtStyle={[styles.dateText, {color: COLORS.black}]}
-                        text={item.date.toLocaleString()}
+                        text={item.creation_date.toLocaleString()}
                       />
                     </View>
                   </View>
@@ -311,7 +335,10 @@ const RecycleBin = observer(() => {
   const toaster = useToast();
   const {control, setValue} = useForm();
   const url = selectedUrl || ProcgURL;
-  const notificationIds = messageStore.notificationMessages.map(msg => msg.id);
+  const limit = 50;
+  const notificationIds = messageStore.notificationMessages.map(
+    msg => msg.notification_id,
+  );
   useFocusEffect(
     useCallback(() => {
       setValue('routeName', {label: 'Recycle Bin'});
@@ -323,7 +350,11 @@ const RecycleBin = observer(() => {
         return null;
       }
       const api_params = {
-        url: api.RecycleBinMessages + userInfo?.user_name + `/${currentPage}`,
+        url:
+          api.RecycleBinMessages +
+          userInfo?.user_id +
+          `/${currentPage}` +
+          `/${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
@@ -331,12 +362,12 @@ const RecycleBin = observer(() => {
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
         setHasMore(res.length);
-        const formattedRes = res.map((msg: any) => ({
+        const formattedRes = res.map((msg: MessageSnapshotType) => ({
           ...msg,
-          date: new Date(msg.date),
+          creation_date: new Date(msg.creation_date) ,
         }));
         messageStore.saveBinMessages(formattedRes);
-        setIsLoading(false);
+        messageStore.setRefreshing(false);
       }
       if (res.length < 5) {
         setIsLoading(false);
@@ -377,17 +408,18 @@ const RecycleBin = observer(() => {
   const handleDisSelect = (id: string) => {
     const newSelected = selectedIds.filter(item => item !== id);
     setSelectedIds(newSelected);
+    if (newSelected.length === 0 || !newSelected) setIsLongPressed(false);
   };
 
   const handleCancelLongPress = () => {
     setIsModalShow(false);
-    // setIsLongPressed(false);
-    // setSelectedIds([]);
+    setIsLongPressed(false);
+    setSelectedIds([]);
   };
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleFromRecycleBin + userInfo?.user_name,
+      url: api.MoveMultipleFromRecycleBin + userInfo?.user_id,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
@@ -399,7 +431,11 @@ const RecycleBin = observer(() => {
       if (response) {
         socket?.emit('multipleDelete', {
           ids: selectedIds,
-          user: userInfo?.user_name,
+          user: userInfo?.user_id,
+        });
+        toaster.show({
+          message: response.message,
+          type: 'success',
         });
         setIsLongPressed(false);
         setSelectedIds([]);
@@ -411,68 +447,86 @@ const RecycleBin = observer(() => {
     }
   };
 
-  const handleDeleteFromRecycleBin = async (msg: any) => {
+  const handleDeleteFromRecycleBin = async (msg: MessageSnapshotType) => {
     const putParams = {
-      url: api.DeleteFromRecycle + msg.id + `/${userInfo?.user_name}`,
+      url:
+        api.DeleteFromRecycle + msg.notification_id + `/${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-    const deleteParams = {
-      url: api.Messages + '/' + msg.id,
-      method: 'delete',
-      baseURL: url,
-      isConsole: true,
-      isConsoleParams: true,
-    };
+    // const deleteParams = {
+    //   url: api.Messages + '/' + msg.notification_id,
+    //   method: 'delete',
+    //   baseURL: url,
+    //   isConsole: true,
+    //   isConsoleParams: true,
+    // };
     try {
-      const holdersNumber = msg.holders?.length ?? 0;
-      const recycleBinNumber = msg.recyclebin?.length ?? 0;
-      if (holdersNumber > 0) {
-        const response = await httpRequest(putParams, setIsLoading);
-        if (response) {
-          socket?.emit('deleteMessage', {
-            id: msg.id,
-            user: userInfo?.user_name,
-          });
-          toaster.show({
-            message: 'Message has been deleted.',
-            type: 'success',
-          });
-        }
-      } else {
-        if (recycleBinNumber > 1) {
-          const response = await httpRequest(putParams, setIsLoading);
-          if (response) {
-            socket?.emit('deleteMessage', {
-              id: msg.id,
-              user: userInfo?.user_name,
-            });
-            toaster.show({
-              message: 'Message has been deleted.',
-              type: 'success',
-            });
-          }
-        } else if (recycleBinNumber === 1) {
-          const response = await httpRequest(deleteParams, setIsLoading);
-          if (response) {
-            socket?.emit('deleteMessage', {
-              id: msg.id,
-              user: userInfo?.user_name,
-            });
-            toaster.show({
-              message: 'Message has been deleted.',
-              type: 'success',
-            });
-          }
-        }
+      const response = await httpRequest(putParams, setIsLoading);
+      if (response.status === 200) {
+        socket?.emit('deleteMessage', {
+          id: msg.notification_id,
+          user: userInfo?.user_id,
+        });
+        toaster.show({
+          message: response.message,
+          type: 'success',
+        });
       }
     } catch (error) {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
       }
     }
+    // try {
+    //   const holdersNumber = msg.holders?.length ?? 0;
+    //   const recycleBinNumber = msg.recyclebin?.length ?? 0;
+    //   if (holdersNumber > 0) {
+    //     const response = await httpRequest(putParams, setIsLoading);
+    //     if (response) {
+    //       socket?.emit('deleteMessage', {
+    //         id: msg.id,
+    //         user: userInfo?.user_name,
+    //       });
+    //       toaster.show({
+    //         message: 'Message has been deleted.',
+    //         type: 'success',
+    //       });
+    //     }
+    //   } else {
+    //     if (recycleBinNumber > 1) {
+    //       const response = await httpRequest(putParams, setIsLoading);
+    //       if (response) {
+    //         socket?.emit('deleteMessage', {
+    //           id: msg.id,
+    //           user: userInfo?.user_name,
+    //         });
+    //         toaster.show({
+    //           message: 'Message has been deleted.',
+    //           type: 'success',
+    //         });
+    //       }
+    //     } else if (recycleBinNumber === 1) {
+    //       const response = await httpRequest(deleteParams, setIsLoading);
+    //       if (response) {
+    //         socket?.emit('deleteMessage', {
+    //           id: msg.id,
+    //           user: userInfo?.user_name,
+    //         });
+    //         toaster.show({
+    //           message: 'Message has been deleted.',
+    //           type: 'success',
+    //         });
+    //       }
+    //     }
+    //   }
+    // } catch (error) {
+    //   if (error instanceof Error) {
+    //     toaster.show({message: error.message, type: 'error'});
+    //   }
+    // }
   };
 
   const MessageGroups = () => {
@@ -514,10 +568,12 @@ const RecycleBin = observer(() => {
       }
       style={styles.container}>
       <MessageGroups />
-      <CustomFlatList
-        // key={messageStore.binMessages.length}
+      <CustomFlatListThree
         data={messageStore.binMessages}
-        numColumns={1}
+        keyExtractor={(item: MessageSnapshotType, index: number) =>
+          item.notification_id + index
+        }
+        // numColumns={1}
         RenderItems={({item}: any) => (
           <RenderMessageItem
             item={item}

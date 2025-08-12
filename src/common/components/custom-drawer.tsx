@@ -80,7 +80,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
 
     const tokenPayload = {
       token: fcmToken?.fcmToken,
-      username: userInfo?.user_name,
+      userId: userInfo?.user_id,
     };
     const tokenParams = {
       url: api.UnregisterToken,

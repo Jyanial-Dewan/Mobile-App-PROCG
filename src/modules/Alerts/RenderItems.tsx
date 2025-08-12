@@ -27,29 +27,31 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
   const onOpenSheet = (item: AlertStoreSnapshotType) => {
     refSheet.current?.open();
     setSelectedItem(item);
-    if (notificationIds.includes(item.alert_id)) {
+    if (item.acknowledge === false) {
       alertRead();
       alertsStore.readAlert(item.alert_id);
     }
   };
   const alertRead = async () => {
+    // alertsStore.setRefreshing(true);
     const api_params = {
-      url: api.UpdateAlert + `/${userInfo?.user_id}` + `/${item.alert_id}`,
+      url: api.UpdateAlert + `/${item.alert_id}` + `/${userInfo?.user_id}`,
+      data: {acknowledge: true},
       baseURL: url,
       method: 'put',
       // isConsole: true,
       // isConsoleParams: true,
     };
     await httpRequest(api_params, setIsLoading);
+    // alertsStore.setRefreshing(false);
   };
   return (
     <View
       style={[
         styles.itemContainer,
         {
-          backgroundColor: notificationIds.includes(item.alert_id)
-            ? COLORS.grayBgColor
-            : COLORS.white,
+          backgroundColor:
+            item.acknowledge === false ? COLORS.grayBgColor : COLORS.white,
         },
       ]}>
       <Row justify="space-between" rowStyle={{gap: 10}}>
@@ -62,25 +64,23 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
           }}>
           <SVGController name="Alert-Low" color={COLORS.white} />
         </View>
-        <Column colWidth="90%">
-          <Row justify="space-between" align="center">
-            <Row align="center" justify="space-between">
-              <CustomTextNew
-                text={item.alert_name}
-                style={{
-                  fontSize: 15,
-                  fontWeight: 'bold',
-                  color: COLORS.black,
-                  marginTop: 5,
-                }}
-              />
-              <CustomTextNew
-                text={convertDate(item.last_update_date)}
-                txtColor={COLORS.textNewBold}
-              />
-            </Row>
-          </Row>
-          <Column colStyle={styles.colStyle}>
+        <Column colWidth="100%">
+          <Column colWidth="90%">
+            <CustomTextNew
+              text={item.alert_name}
+              style={{
+                fontSize: 15,
+                fontWeight: 'bold',
+                color: COLORS.black,
+                marginTop: 5,
+              }}
+            />
+            <CustomTextNew
+              text={convertDate(item.last_update_date)}
+              txtColor={COLORS.textNewBold}
+            />
+          </Column>
+          <Column colStyle={styles.colStyle} colWidth="90%">
             <CustomTextNew
               text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
               txtColor={COLORS.blackish}

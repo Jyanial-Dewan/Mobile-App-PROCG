@@ -7,7 +7,7 @@ export const AlertModel = types.model('alertModel', {
   alert_id: types.number,
   alert_name: types.string,
   description: types.string,
-  readers: types.array(types.number),
+  acknowledge: types.boolean,
   status: types.string,
   created_by: types.number,
   creation_date: types.string,

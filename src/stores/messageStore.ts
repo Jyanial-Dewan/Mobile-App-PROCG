@@ -6,18 +6,21 @@ const userModeL = types.model('userModel', {
 });
 
 export const MessageModel = types.model('messageModel', {
-  id: types.string,
-  sender: userModeL,
-  recivers: types.array(userModeL),
+  notification_id: types.string,
+  notification_type: types.string,
+  sender: types.number,
+  recipients: types.array(types.number),
   subject: types.string,
-  body: types.maybeNull(types.string),
-  date: types.Date,
-  status: types.maybe(types.string),
-  parentid: types.maybe(types.string),
-  involvedusers: types.maybe(types.array(types.string)),
-  readers: types.maybe(types.array(types.string)),
-  holders: types.maybe(types.array(types.string)),
-  recyclebin: types.maybe(types.array(types.string)),
+  notification_body: types.string,
+  creation_date: types.Date,
+  status: types.string,
+  parent_notification_id: types.string,
+  involved_users: types.array(types.number),
+  readers: types.array(types.number),
+  holders: types.array(types.number),
+  recycle_bin: types.array(types.number),
+  action_item_id: types.maybeNull(types.number),
+  alert_id: types.maybeNull(types.number),
 });
 
 export const MessageStore = types
@@ -40,23 +43,28 @@ export const MessageStore = types
 
     // Notification Messages
     saveNotificationMessages(msgs: Array<MessageSnapshotType>) {
-      const validMsgs = msgs.map(msg => MessageModel.create(msg));
+      const validMsgs = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+        }),
+      );
       self.notificationMessages.replace(validMsgs);
     },
     addNotificationMessage(msg: MessageSnapshotType) {
       self.notificationMessages.unshift(msg);
     },
-    readNotificationMessage(id: string) {
+    readNotificationMessage(notificationId: string) {
       const messageToRemove = self.notificationMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
       if (messageToRemove) {
         self.notificationMessages.remove(messageToRemove);
       }
     },
-    removeNotificationMessage(id: string) {
+    removeNotificationMessage(notificationId: string) {
       const messageToRemove = self.notificationMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
       if (messageToRemove) {
         const snapshot = getSnapshot(messageToRemove);
@@ -67,20 +75,25 @@ export const MessageStore = types
 
     //ReceivedMessages
     saveReceivedMessages(msgs: Array<MessageSnapshotType>) {
-      const validMsgs = msgs.map(msg => MessageModel.create(msg));
+      const validMsgs = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+        }),
+      );
 
-      const incommingMsgs = new Set(validMsgs.map(msg => msg.id));
+      const incommingMsgs = new Set(validMsgs.map(msg => msg.notification_id));
       const existMsgs = self.receivedMessages.filter(
-        msg => !incommingMsgs.has(msg.id),
+        msg => !incommingMsgs.has(msg.notification_id),
       );
       self.receivedMessages.replace([...existMsgs, ...validMsgs]);
     },
     addReceivedMessage(msg: MessageSnapshotType) {
       self.receivedMessages.unshift(msg);
     },
-    removeReceivedMessage(id: string) {
+    removeReceivedMessage(notificationId: string) {
       const messageToRemove = self.receivedMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
       if (messageToRemove) {
         const cloned = getSnapshot(messageToRemove);
@@ -101,20 +114,25 @@ export const MessageStore = types
       // const validMsgs = msgs.map(msg => MessageModel.create(msg));
       // self.sentMessages.replace(validMsgs);
 
-      const validMsgs = msgs.map(msg => MessageModel.create(msg));
+      const validMsgs = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+        }),
+      );
 
-      const incommingMsgs = new Set(validMsgs.map(msg => msg.id));
+      const incommingMsgs = new Set(validMsgs.map(msg => msg.notification_id));
       const existMsgs = self.sentMessages.filter(
-        msg => !incommingMsgs.has(msg.id),
+        msg => !incommingMsgs.has(msg.notification_id),
       );
       self.sentMessages.replace([...existMsgs, ...validMsgs]);
     },
     addSentMessage(msg: MessageSnapshotType) {
       self.sentMessages.unshift(msg);
     },
-    removeSentMessage(id: string) {
+    removeSentMessage(notificationId: string) {
       const messageToRemove = self.sentMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
       if (messageToRemove) {
         const cloned = getSnapshot(messageToRemove);
@@ -135,11 +153,16 @@ export const MessageStore = types
     saveDraftMessages(msgs: Array<MessageSnapshotType>) {
       // const validMsgs = msgs.map(msg => MessageModel.create(msg));
       // self.draftMessages.replace(validMsgs);
-      const validMsgs = msgs.map(msg => MessageModel.create(msg));
+      const validMsgs = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+        }),
+      );
 
-      const incommingMsgs = new Set(validMsgs.map(msg => msg.id));
+      const incommingMsgs = new Set(validMsgs.map(msg => msg.notification_id));
       const existMsgs = self.draftMessages.filter(
-        msg => !incommingMsgs.has(msg.id),
+        msg => !incommingMsgs.has(msg.notification_id),
       );
 
       // Append new messages instead of replacing the whole list
@@ -147,34 +170,41 @@ export const MessageStore = types
 
       // Remove duplicates to avoid redundant messages
       const uniqueMessages = Array.from(
-        new Map(self.draftMessages.map(msg => [msg.id, msg])).values(),
+        new Map(
+          self.draftMessages.map(msg => [msg.notification_id, msg]),
+        ).values(),
       );
 
       self.draftMessages.replace(uniqueMessages);
     },
     addDraftMessage(msg: MessageSnapshotType) {
-      const existingIndex = self.draftMessages.findIndex(m => m.id === msg.id);
+      const existingIndex = self.draftMessages.findIndex(
+        m => m.notification_id === msg.notification_id,
+      );
 
       if (existingIndex !== -1) {
         // Replace the existing message with a model instance
-        self.draftMessages[existingIndex] = MessageModel.create(msg);
+        self.draftMessages[existingIndex] = MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+        });
       } else {
         // Add new message at the start as a model instance
         self.draftMessages.unshift(msg);
       }
     },
-    sendDraftMessage(id: string) {
+    sendDraftMessage(notificationId: string) {
       const messageToSend = self.draftMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
       if (messageToSend) {
         self.draftMessages.remove(messageToSend);
         self.totalDraft--;
       }
     },
-    removeDraftMessage(id: string) {
+    removeDraftMessage(notificationId: string) {
       const messageToRemove = self.draftMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
       if (messageToRemove) {
         const snapshot = getSnapshot(messageToRemove);
@@ -193,11 +223,16 @@ export const MessageStore = types
 
     //BinMessages
     saveBinMessages(msgs: Array<MessageSnapshotType>) {
-      const validMsgs = msgs.map(msg => MessageModel.create(msg));
+      const validMsgs = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+        }),
+      );
 
-      const incommingMsgs = new Set(validMsgs.map(msg => msg.id));
+      const incommingMsgs = new Set(validMsgs.map(msg => msg.notification_id));
       const existMsgs = self.binMessages.filter(
-        msg => !incommingMsgs.has(msg.id),
+        msg => !incommingMsgs.has(msg.notification_id),
       );
       self.binMessages.replace([...existMsgs, ...validMsgs]);
     },
@@ -205,9 +240,9 @@ export const MessageStore = types
       self.binMessages.unshift(msg);
       self.totalBin++;
     },
-    removeBinMessage(id: string) {
+    removeBinMessage(notificationId: string) {
       const messageToRemove = self.binMessages.find(
-        message => message.id === id,
+        message => message.notification_id === notificationId,
       );
 
       if (messageToRemove) {

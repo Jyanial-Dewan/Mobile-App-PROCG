@@ -55,7 +55,7 @@ const ActionItemMainIndex = () => {
   // });
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const limit = 10;
   const url = ProcgURL2;
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
@@ -80,6 +80,7 @@ const ActionItemMainIndex = () => {
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
+
       if (res) {
         setHasMore(res.items.length);
         setData(res.items);
@@ -156,7 +157,7 @@ const ActionItemMainIndex = () => {
         sheetHeight={600}
         onClose={() => setSelectedItem(undefined)}>
         {selectedItem && (
-          <View style={styles.itemContainer}>
+          <ScrollView style={styles.itemContainer}>
             <CustomTextNew
               text={selectedItem.action_item_name}
               style={{
@@ -166,14 +167,23 @@ const ActionItemMainIndex = () => {
                 marginTop: 5,
               }}
             />
+            <CustomTextNew
+              text={convertDate(selectedItem.last_update_date as any)}
+              style={{
+                fontSize: 15,
+                fontWeight: 'bold',
+                color: COLORS.black,
+                marginTop: 5,
+              }}
+            />
             <Column colStyle={styles.colStyle}>
               <CustomTextNew
-                text={`${selectedItem.description.slice(0, 180)} ${selectedItem.description.length > 180 ? '...' : ''}`}
+                text={selectedItem.description}
                 txtColor={COLORS.blackish}
                 txtSize={14}
               />
             </Column>
-          </View>
+          </ScrollView>
         )}
       </CustomBottomSheetNew>
     </ContainerNew>
@@ -192,12 +202,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     padding: 15,
     borderRadius: 15,
-    marginBottom: 10,
+    paddingVertical: 10,
+    marginBottom: 20,
     // elevation: 1,
   },
   colStyle: {
-    borderBottomColor: COLORS.borderBottom,
-    borderBottomWidth: 2,
+    // borderBottomColor: COLORS.borderBottom,
+    // borderBottomWidth: 2,
     marginBottom: 10,
     paddingVertical: 5,
   },
