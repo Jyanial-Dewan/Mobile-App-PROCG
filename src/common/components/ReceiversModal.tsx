@@ -13,17 +13,16 @@ import {useRootStore} from '../../stores/rootStore';
 import {COLORS} from '../constant/Themes';
 import CustomTextNew from './CustomText';
 import Image from 'react-native-image-fallback';
-
-interface User {
-  name: string;
-  profile_picture: string;
-}
+import {
+  renderProfilePicture,
+  renderUserName,
+} from '../utility/notifications.utility';
 
 interface ReceiversModalProps {
   showModal: boolean;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  handleX: (rcvr: string) => void;
-  recivers: User[];
+  handleX: (rcvr: number) => void;
+  recivers: number[];
   isHandleX: boolean;
 }
 
@@ -34,7 +33,7 @@ const ReceiversModal = ({
   recivers,
   isHandleX,
 }: ReceiversModalProps) => {
-  const {userInfo, selectedUrl} = useRootStore();
+  const {usersStore, userInfo, selectedUrl} = useRootStore();
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
   return (
@@ -46,7 +45,7 @@ const ReceiversModal = ({
           <TouchableWithoutFeedback>
             <View style={styles.modalContent}>
               <ScrollView>
-                {recivers.map((item, index) => (
+                {recivers.map((recver, index) => (
                   <TouchableOpacity key={index} style={styles.listConatainer}>
                     <View
                       style={{
@@ -57,7 +56,7 @@ const ReceiversModal = ({
                       <Image
                         style={styles.profileImage}
                         source={{
-                          uri: `${url}/${item.profile_picture}`,
+                          uri: `${url}/${renderProfilePicture(recver, usersStore.users)}`,
                           headers: {
                             Authorization: `Bearer ${userInfo?.access_token}`,
                           },
@@ -66,11 +65,11 @@ const ReceiversModal = ({
                       />
                       <CustomTextNew
                         txtColor={COLORS.headerText}
-                        text={item.name}
+                        text={renderUserName(recver, usersStore.users)}
                       />
                     </View>
                     {isHandleX && (
-                      <TouchableOpacity onPress={() => handleX(item.name)}>
+                      <TouchableOpacity onPress={() => handleX(recver)}>
                         <Feather name="x" size={16} color="black" />
                       </TouchableOpacity>
                     )}

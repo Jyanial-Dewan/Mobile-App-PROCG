@@ -1,6 +1,7 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
@@ -34,7 +35,6 @@ import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
-/*************  ✨ Windsurf Command 🌟  *************/
 const Alerts = () => {
   const isFocused = useIsFocused();
   const {userInfo, selectedUrl, alertsStore} = useRootStore();
@@ -45,7 +45,7 @@ const Alerts = () => {
   const [isLoading, setIsLoading] = useState(false);
   const url = selectedUrl || ProcgURL;
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const limit = 10;
   const [data, setData] = useState<AlertStoreSnapshotType[]>([]);
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
@@ -80,7 +80,7 @@ const Alerts = () => {
         alertsStore.setRefreshing(false);
       }
     },
-    [isFocused, currentPage, alertsStore.refreshing, alertsStore.alerts],
+    [isFocused, currentPage, alertsStore.refreshing, alertsStore.alerts.length],
   );
   useEffect(() => {
     const searchActionItems = () => {
@@ -139,7 +139,7 @@ const Alerts = () => {
         sheetHeight={600}
         onClose={() => setSelectedItem(undefined)}>
         {selectedItem && (
-          <View style={styles.itemContainer}>
+          <ScrollView style={styles.itemContainer}>
             <CustomTextNew
               text={selectedItem.alert_name}
               style={{
@@ -149,14 +149,23 @@ const Alerts = () => {
                 marginTop: 5,
               }}
             />
+            <CustomTextNew
+              text={convertDate(selectedItem.last_update_date as any)}
+              style={{
+                fontSize: 15,
+                fontWeight: 'bold',
+                color: COLORS.black,
+                marginTop: 5,
+              }}
+            />
             <Column colStyle={styles.colStyle}>
               <CustomTextNew
-                text={`${selectedItem.description.slice(0, 180)} ${selectedItem.description.length > 180 ? '...' : ''}`}
+                text={selectedItem.description}
                 txtColor={COLORS.blackish}
                 txtSize={14}
               />
             </Column>
-          </View>
+          </ScrollView>
         )}
       </CustomBottomSheetNew>
     </ContainerNew>
@@ -175,7 +184,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     padding: 15,
     borderRadius: 15,
-    marginBottom: 10,
+    paddingVertical: 10,
+    marginBottom: 20,
     // shadowColor: '#000',
     // shadowOffset: {
     //   width: 0,

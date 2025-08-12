@@ -25,6 +25,11 @@ import ReceiversModal from '../../common/components/ReceiversModal';
 import SVGController from '../../common/components/SVGController';
 import {useSocketContext} from '../../context/SocketContext';
 import Image from 'react-native-image-fallback';
+import {MessageSnapshotType} from '../../stores/messageStore';
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../../common/utility/notifications.utility';
 
 interface User {
   name: string;
@@ -34,29 +39,24 @@ interface User {
 const ReplyScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const {userInfo, selectedUrl} = useRootStore();
+  const {usersStore, userInfo, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const {_id} = route.params as {_id: string};
   const isFocused = useIsFocused();
-  const [parrentMessage, setParrentMessage] = useState<any>();
-  const [recivers, setRecivers] = useState<User[]>([]);
+  const [parrentMessage, setParrentMessage] =
+    useState<MessageSnapshotType | null>(null);
+  const [recivers, setRecivers] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const sender = {
-    name: userInfo?.user_name,
-    profile_picture: userInfo?.profile_picture.thumbnail,
-  };
   const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
-
-  const receiverNames = recivers.map(rcvr => rcvr.name);
 
   //Fetch SingleMessage
   useAsyncEffect(
@@ -86,18 +86,21 @@ const ReplyScreen = () => {
 
   const handleSend = async () => {
     const sendPayload = {
-      id,
-      sender,
-      recivers,
-      subject,
-      body,
-      date,
-      status: 'Sent',
-      parentid: parrentMessage.id,
-      involvedusers: parrentMessage.involvedusers,
-      readers: receiverNames,
-      holders: parrentMessage.involvedusers,
-      recyclebin: [],
+      notification_id: id,
+      notification_type: parrentMessage?.notification_type,
+      sender: userInfo?.user_id,
+      recipients: recivers,
+      subject: subject,
+      notification_body: body,
+      status: 'SENT',
+      creation_date: new Date(),
+      parent_notification_id: parrentMessage?.parent_notification_id,
+      involved_users: parrentMessage?.involved_users,
+      readers: recivers,
+      holders: parrentMessage?.involved_users,
+      recycle_bin: [],
+      action_item_id: parrentMessage?.action_item_id,
+      alert_id: parrentMessage?.alert_id,
     };
     const sendParams = {
       url: api.Messages,
@@ -107,12 +110,13 @@ const ReplyScreen = () => {
       isConsole: true,
       // isConsoleParams: true,
     };
+    // notificationID, parentId, date, sender, recipients, subject, body;
     const sendNotificationPayload = {
-      id,
-      parentid: parrentMessage.id,
-      date,
-      sender: sender,
-      recivers: recivers,
+      notificationID: id,
+      parentId: parrentMessage?.parent_notification_id,
+      date: new Date(),
+      sender: userInfo?.user_name,
+      recipients: recivers,
       subject,
       body,
     };
@@ -129,7 +133,7 @@ const ReplyScreen = () => {
       await httpRequest(sendNotificationParams, setIsSending);
       if (response) {
         socket?.emit('sendMessage', sendPayload);
-        toaster.show({message: 'Message Sent Successfully', type: 'success'});
+        toaster.show({message: response.message, type: 'success'});
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -145,18 +149,21 @@ const ReplyScreen = () => {
 
   const handleDraft = async () => {
     const draftPayload = {
-      id,
-      sender,
-      recivers,
-      subject,
-      body,
-      date,
-      status: 'Draft',
-      parentid: parrentMessage.id,
-      involvedusers: parrentMessage.involvedusers,
-      readers: receiverNames,
-      holders: [sender.name],
-      recyclebin: [],
+      notification_id: id,
+      notification_type: parrentMessage?.notification_type,
+      sender: userInfo?.user_id,
+      recipients: recivers,
+      subject: `${subject}`,
+      notification_body: body,
+      status: 'DRAFT',
+      creation_date: new Date(),
+      parent_notification_id: parrentMessage?.parent_notification_id,
+      involved_users: parrentMessage?.involved_users,
+      readers: recivers,
+      holders: [userInfo?.user_id],
+      recycle_bin: [],
+      action_item_id: parrentMessage?.action_item_id,
+      alert_id: parrentMessage?.alert_id,
     };
     const draftParams = {
       url: api.Messages,
@@ -171,7 +178,7 @@ const ReplyScreen = () => {
       if (response) {
         socket?.emit('sendDraft', draftPayload);
         toaster.show({
-          message: 'Message Send to Draft Successfully',
+          message: response.message,
           type: 'success',
         });
         setTimeout(async () => {
@@ -274,15 +281,19 @@ const ReplyScreen = () => {
                     <Image
                       style={styles.profileImage}
                       source={{
-                        uri: `${url}/${recivers[recivers.length - 1].profile_picture}`,
-                        headers: {
-                          Authorization: `Bearer ${userInfo?.access_token}`,
-                        },
+                        uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
+                        // headers: {
+                        //   Authorization: `Bearer ${userInfo?.access_token}`,
+                        // },
                       }}
                       fallback={fallbacks}
                     />
                     <Text style={styles.textGreen}>
-                      {recivers[recivers.length - 1].name}
+                      {renderSlicedUsername(
+                        recivers[recivers.length - 1],
+                        usersStore.users,
+                        1,
+                      )}
                     </Text>
                   </View>
                 </View>

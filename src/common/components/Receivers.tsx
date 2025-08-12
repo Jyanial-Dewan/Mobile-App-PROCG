@@ -12,6 +12,10 @@ import {useRootStore} from '../../stores/rootStore';
 import {COLORS} from '../constant/Themes';
 import CustomTextNew from './CustomText';
 import Image from 'react-native-image-fallback';
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../utility/notifications.utility';
 
 interface User {
   name: string;
@@ -21,7 +25,7 @@ interface User {
 interface ReceiversModalProps {
   showModal: boolean;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  recivers: User[];
+  recivers: number[] | undefined;
   isHandleX?: boolean;
 }
 
@@ -31,7 +35,7 @@ const Receivers = ({
   recivers,
   isHandleX,
 }: ReceiversModalProps) => {
-  const {userInfo, selectedUrl} = useRootStore();
+  const {usersStore, userInfo, selectedUrl} = useRootStore();
 
   const url = selectedUrl || ProcgURL;
 
@@ -46,7 +50,7 @@ const Receivers = ({
           <TouchableWithoutFeedback>
             <View style={styles.modalContent}>
               <ScrollView>
-                {recivers.map((item, index) => (
+                {recivers?.map((recver, index) => (
                   <TouchableOpacity key={index} style={styles.listConatainer}>
                     <View
                       style={{
@@ -57,7 +61,7 @@ const Receivers = ({
                       <Image
                         style={styles.profileImage}
                         source={{
-                          uri: `${url}/${item.profile_picture}`,
+                          uri: `${url}/${renderProfilePicture(recver, usersStore.users)}`,
                           headers: {
                             Authorization: `Bearer ${userInfo?.access_token}`,
                           },
@@ -66,7 +70,11 @@ const Receivers = ({
                       />
                       <CustomTextNew
                         txtColor={COLORS.headerText}
-                        text={item.name}
+                        text={renderSlicedUsername(
+                          recver,
+                          usersStore.users,
+                          20,
+                        )}
                       />
                     </View>
                   </TouchableOpacity>

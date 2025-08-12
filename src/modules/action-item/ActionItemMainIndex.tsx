@@ -35,7 +35,8 @@ import {httpRequest} from '../../common/constant/httpRequest';
 import {ProcgURL2} from '../../../App';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import RenderItems from './RenderItems';
-import {ActionItemsStoreType} from '../../stores/actionItems';
+import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
+import {observer} from 'mobx-react-lite';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -44,7 +45,7 @@ const ActionItemMainIndex = () => {
   const navigation = useNavigation();
   const {userInfo, actionItems} = useRootStore();
   const refRBSheet = useRef<RBSheet>(null);
-  const [data, setData] = useState<ActionItemsStoreType[]>([]);
+  const [data, setData] = useState<ActionItemsStoreSnapshotType[]>([]);
   const [search, setSearch] = useState('');
   const [noResult, setNoResult] = useState(false);
   const height = useWindowDimensions().height;
@@ -54,11 +55,11 @@ const ActionItemMainIndex = () => {
   // });
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const limit = 10;
   const url = ProcgURL2;
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
-    ActionItemsStoreType | undefined
+    ActionItemsStoreSnapshotType | undefined
   >(undefined);
   useAsyncEffect(
     async isMounted => {
@@ -79,6 +80,7 @@ const ActionItemMainIndex = () => {
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
+
       if (res) {
         setHasMore(res.items.length);
         setData(res.items);
@@ -131,7 +133,9 @@ const ActionItemMainIndex = () => {
       />
       <CustomFlatListThree
         data={data}
-        keyExtractor={(item: ActionItemsStoreType) => item.action_item_id}
+        keyExtractor={(item: ActionItemsStoreSnapshotType) =>
+          item.action_item_id
+        }
         RenderItems={({item}: any) => (
           <RenderItems
             item={item}
@@ -153,7 +157,7 @@ const ActionItemMainIndex = () => {
         sheetHeight={600}
         onClose={() => setSelectedItem(undefined)}>
         {selectedItem && (
-          <View style={styles.itemContainer}>
+          <ScrollView style={styles.itemContainer}>
             <CustomTextNew
               text={selectedItem.action_item_name}
               style={{
@@ -163,21 +167,30 @@ const ActionItemMainIndex = () => {
                 marginTop: 5,
               }}
             />
+            <CustomTextNew
+              text={convertDate(selectedItem.last_update_date as any)}
+              style={{
+                fontSize: 15,
+                fontWeight: 'bold',
+                color: COLORS.black,
+                marginTop: 5,
+              }}
+            />
             <Column colStyle={styles.colStyle}>
               <CustomTextNew
-                text={`${selectedItem.description.slice(0, 180)} ${selectedItem.description.length > 180 ? '...' : ''}`}
+                text={selectedItem.description}
                 txtColor={COLORS.blackish}
                 txtSize={14}
               />
             </Column>
-          </View>
+          </ScrollView>
         )}
       </CustomBottomSheetNew>
     </ContainerNew>
   );
 };
 
-export default ActionItemMainIndex;
+export default observer(ActionItemMainIndex);
 
 const styles = StyleSheet.create({
   container: {
@@ -189,12 +202,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     padding: 15,
     borderRadius: 15,
-    marginBottom: 10,
+    paddingVertical: 10,
+    marginBottom: 20,
     // elevation: 1,
   },
   colStyle: {
-    borderBottomColor: COLORS.borderBottom,
-    borderBottomWidth: 2,
+    // borderBottomColor: COLORS.borderBottom,
+    // borderBottomWidth: 2,
     marginBottom: 10,
     paddingVertical: 5,
   },

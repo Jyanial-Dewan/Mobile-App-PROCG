@@ -30,6 +30,7 @@ const CustomBottomSheetNew: React.FC<ContainerProps> = ({
           borderTopRightRadius: 24,
           borderTopLeftRadius: 24,
           backgroundColor: COLORS.white,
+          paddingVertical: 10,
         },
       }}
       {...rest}>

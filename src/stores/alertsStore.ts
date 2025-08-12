@@ -7,7 +7,7 @@ export const AlertModel = types.model('alertModel', {
   alert_id: types.number,
   alert_name: types.string,
   description: types.string,
-  readers: types.array(types.number),
+  acknowledge: types.boolean,
   status: types.string,
   created_by: types.number,
   creation_date: types.string,
@@ -49,33 +49,7 @@ export const AlertsStore = types
         self.notificationAlertsCount--;
       }
     },
-
-    // readAlert(alert: AlertStoreSnapshotType) {
-    //   const alertItem = self.notificationAlerts.find(
-    //     item => item.alert_id === alert.alert_id,
-    //   );
-    //   if (alertItem) {
-    //     self.notificationAlerts.remove(alertItem);
-    //     self.notificationAlertsCount--;
-
-    //     // remove reader from alerts
-
-    //     self.alerts.forEach(item => {
-    //       if (item.alert_id === alert.alert_id) {
-    //         // Log for debugging
-    //         // console.log('before readers:', item.readers);
-
-    //         // Check if user_id exists in the readers and remove it
-    //         const index = item.readers.indexOf(alert.user_id);
-    //         if (index !== -1) {
-    //           item.readers.splice(index, 1);
-    //         }
-    //       }
-    //     });
-    //   }
-    // },
   }));
 
 export type AlertsStoreType = Instance<typeof AlertModel>;
 export type AlertStoreSnapshotType = SnapshotOut<typeof AlertModel>;
-// export type AlertStoreSnapshotType = SnapshotOut<typeof AlertsStore>;

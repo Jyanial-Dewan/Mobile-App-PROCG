@@ -30,11 +30,11 @@ import ReceiversModal from '../../common/components/ReceiversModal';
 import RoundedButton from '../../common/components/RoundedButton';
 import SVGController from '../../common/components/SVGController';
 import {useSocketContext} from '../../context/SocketContext';
-
-interface User {
-  name: string;
-  profile_picture: string;
-}
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+} from '../../common/utility/notifications.utility';
+import {MessageSnapshotType} from '~/stores/messageStore';
 
 const DraftsDetails = observer(() => {
   const navigation = useNavigation();
@@ -44,7 +44,7 @@ const DraftsDetails = observer(() => {
   const [showModal, setShowModal] = useState(false);
   const [parentid, setParentid] = useState<string>('');
   const [status, setStatus] = useState<string>('');
-  const [recivers, setRecivers] = useState<User[]>([]);
+  const [recivers, setRecivers] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [query, setQuery] = useState<string>('');
@@ -54,11 +54,8 @@ const DraftsDetails = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
   const [oldMsgState, setOldMsgState] = useState<any>({});
   const [userChanged, setuserChanged] = useState<boolean>(false);
-  const sender = {
-    name: userInfo?.user_name,
-    profile_picture: userInfo?.profile_picture.thumbnail,
-  };
   const route = useRoute();
+  const notifcationType = 'REGULAR';
   const routeName = route.name;
   const {_id} = route.params as {_id: string};
   const id = uuidv4();
@@ -66,13 +63,10 @@ const DraftsDetails = observer(() => {
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
-
-  const receiverNames = recivers.map(rcvr => rcvr.name);
-
-  const totalusers = [...receiverNames, userInfo?.user_name];
+  const totalusers = [...recivers, userInfo?.user_id];
   const involvedusers = [...new Set(totalusers)];
   const actualUsers = usersStore.users.filter(
-    usr => usr.user_name !== userInfo?.user_name,
+    usr => usr.user_id !== userInfo?.user_id,
   );
 
   const filterdUser = actualUsers.filter(user =>
@@ -90,17 +84,20 @@ const DraftsDetails = observer(() => {
         // isConsole: true,
         // isConsoleParams: true,
       };
-      const res = await httpRequest(api_params, setIsLoading);
+      const res: MessageSnapshotType = await httpRequest(
+        api_params,
+        setIsLoading,
+      );
       if (res) {
-        setParentid(res.parentid);
+        setParentid(res.parent_notification_id);
         setStatus(res.status);
-        setRecivers(res.recivers);
+        setRecivers(res.recipients);
         setSubject(res.subject);
-        setBody(res.body);
+        setBody(res.notification_body);
         setOldMsgState({
-          receivers: res?.recivers,
+          receivers: res?.recipients,
           subject: res?.subject,
-          body: res?.body,
+          body: res?.notification_body,
         });
       }
     },
@@ -113,7 +110,7 @@ const DraftsDetails = observer(() => {
         if (oldMsgState?.receivers?.length !== recivers.length) {
           setuserChanged(true);
         } else {
-          oldMsgState?.receivers?.map((receiver: User) => {
+          oldMsgState?.receivers?.map((receiver: number) => {
             const res = recivers.every(recvr => {
               if (receiver !== recvr) {
                 return true;
@@ -129,7 +126,7 @@ const DraftsDetails = observer(() => {
           setuserChanged(true);
         } else {
           recivers.map(receiver => {
-            const res = oldMsgState?.receivers?.every((recvr: User) => {
+            const res = oldMsgState?.receivers?.every((recvr: number) => {
               if (receiver !== recvr) {
                 return true;
               } else {
@@ -146,9 +143,9 @@ const DraftsDetails = observer(() => {
     handleUserChange();
   }, [recivers, oldMsgState?.receivers]);
 
-  const handleReciever = (reciever: User) => {
-    if (receiverNames.includes(reciever.name)) {
-      const newArray = recivers.filter(rcvr => rcvr.name !== reciever.name);
+  const handleReciever = (reciever: number) => {
+    if (recivers.includes(reciever)) {
+      const newArray = recivers.filter(rcvr => rcvr !== reciever);
       setRecivers(newArray);
       setQuery('');
     } else {
@@ -160,12 +157,7 @@ const DraftsDetails = observer(() => {
   const handleSelectAll = () => {
     if (!isAllClicked) {
       setIsAllClicked(true);
-      const newReceivers = actualUsers.map(usr => {
-        return {
-          name: usr.user_name,
-          profile_picture: usr.profile_picture.thumbnail,
-        };
-      });
+      const newReceivers = actualUsers.map(usr => usr.user_id);
       setRecivers(newReceivers);
     } else {
       setIsAllClicked(false);
@@ -174,25 +166,28 @@ const DraftsDetails = observer(() => {
     setQuery('');
   };
 
-  const handleX = (rcvr: string) => {
-    const newRecievers = recivers.filter(r => r.name !== rcvr);
+  const handleX = (rcvr: number) => {
+    const newRecievers = recivers.filter(r => r !== rcvr);
     setRecivers(newRecievers);
   };
 
   const handleSend = async () => {
     const sendPayload = {
-      id,
-      sender,
-      recivers,
-      subject,
-      body,
-      date,
-      status: 'Sent',
-      parentid: id,
-      involvedusers,
-      readers: receiverNames,
+      notification_id: id,
+      notification_type: notifcationType,
+      sender: userInfo?.user_id,
+      recipients: recivers,
+      subject: subject,
+      notification_body: body,
+      status: 'SENT',
+      creation_date: new Date(),
+      parent_notification_id: id,
+      involved_users: involvedusers,
+      readers: recivers,
       holders: involvedusers,
-      recyclebin: [],
+      recycle_bin: [],
+      action_item_id: null,
+      alert_id: null,
     };
     const sendParams = {
       url: api.Messages,
@@ -203,11 +198,11 @@ const DraftsDetails = observer(() => {
       // isConsoleParams: true,
     };
     const sendNotificationPayload = {
-      id,
-      parentid: id,
-      date,
-      sender: sender,
-      recivers: recivers,
+      notificationID: id,
+      parentId: id,
+      date: new Date(),
+      sender: userInfo?.user_name,
+      recipients: recivers,
       subject,
       body,
     };
@@ -233,9 +228,9 @@ const DraftsDetails = observer(() => {
       await httpRequest(sendNotificationParams, setIsSending);
       if (deleteMsg && newMsg) {
         socket?.emit('sendMessage', sendPayload);
-        socket?.emit('draftMsgId', {id: _id, user: userInfo?.user_name});
+        socket?.emit('draftMsgId', {id: _id, user: userInfo?.user_id});
         console.log(_id, 'Id in draft details screen');
-        toaster.show({message: 'Message Sent Successfully', type: 'success'});
+        toaster.show({message: newMsg.message, type: 'success'});
         setTimeout(async () => {
           navigation.goBack();
         }, 500);
@@ -253,18 +248,21 @@ const DraftsDetails = observer(() => {
   // draft
   const handleDraft = async () => {
     const draftPayload = {
-      id: _id,
-      sender,
-      recivers,
-      subject,
-      body,
-      date,
-      status: status,
-      parentid,
-      involvedusers,
-      readers: receiverNames,
-      holders: [sender.name],
-      recyclebin: [],
+      notification_id: _id,
+      notification_type: notifcationType,
+      sender: userInfo?.user_id,
+      recipients: recivers,
+      subject: subject,
+      notification_body: body,
+      status: 'DRAFT',
+      creation_date: new Date(),
+      parent_notification_id: parentid,
+      involved_users: involvedusers,
+      readers: recivers,
+      holders: [userInfo?.user_id],
+      recycle_bin: [],
+      action_item_id: null,
+      alert_id: null,
     };
     const draftParams = {
       url: api.Messages + '/' + _id,
@@ -292,7 +290,7 @@ const DraftsDetails = observer(() => {
 
   const handleDeleteDraftMessage = async (msgId: string) => {
     const deleteParams = {
-      url: api.DeleteMessage + msgId + `/${userInfo?.user_name}`,
+      url: api.DeleteMessage + msgId + `/${userInfo?.user_id}`,
       method: 'put',
       baseURL: selectedUrl || ProcgURL,
       isConsole: true,
@@ -302,9 +300,9 @@ const DraftsDetails = observer(() => {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_name});
+        socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_id});
         toaster.show({
-          message: 'Message has been moved to recyclebin.',
+          message: response.message,
           type: 'success',
         });
         setTimeout(async () => {
@@ -320,6 +318,7 @@ const DraftsDetails = observer(() => {
 
   return (
     <ContainerNew
+      isRefresh={false}
       isKeyboardAware={true}
       isScrollView={false}
       header={
@@ -427,12 +426,7 @@ const DraftsDetails = observer(() => {
             </Pressable>
             {filterdUser.map(usr => (
               <TouchableOpacity
-                onPress={() =>
-                  handleReciever({
-                    name: usr.user_name,
-                    profile_picture: usr.profile_picture.thumbnail,
-                  })
-                }
+                onPress={() => handleReciever(usr.user_id)}
                 key={usr.user_id}>
                 <View
                   style={{
@@ -450,16 +444,16 @@ const DraftsDetails = observer(() => {
                       style={styles.profileImage}
                       source={{
                         uri: `${url}/${usr.profile_picture.thumbnail}`,
-                        headers: {
-                          Authorization: `Bearer ${userInfo?.access_token}`,
-                        },
+                        // headers: {
+                        //   Authorization: `Bearer ${userInfo?.access_token}`,
+                        // },
                       }}
                       fallback={fallbacks}
                     />
                     <Text style={[styles.item]}>{usr?.user_name}</Text>
                   </View>
                   <View style={styles.itemListWrapper} />
-                  {receiverNames.includes(usr.user_name) && (
+                  {recivers.includes(usr.user_id) && (
                     <AntDesign name="check" size={20} color="#3632A6" />
                   )}
                 </View>
@@ -480,19 +474,23 @@ const DraftsDetails = observer(() => {
                 <Image
                   style={styles.profileImage}
                   source={{
-                    uri: `${url}/${recivers[recivers.length - 1].profile_picture}`,
-                    headers: {
-                      Authorization: `Bearer ${userInfo?.access_token}`,
-                    },
+                    uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
+                    // headers: {
+                    //   Authorization: `Bearer ${userInfo?.access_token}`,
+                    // },
                   }}
                   fallback={fallbacks}
                 />
                 <Text style={styles.textGreen}>
-                  {recivers[recivers.length - 1].name}
+                  {renderSlicedUsername(
+                    recivers[recivers.length - 1],
+                    usersStore.users,
+                    1,
+                  )}
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => handleX(recivers[recivers.length - 1].name)}>
+                onPress={() => handleX(recivers[recivers.length - 1])}>
                 <Feather name="x" size={16} color="black" />
               </TouchableOpacity>
             </View>

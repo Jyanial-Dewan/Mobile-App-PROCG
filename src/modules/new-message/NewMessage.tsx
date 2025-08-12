@@ -27,6 +27,11 @@ import ReceiversModal from '../../common/components/ReceiversModal';
 import SVGController from '../../common/components/SVGController';
 import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
+import {
+  renderProfilePicture,
+  renderSlicedUsername,
+  renderUserName,
+} from '../../common/utility/notifications.utility';
 
 interface User {
   name: string;
@@ -38,7 +43,7 @@ const NewMessage = () => {
   const {usersStore, userInfo, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const [showModal, setShowModal] = useState(false);
-  const [recivers, setRecivers] = useState<User[]>([]);
+  const [recivers, setRecivers] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [query, setQuery] = useState<string>('');
@@ -46,20 +51,15 @@ const NewMessage = () => {
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
   const navigation = useNavigation();
-  const sender = {
-    name: userInfo?.user_name,
-    profile_picture: userInfo?.profile_picture.thumbnail,
-  };
+  const notifcationType = 'REGULAR';
   const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
 
-  const receiverNames = recivers.map(rcvr => rcvr.name);
-
-  const totalusers = [...receiverNames, userInfo?.user_name];
+  const totalusers = [...recivers, userInfo?.user_id];
   const involvedusers = [...new Set(totalusers)];
   const actualUsers = usersStore.users.filter(
-    usr => usr.user_name !== userInfo?.user_name,
+    usr => usr.user_id !== userInfo?.user_id,
   );
 
   const filterdUser = actualUsers.filter(user =>
@@ -69,9 +69,9 @@ const NewMessage = () => {
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
 
-  const handleReciever = (reciever: User) => {
-    if (receiverNames.includes(reciever.name)) {
-      const newArray = recivers.filter(rcvr => rcvr.name !== reciever.name);
+  const handleReciever = (reciever: number) => {
+    if (recivers.includes(reciever)) {
+      const newArray = recivers.filter(rcvr => rcvr !== reciever);
       setRecivers(newArray);
       setQuery('');
     } else {
@@ -83,12 +83,7 @@ const NewMessage = () => {
   const handleSelectAll = () => {
     if (!isAllClicked) {
       setIsAllClicked(true);
-      const newReceivers = actualUsers.map(usr => {
-        return {
-          name: usr.user_name,
-          profile_picture: usr.profile_picture.thumbnail,
-        };
-      });
+      const newReceivers = actualUsers.map(usr => usr.user_id);
       setRecivers(newReceivers);
     } else {
       setIsAllClicked(false);
@@ -99,18 +94,21 @@ const NewMessage = () => {
 
   const handleSend = async () => {
     const sendPayload = {
-      id,
-      sender,
-      recivers,
-      subject,
-      body,
-      date,
-      status: 'Sent',
-      parentid: id,
-      involvedusers,
-      readers: receiverNames,
+      notification_id: id,
+      notification_type: notifcationType,
+      sender: userInfo?.user_id,
+      recipients: recivers,
+      subject: subject,
+      notification_body: body,
+      status: 'SENT',
+      creation_date: new Date(),
+      parent_notification_id: id,
+      involved_users: involvedusers,
+      readers: recivers,
       holders: involvedusers,
-      recyclebin: [],
+      recycle_bin: [],
+      action_item_id: null,
+      alert_id: null,
     };
     const sendParams = {
       url: api.Messages,
@@ -120,13 +118,13 @@ const NewMessage = () => {
       isConsole: true,
       isConsoleParams: true,
     };
-
+    // notificationID, parentId, date, sender, recipients, subject, body;
     const sendNotificationPayload = {
-      id,
-      parentid: id,
-      date,
-      sender: sender,
-      recivers: recivers,
+      notificationID: id,
+      parentId: id,
+      date: new Date(),
+      sender: userInfo?.user_id,
+      recipients: recivers,
       subject,
       body,
     };
@@ -144,7 +142,7 @@ const NewMessage = () => {
       await httpRequest(sendNotificationParams, setIsSending);
       if (response) {
         socket?.emit('sendMessage', sendPayload);
-        toaster.show({message: 'Message Sent Successfully', type: 'success'});
+        toaster.show({message: response.message, type: 'success'});
       }
       setTimeout(async () => {
         navigation.goBack();
@@ -162,18 +160,21 @@ const NewMessage = () => {
   // draft
   const handleDraft = async () => {
     const draftPayload = {
-      id,
-      sender,
-      recivers,
-      subject,
-      body,
-      date,
-      status: 'Draft',
-      parentid: id,
-      involvedusers,
-      readers: receiverNames,
-      holders: [sender.name],
-      recyclebin: [],
+      notification_id: id,
+      notification_type: notifcationType,
+      sender: userInfo?.user_id,
+      recipients: recivers,
+      subject: subject,
+      notification_body: body,
+      status: 'DRAFT',
+      creation_date: new Date(),
+      parent_notification_id: id,
+      involved_users: involvedusers,
+      readers: recivers,
+      holders: involvedusers,
+      recycle_bin: [],
+      action_item_id: null,
+      alert_id: null,
     };
     const draftParams = {
       url: api.Messages,
@@ -181,14 +182,14 @@ const NewMessage = () => {
       method: 'post',
       baseURL: url,
       isConsole: true,
-      // isConsoleParams: true,
+      isConsoleParams: true,
     };
     try {
       const response = await httpRequest(draftParams, setIsDrafting);
       if (response) {
         socket?.emit('sendDraft', draftPayload);
         toaster.show({
-          message: 'Message Send to Draft Successfully',
+          message: response.message,
           type: 'success',
         });
         setTimeout(async () => {
@@ -206,8 +207,8 @@ const NewMessage = () => {
     }
   };
 
-  const handleX = (rcvr: string) => {
-    const newRecievers = recivers.filter(r => r.name !== rcvr);
+  const handleX = (rcvr: number | null | undefined) => {
+    const newRecievers = recivers.filter(r => r !== rcvr);
     setRecivers(newRecievers);
   };
   return (
@@ -309,12 +310,7 @@ const NewMessage = () => {
             </Pressable>
             {filterdUser.map(usr => (
               <TouchableOpacity
-                onPress={() =>
-                  handleReciever({
-                    name: usr.user_name,
-                    profile_picture: usr.profile_picture.thumbnail,
-                  })
-                }
+                onPress={() => handleReciever(usr.user_id)}
                 key={usr.user_id}>
                 <View
                   style={{
@@ -332,16 +328,16 @@ const NewMessage = () => {
                       style={styles.profileImage}
                       source={{
                         uri: `${url}/${usr.profile_picture.thumbnail}`,
-                        headers: {
-                          Authorization: `Bearer ${userInfo?.access_token}`,
-                        },
+                        // headers: {
+                        //   Authorization: `Bearer ${userInfo?.access_token}`,
+                        // },
                       }}
                       fallback={fallbacks}
                     />
                     <Text style={[styles.item]}>{usr?.user_name}</Text>
                   </View>
                   <View style={styles.itemListWrapper} />
-                  {receiverNames.includes(usr.user_name) && (
+                  {recivers.includes(usr.user_id) && (
                     <AntDesign name="check" size={20} color="#3632A6" />
                   )}
                 </View>
@@ -362,19 +358,23 @@ const NewMessage = () => {
                 <Image
                   style={styles.profileImage}
                   source={{
-                    uri: `${url}/${recivers[recivers.length - 1].profile_picture}`,
-                    headers: {
-                      Authorization: `Bearer ${userInfo?.access_token}`,
-                    },
+                    uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
+                    // headers: {
+                    //   Authorization: `Bearer ${userInfo?.access_token}`,
+                    // },
                   }}
                   fallback={fallbacks}
                 />
                 <Text style={styles.textGreen}>
-                  {recivers[recivers.length - 1].name}
+                  {renderSlicedUsername(
+                    recivers[recivers.length - 1],
+                    usersStore.users,
+                    20,
+                  )}
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => handleX(recivers[recivers.length - 1].name)}>
+                onPress={() => handleX(recivers[recivers.length - 1])}>
                 <Feather name="x" size={16} color="black" />
               </TouchableOpacity>
             </View>
