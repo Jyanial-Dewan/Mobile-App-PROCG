@@ -332,7 +332,7 @@ const DraftsDetails = observer(() => {
               child={<Feather name="trash" size={24} color="black" />}
             />
           }
-          routeName="Message Details"
+          routeName="Notification Details"
         />
       }
       footer={

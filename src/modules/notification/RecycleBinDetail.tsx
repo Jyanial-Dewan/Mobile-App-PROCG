@@ -204,7 +204,7 @@ const RecycleBinDetail = observer(() => {
   return (
     <ContainerNew
       style={styles.container}
-      header={<MainHeader routeName="Message Details" />}
+      header={<MainHeader routeName="Notification Details" />}
       isScrollView={false}>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />

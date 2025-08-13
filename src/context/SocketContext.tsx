@@ -60,18 +60,27 @@ export function SocketContextProvider({children}: SocketContextProps) {
     });
 
     socket?.on('receivedMessage', data => {
-      const formattedData = {...data, date: new Date(data.date)};
+      const formattedData = {
+        ...data,
+        creation_date: new Date(data.creation_date),
+      };
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
       messageStore.addTotalReceived();
     });
     socket?.on('sentMessage', data => {
-      const formattedData = {...data, date: new Date(data.date)};
+      const formattedData = {
+        ...data,
+        creation_date: new Date(data.creation_date),
+      };
       messageStore.addSentMessage(formattedData);
       messageStore.addTotalSent();
     });
     socket?.on('draftMessage', data => {
-      const formattedData = {...data, date: new Date(data.date)};
+      const formattedData = {
+        ...data,
+        creation_date: new Date(data.creation_date),
+      };
       messageStore.addDraftMessage(formattedData);
       messageStore.addTotalDraft();
     });

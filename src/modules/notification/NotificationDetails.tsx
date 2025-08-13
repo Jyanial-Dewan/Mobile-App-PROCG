@@ -42,7 +42,9 @@ const NotificationDetails = observer(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [recivers, setRecivers] = useState<number[] | undefined>(undefined);
-  const [parrentMessage, setParrentMessage] = useState<any>();
+  const [parrentMessage, setParrentMessage] = useState<
+    MessageSnapshotType | undefined
+  >(undefined);
 
   const url = selectedUrl || ProcgURL;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
@@ -222,7 +224,7 @@ const NotificationDetails = observer(() => {
   return (
     <ContainerNew
       style={styles.container}
-      header={<MainHeader routeName={'Message_Details'} />}
+      header={<MainHeader routeName={'Notification Details'} />}
       isScrollView={false}>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
