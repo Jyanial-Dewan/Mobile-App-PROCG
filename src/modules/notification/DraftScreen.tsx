@@ -47,7 +47,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
+  renderUserName,
 } from '../../common/utility/notifications.utility';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import {MessageSnapshotType} from '../../stores/messageStore';
@@ -255,10 +255,9 @@ const RenderMessageItem = ({
                     txtStyle={styles.headText}
                     text={
                       item?.recipients.length > 0
-                        ? `${renderSlicedUsername(
+                        ? `${renderUserName(
                             item.recipients[0],
                             usersStore.users,
-                            20,
                           )}${item.recipients.length > 1 ? ', ...' : ''}`
                         : '(no user)'
                     }
@@ -359,6 +358,7 @@ const DraftScreen = observer(() => {
       }
     },
     [
+      socket,
       isFocused,
       currentPage,
       messageStore.draftMessages.length,

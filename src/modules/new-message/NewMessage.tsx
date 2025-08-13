@@ -29,7 +29,6 @@ import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
   renderUserName,
 } from '../../common/utility/notifications.utility';
 
@@ -366,10 +365,9 @@ const NewMessage = () => {
                   fallback={fallbacks}
                 />
                 <Text style={styles.textGreen}>
-                  {renderSlicedUsername(
+                  {renderUserName(
                     recivers[recivers.length - 1],
                     usersStore.users,
-                    20,
                   )}
                 </Text>
               </View>

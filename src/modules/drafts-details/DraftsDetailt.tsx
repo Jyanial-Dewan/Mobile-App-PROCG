@@ -32,7 +32,7 @@ import SVGController from '../../common/components/SVGController';
 import {useSocketContext} from '../../context/SocketContext';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
+  renderUserName,
 } from '../../common/utility/notifications.utility';
 import {MessageSnapshotType} from '~/stores/messageStore';
 
@@ -51,7 +51,7 @@ const DraftsDetails = observer(() => {
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [oldMsgState, setOldMsgState] = useState<any>({});
   const [userChanged, setuserChanged] = useState<boolean>(false);
   const route = useRoute();
@@ -280,6 +280,9 @@ const DraftsDetails = observer(() => {
           message: 'Message Save to Drafts Successfully',
           type: 'success',
         });
+        setTimeout(async () => {
+          navigation.goBack();
+        }, 500);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -329,7 +332,7 @@ const DraftsDetails = observer(() => {
               child={<Feather name="trash" size={24} color="black" />}
             />
           }
-          routeName="Message Details"
+          routeName="Notification Details"
         />
       }
       footer={
@@ -385,145 +388,148 @@ const DraftsDetails = observer(() => {
           </TouchableOpacity>
         </View>
       }>
-      <View style={{flex: 1, marginHorizontal: 20}}>
-        {/*To*/}
-        <View style={styles.lineContainerTo}>
-          <View style={styles.withinLineContainer}>
-            <Text style={{color: COLORS.darkGray}}>To</Text>
-            <TextInput
-              style={{height: 40, width: '90%', color: COLORS.black}}
-              value={query}
-              onChangeText={text => setQuery(text)}
+      {isLoading ? (
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      ) : (
+        <View style={{flex: 1, marginHorizontal: 20}}>
+          {/*To*/}
+          <View style={styles.lineContainerTo}>
+            <View style={styles.withinLineContainer}>
+              <Text style={{color: COLORS.darkGray}}>To</Text>
+              <TextInput
+                style={{height: 40, width: '90%', color: COLORS.black}}
+                value={query}
+                onChangeText={text => setQuery(text)}
+              />
+            </View>
+            {recivers.length > 1 && (
+              <Pressable
+                onPress={() => setShowModal(true)}
+                style={styles.downBtnContainer}>
+                <MaterialCommunityIcons
+                  name="dots-horizontal"
+                  size={24}
+                  color="black"
+                />
+              </Pressable>
+            )}
+            {/** Extra Recievers */}
+            <ReceiversModal
+              showModal={showModal}
+              handleX={handleX}
+              setShowModal={setShowModal}
+              recivers={recivers}
+              isHandleX={true}
             />
           </View>
-          {recivers.length > 1 && (
-            <Pressable
-              onPress={() => setShowModal(true)}
-              style={styles.downBtnContainer}>
-              <MaterialCommunityIcons
-                name="dots-horizontal"
-                size={24}
-                color="black"
-              />
-            </Pressable>
-          )}
-          {/** Extra Recievers */}
-          <ReceiversModal
-            showModal={showModal}
-            handleX={handleX}
-            setShowModal={setShowModal}
-            recivers={recivers}
-            isHandleX={true}
-          />
-        </View>
-        {query !== '' && (
-          <ScrollView style={styles.modal}>
-            <Pressable style={styles.selectPress} onPress={handleSelectAll}>
-              <Text style={[styles.item]}>All</Text>
-              {isAllClicked && (
-                <AntDesign name="check" size={20} color="#3632A6" />
-              )}
-            </Pressable>
-            {filterdUser.map(usr => (
-              <TouchableOpacity
-                onPress={() => handleReciever(usr.user_id)}
-                key={usr.user_id}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
+          {query !== '' && (
+            <ScrollView style={styles.modal}>
+              <Pressable style={styles.selectPress} onPress={handleSelectAll}>
+                <Text style={[styles.item]}>All</Text>
+                {isAllClicked && (
+                  <AntDesign name="check" size={20} color="#3632A6" />
+                )}
+              </Pressable>
+              {filterdUser.map(usr => (
+                <TouchableOpacity
+                  onPress={() => handleReciever(usr.user_id)}
+                  key={usr.user_id}>
                   <View
                     style={{
                       flexDirection: 'row',
-                      gap: 6,
+                      justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                    <Image
-                      style={styles.profileImage}
-                      source={{
-                        uri: `${url}/${usr.profile_picture.thumbnail}`,
-                        // headers: {
-                        //   Authorization: `Bearer ${userInfo?.access_token}`,
-                        // },
-                      }}
-                      fallback={fallbacks}
-                    />
-                    <Text style={[styles.item]}>{usr?.user_name}</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        gap: 6,
+                        alignItems: 'center',
+                      }}>
+                      <Image
+                        style={styles.profileImage}
+                        source={{
+                          uri: `${url}/${usr.profile_picture.thumbnail}`,
+                          // headers: {
+                          //   Authorization: `Bearer ${userInfo?.access_token}`,
+                          // },
+                        }}
+                        fallback={fallbacks}
+                      />
+                      <Text style={[styles.item]}>{usr?.user_name}</Text>
+                    </View>
+                    <View style={styles.itemListWrapper} />
+                    {recivers.includes(usr.user_id) && (
+                      <AntDesign name="check" size={20} color="#3632A6" />
+                    )}
                   </View>
-                  <View style={styles.itemListWrapper} />
-                  {recivers.includes(usr.user_id) && (
-                    <AntDesign name="check" size={20} color="#3632A6" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              ))}
 
-            {filterdUser?.length === 0 && (
-              <View style={styles.noData}>
-                <Text style={[styles.noItem]}>No Data Found</Text>
+              {filterdUser?.length === 0 && (
+                <View style={styles.noData}>
+                  <Text style={[styles.noItem]}>No Data Found</Text>
+                </View>
+              )}
+            </ScrollView>
+          )}
+          {recivers.length !== 0 ? (
+            <View style={{flexDirection: 'row'}}>
+              <View style={styles.singleRcvr}>
+                <View style={styles.withinSinglRcve}>
+                  <Image
+                    style={styles.profileImage}
+                    source={{
+                      uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
+                      // headers: {
+                      //   Authorization: `Bearer ${userInfo?.access_token}`,
+                      // },
+                    }}
+                    fallback={fallbacks}
+                  />
+                  <Text style={styles.textGreen}>
+                    {renderUserName(
+                      recivers[recivers.length - 1],
+                      usersStore.users,
+                    )}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleX(recivers[recivers.length - 1])}>
+                  <Feather name="x" size={16} color="black" />
+                </TouchableOpacity>
               </View>
-            )}
-          </ScrollView>
-        )}
-        {recivers.length !== 0 ? (
-          <View style={{flexDirection: 'row'}}>
-            <View style={styles.singleRcvr}>
-              <View style={styles.withinSinglRcve}>
-                <Image
-                  style={styles.profileImage}
-                  source={{
-                    uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
-                    // headers: {
-                    //   Authorization: `Bearer ${userInfo?.access_token}`,
-                    // },
-                  }}
-                  fallback={fallbacks}
-                />
-                <Text style={styles.textGreen}>
-                  {renderSlicedUsername(
-                    recivers[recivers.length - 1],
-                    usersStore.users,
-                    1,
-                  )}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleX(recivers[recivers.length - 1])}>
-                <Feather name="x" size={16} color="black" />
-              </TouchableOpacity>
             </View>
+          ) : (
+            <View
+              style={{
+                width: '100%',
+                height: 0.5,
+                backgroundColor: COLORS.lightGray5,
+              }}></View>
+          )}
+          {/*Subject*/}
+          <View style={styles.lineContainer}>
+            <Text style={{color: COLORS.darkGray}}>Subject</Text>
+            <TextInput
+              style={{height: 40, width: '80%', color: COLORS.black}}
+              value={subject}
+              onChangeText={text => setSubject(text)}
+            />
           </View>
-        ) : (
-          <View
-            style={{
-              width: '100%',
-              height: 0.5,
-              backgroundColor: COLORS.lightGray5,
-            }}></View>
-        )}
-        {/*Subject*/}
-        <View style={styles.lineContainer}>
-          <Text style={{color: COLORS.darkGray}}>Subject</Text>
-          <TextInput
-            style={{height: 40, width: '80%', color: COLORS.black}}
-            value={subject}
-            onChangeText={text => setSubject(text)}
-          />
+          {/*Body*/}
+          <View style={styles.lineContainerBody}>
+            <TextInput
+              style={styles.textInputBody}
+              placeholderTextColor={COLORS.darkGray}
+              placeholder="Body"
+              value={body}
+              onChangeText={text => setBody(text)}
+              multiline={true}
+            />
+          </View>
         </View>
-        {/*Body*/}
-        <View style={styles.lineContainerBody}>
-          <TextInput
-            style={styles.textInputBody}
-            placeholderTextColor={COLORS.darkGray}
-            placeholder="Body"
-            value={body}
-            onChangeText={text => setBody(text)}
-            multiline={true}
-          />
-        </View>
-      </View>
+      )}
     </ContainerNew>
   );
 });

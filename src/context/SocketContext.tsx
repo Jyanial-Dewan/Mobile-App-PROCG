@@ -12,6 +12,7 @@ import {useRootStore} from '../stores/rootStore';
 import {DeviceModel} from '../types/device/device';
 import {MsgBroker} from '../../App';
 import {useNetInfo} from '@react-native-community/netinfo';
+import {MessageSnapshotType} from '~/stores/messageStore';
 
 interface SocketContextProps {
   children: ReactNode;
@@ -59,19 +60,27 @@ export function SocketContextProvider({children}: SocketContextProps) {
     });
 
     socket?.on('receivedMessage', data => {
-      console.log('recivedMessage', data);
-      const formattedData = {...data, date: new Date(data.date)};
+      const formattedData = {
+        ...data,
+        creation_date: new Date(data.creation_date),
+      };
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
       messageStore.addTotalReceived();
     });
     socket?.on('sentMessage', data => {
-      const formattedData = {...data, date: new Date(data.date)};
+      const formattedData = {
+        ...data,
+        creation_date: new Date(data.creation_date),
+      };
       messageStore.addSentMessage(formattedData);
       messageStore.addTotalSent();
     });
     socket?.on('draftMessage', data => {
-      const formattedData = {...data, date: new Date(data.date)};
+      const formattedData = {
+        ...data,
+        creation_date: new Date(data.creation_date),
+      };
       messageStore.addDraftMessage(formattedData);
       messageStore.addTotalDraft();
     });
@@ -118,29 +127,25 @@ export function SocketContextProvider({children}: SocketContextProps) {
     });
 
     socket.on('restoreMessage', id => {
+      // messageStore.setRefreshing(true);
       const message = messageStore.binMessages.find(
         msg => msg.notification_id === id,
       );
-      const deepClone = (obj: any) => {
-        return JSON.parse(JSON.stringify(obj));
-      };
       try {
         if (!message || !userId) return;
-        const formattedData = {
+        const formattedData: MessageSnapshotType = {
           ...message,
-          creation_date: new Date(message.creation_date),
+          creation_date: new Date(message.creation_date).getTime(),
         };
-        const newMessage = deepClone(formattedData);
-
-        if (formattedData.status === 'Draft') {
-          messageStore.addDraftMessage(newMessage);
+        if (formattedData?.status.toLocaleLowerCase() === 'draft') {
+          messageStore.addDraftMessage(formattedData);
           messageStore.addTotalDraft();
         } else {
-          if (formattedData.sender === userId) {
-            messageStore.addSentMessage(newMessage);
+          if (formattedData?.sender === userId) {
+            messageStore.addSentMessage(formattedData);
             messageStore.addTotalSent();
           } else {
-            messageStore.addReceivedMessage(newMessage);
+            messageStore.addReceivedMessage(formattedData);
             messageStore.addTotalReceived();
           }
         }

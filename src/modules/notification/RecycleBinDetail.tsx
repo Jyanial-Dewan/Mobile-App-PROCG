@@ -21,7 +21,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
+  renderUserName,
 } from '../../common/utility/notifications.utility';
 import Receivers from '../../common/components/Receivers';
 
@@ -191,7 +191,7 @@ const RecycleBinDetail = observer(() => {
   //     }
   //   };
   const findOrigin = (msg: MessageSnapshotType) => {
-    if (msg?.status === 'DRAFT') {
+    if (msg?.status.toLocaleLowerCase() === 'draft') {
       return 'Draft';
     } else {
       if (msg?.sender === userInfo?.user_id) {
@@ -204,7 +204,7 @@ const RecycleBinDetail = observer(() => {
   return (
     <ContainerNew
       style={styles.container}
-      header={<MainHeader routeName="Message Details" />}
+      header={<MainHeader routeName="Notification Details" />}
       isScrollView={false}>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -258,10 +258,9 @@ const RecycleBinDetail = observer(() => {
                 <View>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={renderSlicedUsername(
+                    text={renderUserName(
                       parrentMessage?.recipients[0],
                       usersStore.users,
-                      20,
                     )}
                   />
                   <View style={{flexDirection: 'row', gap: 4}}>
@@ -274,15 +273,13 @@ const RecycleBinDetail = observer(() => {
                           ? '(no user)'
                           : 'to ' +
                             (parrentMessage?.recipients.length! > 1
-                              ? `${renderSlicedUsername(
+                              ? `${renderUserName(
                                   parrentMessage?.sender,
                                   usersStore.users,
-                                  20,
                                 )}`
-                              : renderSlicedUsername(
+                              : renderUserName(
                                   parrentMessage?.recipients[0],
                                   usersStore.users,
-                                  20,
                                 ))
                       }
                       // text={

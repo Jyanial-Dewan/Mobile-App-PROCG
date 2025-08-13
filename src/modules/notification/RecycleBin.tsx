@@ -47,7 +47,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import {MessageSnapshotType} from '~/stores/messageStore';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
+  renderUserName,
 } from '../../common/utility/notifications.utility';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
@@ -152,7 +152,7 @@ const RenderMessageItem = observer(
       : COLORS.primaryRed;
 
     const findOrigin = (msg: MessageSnapshotType) => {
-      if (msg?.status === 'DRAFT') {
+      if (msg?.status.toLocaleLowerCase() === 'draft') {
         return 'Draft';
       } else {
         if (msg?.sender === userInfo.user_id) {
@@ -269,16 +269,11 @@ const RenderMessageItem = observer(
                         item?.recipients?.length === 0
                           ? '(No User)'
                           : findOrigin(item) === 'Inbox'
-                            ? renderSlicedUsername(
+                            ? renderUserName(
                                 item.recipients[0],
                                 usersStore.users,
-                                20,
                               )
-                            : renderSlicedUsername(
-                                item.sender,
-                                usersStore.users,
-                                20,
-                              )
+                            : renderUserName(item.sender, usersStore.users)
                         // item?.recivers?.length === 0
                         //   ? '(No User)'
                         //   : findOrigin(item) === 'Inbox'
@@ -364,7 +359,7 @@ const RecycleBin = observer(() => {
         setHasMore(res.length);
         const formattedRes = res.map((msg: MessageSnapshotType) => ({
           ...msg,
-          creation_date: new Date(msg.creation_date) ,
+          creation_date: new Date(msg.creation_date),
         }));
         messageStore.saveBinMessages(formattedRes);
         messageStore.setRefreshing(false);

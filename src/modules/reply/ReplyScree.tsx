@@ -28,7 +28,7 @@ import Image from 'react-native-image-fallback';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
+  renderUserName,
 } from '../../common/utility/notifications.utility';
 
 interface User {
@@ -70,13 +70,16 @@ const ReplyScreen = () => {
         // isConsole: true,
         // isConsoleParams: true,
       };
-      const res = await httpRequest(api_params, setIsLoading);
+      const res: MessageSnapshotType = await httpRequest(
+        api_params,
+        setIsLoading,
+      );
       if (res) {
         setParrentMessage(res);
         setSubject(`Re: ${res.subject}`);
-        const totalInvolved = [...res.recivers, res.sender];
+        const totalInvolved = [...res.recipients, res.sender];
         const newRecivers = totalInvolved.filter(
-          usr => usr.name !== userInfo?.user_name,
+          usr => usr !== userInfo?.user_id,
         );
         setRecivers(newRecivers);
       }
@@ -289,10 +292,9 @@ const ReplyScreen = () => {
                       fallback={fallbacks}
                     />
                     <Text style={styles.textGreen}>
-                      {renderSlicedUsername(
+                      {renderUserName(
                         recivers[recivers.length - 1],
                         usersStore.users,
-                        1,
                       )}
                     </Text>
                   </View>
@@ -384,11 +386,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: '#3886e6',
     padding: 8,
     borderRadius: 99,
     // iOS Shadow
-    shadowColor: '#000',
+    shadowColor: '#3886e6',
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -400,11 +402,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 70,
     bottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: '#3886e6',
     padding: 8,
     borderRadius: 99,
     // iOS Shadow
-    shadowColor: '#000',
+    shadowColor: '#3886e6',
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -507,5 +509,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.white,
   },
-  loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}]},
+  loadingStyle: {
+    transform: [{scaleX: 0.8}, {scaleY: 0.8}],
+  },
 });
