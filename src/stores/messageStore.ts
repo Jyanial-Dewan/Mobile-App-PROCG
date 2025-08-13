@@ -89,7 +89,15 @@ export const MessageStore = types
       self.receivedMessages.replace([...existMsgs, ...validMsgs]);
     },
     addReceivedMessage(msg: MessageSnapshotType) {
-      self.receivedMessages.unshift(msg);
+      const clonedMessage = {
+        ...msg,
+        recipients: [...msg.recipients],
+        involved_users: [...msg.involved_users],
+        readers: [...msg.readers],
+        holders: [...msg.holders],
+        recycle_bin: [...msg.recycle_bin],
+      };
+      self.receivedMessages.unshift(clonedMessage);
     },
     removeReceivedMessage(notificationId: string) {
       const messageToRemove = self.receivedMessages.find(
@@ -128,7 +136,15 @@ export const MessageStore = types
       self.sentMessages.replace([...existMsgs, ...validMsgs]);
     },
     addSentMessage(msg: MessageSnapshotType) {
-      self.sentMessages.unshift(msg);
+      const clonedMessage = {
+        ...msg,
+        recipients: [...msg.recipients],
+        involved_users: [...msg.involved_users],
+        readers: [...msg.readers],
+        holders: [...msg.holders],
+        recycle_bin: [...msg.recycle_bin],
+      };
+      self.sentMessages.unshift(clonedMessage);
     },
     removeSentMessage(notificationId: string) {
       const messageToRemove = self.sentMessages.find(
@@ -190,7 +206,15 @@ export const MessageStore = types
         });
       } else {
         // Add new message at the start as a model instance
-        self.draftMessages.unshift(msg);
+        const clonedMessage = {
+          ...msg,
+          recipients: [...msg.recipients],
+          involved_users: [...msg.involved_users],
+          readers: [...msg.readers],
+          holders: [...msg.holders],
+          recycle_bin: [...msg.recycle_bin],
+        };
+        self.draftMessages.unshift(clonedMessage);
       }
     },
     sendDraftMessage(notificationId: string) {

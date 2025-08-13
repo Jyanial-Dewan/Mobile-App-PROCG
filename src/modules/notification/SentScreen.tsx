@@ -46,7 +46,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 import {
   renderProfilePicture,
-  renderSlicedUsername,
+  renderUserName,
 } from '../../common/utility/notifications.utility';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import {MessageSnapshotType} from '../../stores/messageStore';
@@ -249,11 +249,7 @@ const RenderMessageItem = ({
                   }}>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={renderSlicedUsername(
-                      item.recipients[0],
-                      usersStore.users,
-                      20,
-                    )}
+                    text={renderUserName(item.recipients[0], usersStore.users)}
                     // text={
                     //   item.recivers.length > 1
                     //     ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
