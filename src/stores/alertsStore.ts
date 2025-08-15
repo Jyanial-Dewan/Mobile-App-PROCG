@@ -1,11 +1,4 @@
-import {
-  clone,
-  getSnapshot,
-  Instance,
-  SnapshotOut,
-  types,
-} from 'mobx-state-tree';
-
+import {types, Instance, SnapshotOut, detach, clone} from 'mobx-state-tree';
 export const AlertModel = types.model('alertModel', {
   user_id: types.number,
   user_name: types.string,
@@ -20,12 +13,11 @@ export const AlertModel = types.model('alertModel', {
   last_updated_by: types.number,
   last_update_date: types.Date,
 });
-
 export const AlertsStore = types
   .model('alertsStore', {
     alerts: types.optional(types.array(AlertModel), []),
     notificationAlerts: types.optional(types.array(AlertModel), []),
-    notificationAlertsCount: types.number,
+    notificationAlertsCount: types.optional(types.number, 0),
     refreshing: types.optional(types.boolean, false),
   })
   .actions(self => ({
@@ -33,58 +25,62 @@ export const AlertsStore = types
       self.refreshing = value;
     },
 
-    saveAlerts(alerts: Array<AlertStoreSnapshotType>) {
-      const alertsData = alerts.map(alert =>
-        AlertModel.create({
-          ...alert,
-          creation_date: new Date(alert.creation_date).getTime(),
-          last_update_date: new Date(alert.last_update_date).getTime(),
-        }),
-      );
-      const incomingAlerts = new Set(alertsData.map(alert => alert.alert_id));
-      const existingAlerts = self.alerts.filter(
-        alert => !incomingAlerts.has(alert.alert_id),
-      );
-      self.alerts.replace([...existingAlerts, ...alertsData]);
+    saveAlerts(alerts: AlertStoreSnapshotType[]) {
+      self.alerts.forEach(detach);
+
+      const formattedAlerts = alerts.map(alert => ({
+        ...alert,
+        creation_date: new Date(alert.creation_date),
+        last_update_date: new Date(alert.last_update_date),
+      }));
+
+      const newAlerts = formattedAlerts.map(data => AlertModel.create(data));
+
+      self.alerts.replace(newAlerts);
     },
 
-    saveNotificationAlerts(alerts: Array<AlertStoreSnapshotType>) {
-      const alertsData = alerts.map(alert =>
-        AlertModel.create({
-          ...alert,
-          creation_date: new Date(alert.creation_date).getTime(),
-          last_update_date: new Date(alert.last_update_date).getTime(),
-        }),
-      );
-      self.notificationAlerts.replace(alertsData);
-      self.notificationAlertsCount = alertsData.length;
+    saveNotificationAlerts(alerts: AlertStoreSnapshotType[]) {
+      self.notificationAlerts.forEach(detach);
+
+      const formattedAlerts = alerts.map(alert => ({
+        ...alert,
+        creation_date: new Date(alert.creation_date),
+        last_update_date: new Date(alert.last_update_date),
+      }));
+
+      const newAlerts = formattedAlerts.map(data => AlertModel.create(data));
+
+      self.notificationAlerts.replace(newAlerts);
+      self.notificationAlertsCount = newAlerts.length;
     },
 
     addAlert(alert: AlertStoreSnapshotType) {
-      const formatedAlert = AlertModel.create({
+      const newAlert = AlertModel.create({
         ...alert,
-        creation_date: new Date(alert.creation_date).getTime(),
-        last_update_date: new Date(alert.last_update_date).getTime(),
+        creation_date: new Date(alert.creation_date),
+        last_update_date: new Date(alert.last_update_date),
       });
-      self.alerts.unshift(formatedAlert);
-      self.notificationAlerts.unshift(clone(formatedAlert));
+
+      self.alerts.unshift(newAlert);
+      self.notificationAlerts.unshift(clone(newAlert));
       self.notificationAlertsCount++;
     },
 
     readAlert(alert_id: number) {
-      const alert = self.alerts.find(alert => alert.alert_id === alert_id);
+      const alert = self.alerts.find(a => a.alert_id === alert_id);
       if (alert) {
-        self.alerts[self.alerts.indexOf(alert)].acknowledge = true;
+        alert.acknowledge = true;
       }
-      const alertNotification = self.notificationAlerts.find(
-        alert => alert.alert_id === alert_id,
+
+      const notificationAlert = self.notificationAlerts.find(
+        a => a.alert_id === alert_id,
       );
-      if (alertNotification) {
-        self.notificationAlerts.remove(alertNotification);
+      if (notificationAlert) {
+        self.notificationAlerts.remove(notificationAlert);
         self.notificationAlertsCount--;
       }
     },
   }));
 
-export type AlertsStoreType = Instance<typeof AlertModel>;
+export type AlertsStoreType = Instance<typeof AlertsStore>;
 export type AlertStoreSnapshotType = SnapshotOut<typeof AlertModel>;

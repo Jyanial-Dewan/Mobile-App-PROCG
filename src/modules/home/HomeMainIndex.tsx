@@ -287,7 +287,9 @@ const HomeMainIndex = () => {
                 backgroundColor: COLORS.iconBGREDColor,
                 color: COLORS.white,
               }}>
-              {alertsStore.notificationAlertsCount}
+              {alertsStore.notificationAlertsCount > 9
+                ? '9+'
+                : alertsStore.notificationAlertsCount}
             </Badge>
             {/* )} */}
           </View>

@@ -140,7 +140,9 @@ const BottomTab = observer(() => {
                     backgroundColor: COLORS.grayBgColor,
                     color: COLORS.black,
                   }}>
-                  {messageStore.notificationMessages?.length}
+                  {messageStore.notificationMessages.length > 9
+                    ? '9+'
+                    : messageStore.notificationMessages?.length}
                 </Badge>
               )}
             </View>
