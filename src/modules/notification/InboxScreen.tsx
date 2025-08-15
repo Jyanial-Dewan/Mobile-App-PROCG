@@ -387,7 +387,10 @@ const InboxScreen = observer(() => {
         const response = await httpRequest(readerParams, setIsLoading);
         if (response) {
           if (notificationIds.includes(parentId)) {
-            socket?.emit('read', {id: parentId, user: userInfo?.user_id});
+            socket?.emit('read', {
+              parentID: parentId,
+              sender: userInfo?.user_id,
+            });
           }
           navigation.navigate('NotificationDetails', {
             _id: parentId,
@@ -438,7 +441,10 @@ const InboxScreen = observer(() => {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_id});
+        socket?.emit('deleteMessage', {
+          notificationId: msgId,
+          sender: userInfo?.user_id,
+        });
         toaster.show({
           message: response.message,
           type: 'success',

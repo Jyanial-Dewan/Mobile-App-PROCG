@@ -324,7 +324,7 @@ const Main = observer(() => {
       if (res) {
         const formattedRes = res.map((msg: any) => ({
           ...msg,
-          date: new Date(msg.date),
+          creation_date: new Date(msg.creation_date),
         }));
         messageStore.saveBinMessages(formattedRes);
       }

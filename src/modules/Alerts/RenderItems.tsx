@@ -11,7 +11,7 @@ import {AlertStoreSnapshotType} from '../../stores/alertsStore';
 import {useRootStore} from '../../stores/rootStore';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
-import {observer} from 'mobx-react-lite';
+import {useSocketContext} from '../../context/SocketContext';
 interface Props {
   item: AlertStoreSnapshotType;
   refSheet: any;
@@ -20,6 +20,7 @@ interface Props {
 
 const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
   const {userInfo, alertsStore} = useRootStore();
+  const {socket} = useSocketContext();
   const [isLoading, setIsLoading] = useState(false);
   const notificationIds = alertsStore.notificationAlerts.map(
     item => item.alert_id,
@@ -30,6 +31,11 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
     if (item.acknowledge === false) {
       alertRead();
       alertsStore.readAlert(item.alert_id);
+      socket.emit('SendAlert', {
+        alertId: item.alert_id,
+        recipients: [userInfo?.user_id],
+        isAcknowledge: true,
+      });
     }
   };
   const alertRead = async () => {

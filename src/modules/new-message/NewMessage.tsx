@@ -140,7 +140,10 @@ const NewMessage = () => {
       const response = await httpRequest(sendParams, setIsSending);
       await httpRequest(sendNotificationParams, setIsSending);
       if (response) {
-        socket?.emit('sendMessage', sendPayload);
+        socket?.emit('sendMessage', {
+          notificationId: sendPayload.notification_id,
+          sender: sendPayload.sender,
+        });
         toaster.show({message: response.message, type: 'success'});
       }
       setTimeout(async () => {
@@ -186,7 +189,10 @@ const NewMessage = () => {
     try {
       const response = await httpRequest(draftParams, setIsDrafting);
       if (response) {
-        socket?.emit('sendDraft', draftPayload);
+        socket?.emit('sendDraft', {
+          notificationId: draftPayload.notification_id,
+          sender: draftPayload.sender,
+        });
         toaster.show({
           message: response.message,
           type: 'success',

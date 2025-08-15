@@ -32,6 +32,7 @@ import {httpRequest} from '../../common/constant/httpRequest';
 import {AlertStoreSnapshotType} from '../../stores/alertsStore';
 import RenderItems from './RenderItems';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
+import {getSnapshot} from 'mobx-state-tree';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -80,7 +81,13 @@ const Alerts = () => {
         alertsStore.setRefreshing(false);
       }
     },
-    [isFocused, currentPage, alertsStore.refreshing, alertsStore.alerts.length],
+    [
+      isFocused,
+      currentPage,
+      alertsStore.refreshing,
+      alertsStore.alerts.length,
+      alertsStore.notificationAlerts.length,
+    ],
   );
   useEffect(() => {
     const searchActionItems = () => {
@@ -97,7 +104,7 @@ const Alerts = () => {
     if (search.length) {
       searchActionItems();
     } else {
-      setData(alertsStore.alerts);
+      setData(alertsStore.alerts.map(alert => getSnapshot(alert)));
     }
   }, [search]);
   const handleRefresh = () => {
@@ -115,7 +122,7 @@ const Alerts = () => {
       header={<MainHeader routeName="Alerts" style={{fontWeight: '700'}} />}>
       <SearchBar placeholder="Search" value={search} onChangeText={setSearch} />
       <CustomFlatListThree
-        data={data}
+        data={alertsStore.alerts}
         keyExtractor={(item: AlertStoreSnapshotType) => item.alert_id}
         RenderItems={({item}: any) => (
           <RenderItems

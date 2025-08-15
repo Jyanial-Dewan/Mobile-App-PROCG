@@ -24,8 +24,14 @@ export const ActionItemsStore = types
     },
 
     saveActionItems(items: ActionItemsStoreSnapshotType[]) {
-      const alertsData = items.map(item => ActionItemsModel.create(item));
-      self.actionItems.replace(alertsData);
+      const actionItemsData = items.map(item => ActionItemsModel.create(item));
+      const incomingAlerts = new Set(
+        actionItemsData.map(alert => alert.action_item_id),
+      );
+      const existingAlerts = self.actionItems.filter(
+        alert => !incomingAlerts.has(alert.action_item_id),
+      );
+      self.actionItems.replace([...existingAlerts, ...actionItemsData]);
     },
   }));
 
