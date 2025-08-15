@@ -45,9 +45,8 @@ const BottomTab = observer(() => {
         alertsStore.setRefreshing(false);
       }
     },
-    [isFocused, alertsStore.refreshing],
+    [isFocused, alertsStore.refreshing, alertsStore.notificationAlerts.length],
   );
-
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {

@@ -27,7 +27,13 @@ export const AlertsStore = types
       self.refreshing = value;
     },
     saveAlerts(alerts: Array<AlertStoreSnapshotType>) {
-      const alertsData = alerts.map(alert => AlertModel.create(alert));
+      const alertsData = alerts.map(alert =>
+        AlertModel.create({
+          ...alert,
+          creation_date: alert.creation_date,
+          last_update_date: alert.last_update_date,
+        }),
+      );
       self.alerts.replace(alertsData);
     },
     saveNotificationAlerts(alerts: Array<AlertStoreSnapshotType>) {
@@ -36,8 +42,9 @@ export const AlertsStore = types
       self.notificationAlertsCount = alertsData.length;
     },
     addAlert(alert: AlertStoreSnapshotType) {
-      const alertData = AlertModel.create(alert);
-      self.alerts.unshift(alertData);
+      self.alerts.unshift(alert);
+      self.notificationAlerts.unshift(alert);
+      self.notificationAlertsCount++;
     },
     readAlert(alert_id: number) {
       const notificationAlertItem = self.notificationAlerts.find(

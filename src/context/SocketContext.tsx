@@ -12,7 +12,7 @@ import {useRootStore} from '../stores/rootStore';
 import {DeviceModel} from '../types/device/device';
 import {MsgBroker} from '../../App';
 import {useNetInfo} from '@react-native-community/netinfo';
-import {MessageSnapshotType} from '~/stores/messageStore';
+import {MessageSnapshotType} from '../stores/messageStore';
 
 interface SocketContextProps {
   children: ReactNode;
@@ -31,7 +31,8 @@ export function useSocketContext() {
 }
 
 export function SocketContextProvider({children}: SocketContextProps) {
-  const {userInfo, deviceInfoData, messageStore, devicesStore} = useRootStore();
+  const {userInfo, deviceInfoData, messageStore, devicesStore, alertsStore} =
+    useRootStore();
   const [userId, setUserId] = useState<number | null>(null);
   const hasInternet = useNetInfo().isConnected;
 
@@ -156,6 +157,10 @@ export function SocketContextProvider({children}: SocketContextProps) {
       }
     });
 
+    socket.on('SentAlert', data => {
+      alertsStore.addAlert(data);
+    });
+
     return () => {
       socket?.off('receivedMessage');
       socket?.off('draftMessage');
@@ -165,6 +170,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('draftMessageId');
       socket?.off('addDevice');
       socket?.off('restoreMessage');
+      socket?.off('SentAlert');
     };
   }, [socket, userId]);
 
