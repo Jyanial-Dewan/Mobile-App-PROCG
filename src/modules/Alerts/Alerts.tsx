@@ -97,7 +97,7 @@ const Alerts = () => {
     if (search.length) {
       searchActionItems();
     } else {
-      setData(alertsStore.alerts);
+      // setData(alertsStore.alerts);
     }
   }, [search]);
   const handleRefresh = () => {
@@ -115,7 +115,7 @@ const Alerts = () => {
       header={<MainHeader routeName="Alerts" style={{fontWeight: '700'}} />}>
       <SearchBar placeholder="Search" value={search} onChangeText={setSearch} />
       <CustomFlatListThree
-        data={data}
+        data={alertsStore.alerts}
         keyExtractor={(item: AlertStoreSnapshotType) => item.alert_id}
         RenderItems={({item}: any) => (
           <RenderItems

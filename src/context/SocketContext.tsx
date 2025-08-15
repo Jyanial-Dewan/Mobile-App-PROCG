@@ -157,8 +157,8 @@ export function SocketContextProvider({children}: SocketContextProps) {
       }
     });
 
-    socket.on('SentAlert', data => {
-      alertsStore.addAlert(data);
+    socket.on('SentAlert', ({alert, isAcknowledge}) => {
+      alertsStore.addAlert(alert);
     });
 
     return () => {
