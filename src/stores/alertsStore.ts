@@ -1,4 +1,10 @@
-import {getSnapshot, Instance, SnapshotOut, types} from 'mobx-state-tree';
+import {
+  clone,
+  getSnapshot,
+  Instance,
+  SnapshotOut,
+  types,
+} from 'mobx-state-tree';
 
 export const AlertModel = types.model('alertModel', {
   user_id: types.number,
@@ -26,6 +32,7 @@ export const AlertsStore = types
     setRefreshing(value: boolean) {
       self.refreshing = value;
     },
+
     saveAlerts(alerts: Array<AlertStoreSnapshotType>) {
       const alertsData = alerts.map(alert =>
         AlertModel.create({
@@ -34,8 +41,13 @@ export const AlertsStore = types
           last_update_date: new Date(alert.last_update_date).getTime(),
         }),
       );
-      self.alerts.replace(alertsData);
+      const incomingAlerts = new Set(alertsData.map(alert => alert.alert_id));
+      const existingAlerts = self.alerts.filter(
+        alert => !incomingAlerts.has(alert.alert_id),
+      );
+      self.alerts.replace([...existingAlerts, ...alertsData]);
     },
+
     saveNotificationAlerts(alerts: Array<AlertStoreSnapshotType>) {
       const alertsData = alerts.map(alert =>
         AlertModel.create({
@@ -47,23 +59,28 @@ export const AlertsStore = types
       self.notificationAlerts.replace(alertsData);
       self.notificationAlertsCount = alertsData.length;
     },
+
     addAlert(alert: AlertStoreSnapshotType) {
-      const formatedAlert = {
+      const formatedAlert = AlertModel.create({
         ...alert,
         creation_date: new Date(alert.creation_date).getTime(),
         last_update_date: new Date(alert.last_update_date).getTime(),
-      };
+      });
       self.alerts.unshift(formatedAlert);
-      self.notificationAlerts.unshift(formatedAlert);
+      self.notificationAlerts.unshift(clone(formatedAlert));
       self.notificationAlertsCount++;
     },
+
     readAlert(alert_id: number) {
-      const alert = self.notificationAlerts.find(
+      const alert = self.alerts.find(alert => alert.alert_id === alert_id);
+      if (alert) {
+        self.alerts[self.alerts.indexOf(alert)].acknowledge = true;
+      }
+      const alertNotification = self.notificationAlerts.find(
         alert => alert.alert_id === alert_id,
       );
-      if (alert) {
-        getSnapshot(alert);
-        self.notificationAlerts.remove(alert);
+      if (alertNotification) {
+        self.notificationAlerts.remove(alertNotification);
         self.notificationAlertsCount--;
       }
     },

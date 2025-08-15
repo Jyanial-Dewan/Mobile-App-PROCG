@@ -93,8 +93,8 @@ const RecycleBinDetail = observer(() => {
         const response = await httpRequest(putParams, setIsLoading);
         if (response) {
           socket?.emit('deleteMessage', {
-            id: msg.id,
-            user: userInfo?.user_id,
+            notificationId: msg.id,
+            sender: userInfo?.user_id,
           });
           toaster.show({
             message: 'Message has been deleted.',
@@ -109,8 +109,8 @@ const RecycleBinDetail = observer(() => {
           const response = await httpRequest(putParams, setIsLoading);
           if (response) {
             socket?.emit('deleteMessage', {
-              id: msg.id,
-              user: userInfo?.user_id,
+              notificationId: msg.id,
+              sender: userInfo?.user_id,
             });
             toaster.show({
               message: 'Message has been deleted.',
@@ -124,8 +124,8 @@ const RecycleBinDetail = observer(() => {
           const response = await httpRequest(deleteParams, setIsLoading);
           if (response) {
             socket?.emit('deleteMessage', {
-              id: msg.id,
-              user: userInfo?.user_id,
+              notificationId: msg.id,
+              sender: userInfo?.user_id,
             });
             toaster.show({
               message: 'Message has been deleted.',

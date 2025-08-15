@@ -412,7 +412,10 @@ const DraftScreen = observer(() => {
     try {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
-      socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_id});
+      socket?.emit('deleteMessage', {
+        notificationId: msgId,
+        sender: userInfo?.user_id,
+      });
       if (response) {
         toaster.show({
           message: response.message,

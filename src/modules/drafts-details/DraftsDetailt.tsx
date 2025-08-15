@@ -227,8 +227,14 @@ const DraftsDetails = observer(() => {
       const newMsg = await httpRequest(sendParams, setIsSending);
       await httpRequest(sendNotificationParams, setIsSending);
       if (deleteMsg && newMsg) {
-        socket?.emit('sendMessage', sendPayload);
-        socket?.emit('draftMsgId', {id: _id, user: userInfo?.user_id});
+        socket?.emit('sendMessage', {
+          notificationId: sendPayload.notification_id,
+          sender: sendPayload.sender,
+        });
+        socket?.emit('draftMsgId', {
+          notificationId: _id,
+          sender: userInfo?.user_id,
+        });
         console.log(_id, 'Id in draft details screen');
         toaster.show({message: newMsg.message, type: 'success'});
         setTimeout(async () => {
@@ -275,7 +281,10 @@ const DraftsDetails = observer(() => {
     try {
       const response = await httpRequest(draftParams, setIsDrafting);
       if (response) {
-        socket?.emit('sendDraft', draftPayload);
+        socket?.emit('sendDraft', {
+          notificationId: draftPayload.notification_id,
+          sender: draftPayload.sender,
+        });
         toaster.show({
           message: 'Message Save to Drafts Successfully',
           type: 'success',
@@ -303,7 +312,10 @@ const DraftsDetails = observer(() => {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        socket?.emit('deleteMessage', {id: msgId, user: userInfo?.user_id});
+        socket?.emit('deleteMessage', {
+          notificationId: msgId,
+          sender: userInfo?.user_id,
+        });
         toaster.show({
           message: response.message,
           type: 'success',
