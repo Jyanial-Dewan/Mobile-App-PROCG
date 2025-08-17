@@ -17,12 +17,15 @@ import {MessageSnapshotType} from '../stores/messageStore';
 interface SocketContextProps {
   children: ReactNode;
 }
-
+interface InActiveDevicesProps {
+  inactiveDevices: DeviceModel[];
+  userId: number;
+}
 interface SocketContext {
   socket: Socket;
   setUserId: (userId: number | null) => void;
   addDevice: (device: DeviceModel) => void;
-  inactiveDevice: (deviceInfoData: {data: DeviceModel[]; user: string}) => void;
+  inactiveDevice: (deviceInfoData: InActiveDevicesProps) => void;
 }
 const SocketContext = createContext({} as SocketContext);
 
@@ -123,8 +126,8 @@ export function SocketContextProvider({children}: SocketContextProps) {
     });
 
     // Device Action
-    socket?.on('addDevice', data => {
-      devicesStore.addDevice(data);
+    socket?.on('addDevice', device => {
+      devicesStore.addDevice(device);
     });
 
     socket.on('restoreMessage', id => {
@@ -179,13 +182,10 @@ export function SocketContextProvider({children}: SocketContextProps) {
   }, [socket, userId]);
 
   const addDevice = (device: DeviceModel) => {
-    socket?.emit('addDevice', device);
+    socket?.emit('addDevice', {deviceId: device.id, userId});
   };
-  const inactiveDevice = (deviceInfoData: {
-    data: DeviceModel[];
-    user: string;
-  }) => {
-    socket?.emit('inactiveDevice', deviceInfoData);
+  const inactiveDevice = ({inactiveDevices, userId}: InActiveDevicesProps) => {
+    socket?.emit('inactiveDevice', {inactiveDevices, userId});
   };
   return (
     <SocketContext.Provider
