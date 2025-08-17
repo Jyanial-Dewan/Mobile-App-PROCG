@@ -1,5 +1,5 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import Row from '../../common/components/Row';
 import SVGController from '../../common/components/SVGController';
 import {COLORS} from '../../common/constant/Themes';
@@ -8,22 +8,52 @@ import CustomTextNew from '../../common/components/CustomText';
 import CustomButtonNew from '../../common/components/CustomButton';
 import {convertDate} from '../../common/services/DateConverter';
 import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
+import {api} from '../../common/api/api';
+import {ProcgURL2} from '../../../App';
+import {useRootStore} from '../../stores/rootStore';
+import {httpRequest} from '../../common/constant/httpRequest';
+import StatusUpdateButton from '../../common/components/StatusUpdateButton';
 interface Props {
   item: ActionItemsStoreSnapshotType;
   refSheet: any;
   setSelectedItem: (item: ActionItemsStoreSnapshotType) => void;
+  setIsLoading: (isLoading: boolean) => void;
 }
-const RenderItems = ({item, refSheet, setSelectedItem}: any) => {
+const RenderItems = ({
+  item,
+  refSheet,
+  setSelectedItem,
+  setIsLoading,
+}: Props) => {
+  const url = ProcgURL2;
+  const {userInfo, actionItems} = useRootStore();
+
+  const handleStatusUpdate = async (action_item_id: number, status: string) => {
+    const api_params = {
+      url: `${api.UpdateActionItem}/${userInfo?.user_id}/${action_item_id}`,
+      baseURL: url,
+      method: 'put',
+      data: {status},
+      access_token: userInfo?.access_token,
+      // isConsole: true,
+      // isConsoleParams: true,
+    };
+    await httpRequest(api_params, setIsLoading);
+    actionItems.updateActionItem(action_item_id, status);
+  };
+
   const onOpenSheet = (item: ActionItemsStoreSnapshotType) => {
     refSheet.current?.open();
     setSelectedItem(item);
   };
+
   const bgColor =
     item.status.toLowerCase() === 'completed'
       ? '#dcfce7'
       : item.status.toLowerCase() === 'in progress'
         ? '#fef9c3'
         : '#ffedd5';
+
   return (
     <View style={styles.itemContainer}>
       <Row justify="space-between" align="center">
@@ -76,7 +106,7 @@ const RenderItems = ({item, refSheet, setSelectedItem}: any) => {
                 </View>
               </View>
               <CustomTextNew
-                text={convertDate(item.last_update_date)}
+                text={convertDate(item.last_update_date as any)}
                 style={{color: COLORS.textNewBold}}
               />
             </Row>
@@ -89,16 +119,17 @@ const RenderItems = ({item, refSheet, setSelectedItem}: any) => {
           txtColor={COLORS.blackish}
           txtSize={14}
         />
-        <TouchableOpacity
-          onPress={() => {
-            onOpenSheet(item);
-            // setViewDetailsModalVisible({id: item.id, visible: true});
-          }}>
-          <CustomTextNew
-            text="View Details"
-            style={{fontWeight: 'bold', color: COLORS.primary}}
-          />
-        </TouchableOpacity>
+        {item.description.length > 180 && (
+          <TouchableOpacity
+            onPress={() => {
+              onOpenSheet(item);
+            }}>
+            <CustomTextNew
+              text="View Details"
+              style={{fontWeight: 'bold', color: COLORS.primary}}
+            />
+          </TouchableOpacity>
+        )}
       </Column>
       {/* View Details Modal */}
       {/* <ViewDetailsModal
@@ -119,11 +150,11 @@ const RenderItems = ({item, refSheet, setSelectedItem}: any) => {
           // onBtnPress={handleOpenSheet}
           btnstyle={styles.btn}
         />
-        <CustomButtonNew
+        <StatusUpdateButton
           disabled={false}
-          btnText={'Item 2'}
-          // isLoading={false}
-          // onBtnPress={handleOpenSheet}
+          actionItem={item}
+          btnText={'Update Status'}
+          handleStatusUpdate={handleStatusUpdate}
           btnstyle={styles.btn}
         />
       </Row>

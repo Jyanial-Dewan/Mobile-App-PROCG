@@ -1,4 +1,4 @@
-import {Instance, SnapshotOut, types} from 'mobx-state-tree';
+import {detach, Instance, SnapshotOut, types} from 'mobx-state-tree';
 
 export const ActionItemsModel = types.model('ActionItemsModel', {
   action_item_id: types.number,
@@ -9,9 +9,9 @@ export const ActionItemsModel = types.model('ActionItemsModel', {
   status: types.string,
   notification_id: types.string,
   created_by: types.number,
-  creation_date: types.string,
+  creation_date: types.Date,
   last_updated_by: types.number,
-  last_update_date: types.string,
+  last_update_date: types.Date,
 });
 export const ActionItemsStore = types
   .model('ActionItemsStore', {
@@ -24,14 +24,27 @@ export const ActionItemsStore = types
     },
 
     saveActionItems(items: ActionItemsStoreSnapshotType[]) {
-      const actionItemsData = items.map(item => ActionItemsModel.create(item));
-      const incomingAlerts = new Set(
-        actionItemsData.map(alert => alert.action_item_id),
+      self.actionItems.forEach(detach);
+
+      const formattedActionItems = items.map(actionItem => ({
+        ...actionItem,
+        creation_date: new Date(actionItem.creation_date),
+        last_update_date: new Date(actionItem.last_update_date),
+      }));
+
+      const newAlerts = formattedActionItems.map(data =>
+        ActionItemsModel.create(data),
       );
-      const existingAlerts = self.actionItems.filter(
-        alert => !incomingAlerts.has(alert.action_item_id),
-      );
-      self.actionItems.replace([...existingAlerts, ...actionItemsData]);
+
+      self.actionItems.replace(newAlerts);
+    },
+    updateActionItem(actionItemId: number, status: string) {
+      this.setRefreshing(true);
+      self.actionItems.forEach(item => {
+        if (item.action_item_id === actionItemId) {
+          item.status = status;
+        }
+      });
     },
   }));
 
