@@ -30,7 +30,7 @@ const RenderItems = ({
 
   const handleStatusUpdate = async (action_item_id: number, status: string) => {
     const api_params = {
-      url: `${api.UpdateActionItem}/${userInfo?.user_id}/${action_item_id}`,
+      url: `${api.UpdateActionItemAssignment}/${userInfo?.user_id}/${action_item_id}`,
       baseURL: url,
       method: 'put',
       data: {status},

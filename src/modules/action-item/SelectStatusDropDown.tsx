@@ -33,7 +33,7 @@ const SelectStatusDropDown = ({
     <SelectDropdown
       data={data}
       onSelect={(selectedItem, index) => {
-        handleSelectedStatus(selectedItem.title);
+        handleSelectedStatus(selectedItem.value);
       }}
       defaultValue={{title: defaultValue}}
       renderButton={(selectedItem, isOpened) => {

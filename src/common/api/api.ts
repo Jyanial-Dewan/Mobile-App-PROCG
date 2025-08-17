@@ -34,8 +34,10 @@ export const api = {
   // addDevice: '/devices/add-device',
   inactiveDevice: '/devices/inactive-device/${token.user_id}/${data.id}',
   GetAlerts: '/alerts/view',
+  CreateAlert: '/alerts',
   GetNotificationAlerts: '/alerts/view/total',
   UpdateAlert: '/recepients',
   GetActionItems: '/def_action_items_view',
-  UpdateActionItem: '/def_action_item_assignments',
+  UpdateActionItemAssignment: '/def_action_item_assignments',
+  ActionItem: '/def_action_items',
 };
