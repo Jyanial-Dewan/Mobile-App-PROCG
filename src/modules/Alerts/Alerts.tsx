@@ -132,6 +132,19 @@ const Alerts = () => {
             setSelectedItem={setSelectedItem}
           />
         )}
+        emptyItem={() => {
+          if (!isLoading && alertsStore.alerts.length === 0) {
+            return (
+              <CustomTextNew
+                style={{
+                  textAlign: 'center',
+                  marginTop: height / 3,
+                }}
+                text="No data found"
+              />
+            );
+          }
+        }}
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
