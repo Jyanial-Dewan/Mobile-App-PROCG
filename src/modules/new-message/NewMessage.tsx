@@ -32,9 +32,6 @@ import {
   renderUserName,
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../action-item/SelectStatusDropDown';
-import CustomTextNew from '../../common/components/CustomText';
-import CustomInputNew from '../../common/components/CustomInput';
-import {useForm} from 'react-hook-form';
 
 interface User {
   name: string;
@@ -43,8 +40,7 @@ interface User {
 
 const NewMessage = () => {
   const {name} = useRoute();
-  const {usersStore, userInfo, selectedUrl, alertsStore, actionItems} =
-    useRootStore();
+  const {usersStore, userInfo, selectedUrl} = useRootStore();
   const {socket} = useSocketContext();
   const [showModal, setShowModal] = useState(false);
   const [recivers, setRecivers] = useState<number[]>([]);
@@ -71,7 +67,7 @@ const NewMessage = () => {
   );
 
   const urlNode = selectedUrl || ProcgURL;
-  const urlPython = selectedUrl || ProcgURL2;
+  const urlPython = ProcgURL2;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
 
   const handleReciever = (reciever: number) => {

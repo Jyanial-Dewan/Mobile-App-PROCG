@@ -121,13 +121,13 @@ const ActionItemMainIndex = () => {
     setCurrentPage(1);
   };
   const allStatus = [
-    {title: 'All'},
-    {title: 'New'},
-    {title: 'In Progress'},
-    {title: 'Completed'},
+    {title: 'All', value: 'All'},
+    {title: 'New', value: 'NEW'},
+    {title: 'In Progress', value: 'IN PROGRESS'},
+    {title: 'Completed', value: 'COMPLETED'},
   ];
   const handleSelectedStatus = (status: string) => {
-    if (status === 'All') {
+    if (status.toLowerCase() === 'all') {
       setSelectedStatusQuery('');
     } else {
       setSelectedStatusQuery(status);
@@ -153,7 +153,7 @@ const ActionItemMainIndex = () => {
           customStyle={{width: 180}}
         />
         <SelectStatusDropDown
-          defaultValue="All"
+          defaultValue={'All'}
           data={allStatus}
           handleSelectedStatus={handleSelectedStatus}
         />
