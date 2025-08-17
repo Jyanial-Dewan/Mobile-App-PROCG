@@ -120,7 +120,7 @@ const Alerts = () => {
       style={styles.container}
       backgroundColor={COLORS.lightBackground}
       header={<MainHeader routeName="Alerts" style={{fontWeight: '700'}} />}>
-      <SearchBar placeholder="Search" value={search} onChangeText={setSearch} />
+      {/* <SearchBar placeholder="Search" value={search} onChangeText={setSearch} /> */}
       <CustomFlatListThree
         data={alertsStore.alerts}
         keyExtractor={(item: AlertStoreSnapshotType) => item.alert_id}

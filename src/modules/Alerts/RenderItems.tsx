@@ -26,8 +26,10 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
     item => item.alert_id,
   );
   const onOpenSheet = (item: AlertStoreSnapshotType) => {
-    refSheet.current?.open();
     setSelectedItem(item);
+    refSheet.current?.open();
+  };
+  const handleAcknowledge = () => {
     if (item.acknowledge === false) {
       alertRead();
       alertsStore.readAlert(item.alert_id);
@@ -39,7 +41,6 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
     }
   };
   const alertRead = async () => {
-    // alertsStore.setRefreshing(true);
     const api_params = {
       url: api.UpdateAlert + `/${item.alert_id}` + `/${userInfo?.user_id}`,
       data: {acknowledge: true},
@@ -49,7 +50,6 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
       // isConsoleParams: true,
     };
     await httpRequest(api_params, setIsLoading);
-    // alertsStore.setRefreshing(false);
   };
   return (
     <View
@@ -92,17 +92,18 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
               txtColor={COLORS.blackish}
               txtSize={14}
             />
-            <TouchableOpacity
-              onPress={() => {
-                // setViewDetailsModalVisible({id: item.id, visible: true});
-                onOpenSheet(item);
-              }}>
-              <CustomTextNew
-                text="View Details"
-                txtSize={12}
-                style={[styles.linkText, {marginTop: 5}]}
-              />
-            </TouchableOpacity>
+            {item.description.length > 180 && (
+              <TouchableOpacity
+                onPress={() => {
+                  onOpenSheet(item);
+                }}>
+                <CustomTextNew
+                  text="View Details"
+                  txtSize={12}
+                  style={[styles.linkText, {marginTop: 5}]}
+                />
+              </TouchableOpacity>
+            )}
           </Column>
           {/* View Details Modal */}
           {/* <ViewDetailsModal
@@ -118,9 +119,9 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
           <Row justify="flex-start">
             <CustomButtonNew
               disabled={false}
-              btnText={'Button'}
+              btnText={'Acknowledge'}
               // isLoading={false}
-              // onBtnPress={handleOpenSheet}
+              onBtnPress={handleAcknowledge}
               btnstyle={styles.btn}
             />
           </Row>
