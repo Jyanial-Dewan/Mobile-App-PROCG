@@ -31,7 +31,7 @@ import {
   renderProfilePicture,
   renderUserName,
 } from '../../common/utility/notifications.utility';
-import SelectStatusDropDown from '../action-item/SelectStatusDropDown';
+import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 
 interface User {
   name: string;
@@ -321,7 +321,11 @@ const NewMessage = () => {
   const handleNotificationType = (type: string) => {
     setSelectedNotificationType(type);
   };
-
+  const allNotificationType = [
+    {title: 'Notification', value: 'NOTIFICATION'},
+    {title: 'Action Item', value: 'ACTION ITEM'},
+    {title: 'Alert', value: 'ALERT'},
+  ];
   return (
     <ContainerNew
       isRefresh={false}
@@ -382,12 +386,8 @@ const NewMessage = () => {
       }>
       <View style={{marginHorizontal: 20}}>
         <SelectStatusDropDown
-          defaultValue="Notification"
-          data={[
-            {title: 'Notification', value: 'NOTIFICATION'},
-            {title: 'Action Item', value: 'ACTION ITEM'},
-            {title: 'Alert', value: 'ALERT'},
-          ]}
+          defaultValue={allNotificationType[0]?.title}
+          data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
         />
       </View>

@@ -17,7 +17,7 @@ export type RootStackScreensParms = {
   Drafts: undefined;
   Recycle_Bin: undefined;
   Settings: undefined;
-  New_Message: undefined;
+  New_Notification: undefined;
   Reply: {_id: string};
   Drafts_Detail: {_id: string};
   Recycle_Bin_Detail: {_id: string};

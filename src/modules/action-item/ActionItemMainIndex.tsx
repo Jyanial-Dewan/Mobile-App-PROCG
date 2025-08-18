@@ -37,7 +37,7 @@ import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import RenderItems from './RenderItems';
 import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
 import {observer} from 'mobx-react-lite';
-import SelectStatusDropDown from './SelectStatusDropDown';
+import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -153,7 +153,7 @@ const ActionItemMainIndex = () => {
           customStyle={{width: 180}}
         />
         <SelectStatusDropDown
-          defaultValue={'All'}
+          defaultValue={allStatus[0].title}
           data={allStatus}
           handleSelectedStatus={handleSelectedStatus}
         />

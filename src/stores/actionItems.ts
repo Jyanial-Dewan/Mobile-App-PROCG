@@ -7,6 +7,7 @@ export const ActionItemsModel = types.model('ActionItemsModel', {
   user_name: types.string,
   description: types.string,
   status: types.string,
+  notification_status: types.string,
   notification_id: types.string,
   created_by: types.number,
   creation_date: types.Date,

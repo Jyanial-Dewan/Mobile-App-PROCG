@@ -68,7 +68,7 @@ const Drawer = () => {
       />
       <Screen name="ProfileScreen" component={ProfileScreen} />
       <Screen name="NotificationDetails" component={NotificationDetails} />
-      <Screen name="New_Message" component={NewMessage} />
+      <Screen name="New_Notification" component={NewMessage} />
       <Screen name="Drafts_Detail" component={DraftsDetails} />
       <Screen name="Recycle_Bin_Detail" component={RecycleBinDetail} />
       <Screen name="Reply" component={ReplyScreen} />

@@ -12,30 +12,14 @@ const SelectStatusDropDown = ({
   data,
   handleSelectedStatus,
 }: Props) => {
-  // const emojisWithIcons = [
-  //   {title: 'happy', icon: 'emoticon-happy-outline'},
-  //   {title: 'cool', icon: 'emoticon-cool-outline'},
-  //   {title: 'lol', icon: 'emoticon-lol-outline'},
-  //   {title: 'sad', icon: 'emoticon-sad-outline'},
-  //   {title: 'cry', icon: 'emoticon-cry-outline'},
-  //   {title: 'angry', icon: 'emoticon-angry-outline'},
-  //   {title: 'confused', icon: 'emoticon-confused-outline'},
-  //   {title: 'excited', icon: 'emoticon-excited-outline'},
-  //   {title: 'kiss', icon: 'emoticon-kiss-outline'},
-  //   {title: 'devil', icon: 'emoticon-devil-outline'},
-  //   {title: 'dead', icon: 'emoticon-dead-outline'},
-  //   {title: 'wink', icon: 'emoticon-wink-outline'},
-  //   {title: 'sick', icon: 'emoticon-sick-outline'},
-  //   {title: 'frown', icon: 'emoticon-frown-outline'},
-  // ];
-
+  const defaultItem = data.find((item: any) => item.title === defaultValue);
   return (
     <SelectDropdown
       data={data}
       onSelect={(selectedItem, index) => {
         handleSelectedStatus(selectedItem.value);
       }}
-      defaultValue={{title: defaultValue}}
+      defaultValue={defaultItem}
       renderButton={(selectedItem, isOpened) => {
         return (
           <View style={styles.dropdownButtonStyle}>
