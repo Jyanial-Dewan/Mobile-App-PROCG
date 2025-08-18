@@ -12,6 +12,7 @@ import {useRootStore} from '../../stores/rootStore';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {useSocketContext} from '../../context/SocketContext';
+import {useToast} from '../../common/components/CustomToast';
 interface Props {
   item: AlertStoreSnapshotType;
   refSheet: any;
@@ -25,32 +26,39 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
   const notificationIds = alertsStore.notificationAlerts.map(
     item => item.alert_id,
   );
+  const toaster = useToast();
   const onOpenSheet = (item: AlertStoreSnapshotType) => {
-    refSheet.current?.open();
     setSelectedItem(item);
-    if (item.acknowledge === false) {
-      alertRead();
-      alertsStore.readAlert(item.alert_id);
-      socket.emit('SendAlert', {
-        alertId: item.alert_id,
-        recipients: [userInfo?.user_id],
-        isAcknowledge: true,
-      });
+    refSheet.current?.open();
+  };
+
+  const handleAcknowledge = async () => {
+    try {
+      const api_params = {
+        url: api.UpdateAlert + `/${item.alert_id}` + `/${userInfo?.user_id}`,
+        data: {acknowledge: true},
+        baseURL: url,
+        method: 'put',
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      if (res) {
+        toaster.show({message: `Alert acknowledged.`, type: 'success'});
+        socket.emit('SendAlert', {
+          alertId: item.alert_id,
+          recipients: [userInfo?.user_id],
+          isAcknowledge: true,
+        });
+        alertsStore.readAlert(item.alert_id);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toaster.show({message: error.message, type: 'error'});
+      }
     }
   };
-  const alertRead = async () => {
-    // alertsStore.setRefreshing(true);
-    const api_params = {
-      url: api.UpdateAlert + `/${item.alert_id}` + `/${userInfo?.user_id}`,
-      data: {acknowledge: true},
-      baseURL: url,
-      method: 'put',
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
-    await httpRequest(api_params, setIsLoading);
-    // alertsStore.setRefreshing(false);
-  };
+
   return (
     <View
       style={[
@@ -92,17 +100,18 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
               txtColor={COLORS.blackish}
               txtSize={14}
             />
-            <TouchableOpacity
-              onPress={() => {
-                // setViewDetailsModalVisible({id: item.id, visible: true});
-                onOpenSheet(item);
-              }}>
-              <CustomTextNew
-                text="View Details"
-                txtSize={12}
-                style={[styles.linkText, {marginTop: 5}]}
-              />
-            </TouchableOpacity>
+            {item.description.length > 180 && (
+              <TouchableOpacity
+                onPress={() => {
+                  onOpenSheet(item);
+                }}>
+                <CustomTextNew
+                  text="View Details"
+                  txtSize={12}
+                  style={[styles.linkText, {marginTop: 5}]}
+                />
+              </TouchableOpacity>
+            )}
           </Column>
           {/* View Details Modal */}
           {/* <ViewDetailsModal
@@ -118,9 +127,9 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
           <Row justify="flex-start">
             <CustomButtonNew
               disabled={false}
-              btnText={'Button'}
+              btnText={'Acknowledge'}
               // isLoading={false}
-              // onBtnPress={handleOpenSheet}
+              onBtnPress={handleAcknowledge}
               btnstyle={styles.btn}
             />
           </Row>

@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
     // shadowRadius: 1.41,
 
     // elevation: 2,
-    width: '100%',
+    // width: '100%',
     // height: 40,
-    borderRadius: 20,
+    borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 10,
     paddingHorizontal: 10,

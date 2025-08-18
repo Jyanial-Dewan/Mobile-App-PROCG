@@ -12,7 +12,7 @@ const PlusButton = () => {
   return (
     <TouchableOpacity
       style={styles.btn}
-      onPress={() => navigate('New_Message')}>
+      onPress={() => navigate('New_Notification')}>
       <AntDesign name="plus" size={30} color={COLORS.white} />
     </TouchableOpacity>
   );

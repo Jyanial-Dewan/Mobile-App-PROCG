@@ -92,8 +92,8 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
     };
     const res = await httpRequest(api_params, setIsLoading);
     inactiveDevice({
-      data: [res],
-      user: userInfo?.user_name || '',
+      inactiveDevices: [res],
+      userId: userInfo?.user_id || 0,
     });
 
     await httpRequest(tokenParams, setIsLoading);

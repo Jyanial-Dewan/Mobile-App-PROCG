@@ -37,6 +37,7 @@ import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import RenderItems from './RenderItems';
 import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
 import {observer} from 'mobx-react-lite';
+import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -61,6 +62,9 @@ const ActionItemMainIndex = () => {
   const [selectedItem, setSelectedItem] = useState<
     ActionItemsStoreSnapshotType | undefined
   >(undefined);
+  const [selectedStatusQuery, setSelectedStatusQuery] = useState('');
+  const [updateStatus, setUpdateStatus] = useState('');
+
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
@@ -69,11 +73,7 @@ const ActionItemMainIndex = () => {
       //api call here
       setIsLoading(true);
       const api_params = {
-        url:
-          api.GetActionItems +
-          `/${userInfo?.user_id}` +
-          `/${currentPage}` +
-          `/${limit}`,
+        url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}`,
         baseURL: url,
         access_token: userInfo?.access_token,
         // isConsole: true,
@@ -88,31 +88,50 @@ const ActionItemMainIndex = () => {
         actionItems.setRefreshing(false);
       }
     },
-    [isFocused, currentPage, actionItems.refreshing, actionItems.actionItems],
+    [
+      isFocused,
+      currentPage,
+      actionItems.refreshing,
+      actionItems.actionItems,
+      selectedStatusQuery,
+    ],
   );
 
-  useEffect(() => {
-    const searchActionItems = () => {
-      const filteredItems = actionItems.actionItems.filter(item =>
-        item.action_item_name.toLowerCase().includes(search.toLowerCase()),
-      );
-      if (filteredItems.length) {
-        setData(filteredItems);
-      } else {
-        setData([]);
-        setNoResult(true);
-      }
-    };
-    if (search) {
-      searchActionItems();
-    } else {
-      setData(actionItems.actionItems);
-    }
-  }, [search]);
+  // useEffect(() => {
+  //   const searchActionItems = () => {
+  //     const filteredItems = actionItems.actionItems.filter(item =>
+  //       item.action_item_name.toLowerCase().includes(search.toLowerCase()),
+  //     );
+  //     if (filteredItems.length) {
+  //       setData(filteredItems);
+  //     } else {
+  //       setData([]);
+  //       setNoResult(true);
+  //     }
+  //   };
+  //   if (search) {
+  //     searchActionItems();
+  //   } else {
+  //     setData(actionItems.actionItems);
+  //   }
+  // }, [search]);
 
   const handleRefresh = () => {
     actionItems.setRefreshing(true);
     setCurrentPage(1);
+  };
+  const allStatus = [
+    {title: 'All', value: 'All'},
+    {title: 'New', value: 'NEW'},
+    {title: 'In Progress', value: 'IN PROGRESS'},
+    {title: 'Completed', value: 'COMPLETED'},
+  ];
+  const handleSelectedStatus = (status: string) => {
+    if (status.toLowerCase() === 'all') {
+      setSelectedStatusQuery('');
+    } else {
+      setSelectedStatusQuery(status);
+    }
   };
 
   return (
@@ -126,13 +145,21 @@ const ActionItemMainIndex = () => {
       header={
         <MainHeader routeName="Action Items" style={{fontWeight: '700'}} />
       }>
-      <SearchBar
-        placeholder="Search item"
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <SearchBar
+          placeholder="Search item"
+          value={search}
+          onChangeText={setSearch}
+          customStyle={{width: 180}}
+        />
+        <SelectStatusDropDown
+          defaultValue={allStatus[0].title}
+          data={allStatus}
+          handleSelectedStatus={handleSelectedStatus}
+        />
+      </View>
       <CustomFlatListThree
-        data={data}
+        data={actionItems.actionItems}
         keyExtractor={(item: ActionItemsStoreSnapshotType) =>
           item.action_item_id
         }
@@ -141,8 +168,20 @@ const ActionItemMainIndex = () => {
             item={item}
             refSheet={refRBSheet}
             setSelectedItem={setSelectedItem}
+            setIsLoading={setIsLoading}
           />
         )}
+        emptyItem={() => {
+          return (
+            <CustomTextNew
+              style={{
+                textAlign: 'center',
+                marginTop: height / 3,
+              }}
+              text="No data found"
+            />
+          );
+        }}
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}

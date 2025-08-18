@@ -21,7 +21,7 @@ import {useRootStore} from '../../stores/rootStore';
 import {useToast} from '../../common/components/CustomToast';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
+import {ProcgURL, ProcgURL2} from '../../../App';
 import {v4 as uuidv4} from 'uuid';
 import ReceiversModal from '../../common/components/ReceiversModal';
 import SVGController from '../../common/components/SVGController';
@@ -31,6 +31,8 @@ import {
   renderProfilePicture,
   renderUserName,
 } from '../../common/utility/notifications.utility';
+import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
+import {toTitleCase} from '../../common/utility/general';
 
 interface User {
   name: string;
@@ -65,7 +67,8 @@ const NewMessage = () => {
     user.user_name.toLowerCase().includes(query.toLowerCase()),
   );
 
-  const url = selectedUrl || ProcgURL;
+  const urlNode = selectedUrl || ProcgURL;
+  const urlPython = ProcgURL2;
   const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
 
   const handleReciever = (reciever: number) => {
@@ -94,7 +97,7 @@ const NewMessage = () => {
   const handleSend = async () => {
     const sendPayload = {
       notification_id: id,
-      notification_type: notifcationType,
+      notification_type: selectedNotificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
@@ -113,7 +116,7 @@ const NewMessage = () => {
       url: api.Messages,
       data: sendPayload,
       method: 'post',
-      baseURL: url,
+      baseURL: urlNode,
       isConsole: true,
       isConsoleParams: true,
     };
@@ -131,20 +134,114 @@ const NewMessage = () => {
       url: api.SendNotification,
       data: sendNotificationPayload,
       method: 'post',
-      baseURL: url,
+      baseURL: urlNode,
       isConsole: true,
       isConsoleParams: true,
     };
 
     try {
-      const response = await httpRequest(sendParams, setIsSending);
+      const notificationResponse = await httpRequest(sendParams, setIsSending);
       await httpRequest(sendNotificationParams, setIsSending);
-      if (response) {
+
+      if (notificationResponse.message) {
+        if (selectedNotificationType.toLowerCase() === 'alert') {
+          const SendAlertPayload = {
+            alert_name: alertName,
+            description: alertDescription,
+            recepients: recivers,
+            notification_id: id,
+            created_by: userInfo?.user_id,
+            last_updated_by: userInfo?.user_id,
+          };
+          const sendAlertParams = {
+            url: api.CreateAlert,
+            data: SendAlertPayload,
+            method: 'post',
+            baseURL: urlNode,
+            isConsole: true,
+            isConsoleParams: true,
+          };
+          const alertResponse = await httpRequest(
+            sendAlertParams,
+            setIsSending,
+          );
+
+          if (alertResponse.message) {
+            setAlertName('');
+            setAlertDescription('');
+            const params = {
+              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+              data: {
+                alert_id: alertResponse.result.alert_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              isConsole: true,
+              isConsoleParams: true,
+            };
+            await httpRequest(params, setIsSending);
+            socket.emit('SendAlert', {
+              alertId: alertResponse.result.alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+          }
+        }
+        if (selectedNotificationType.toLowerCase() === 'action item') {
+          const SendActionItemPayload = {
+            action_item_name: actionItemName,
+            description: actionItemDescription,
+            status: 'NEW',
+            user_ids: recivers,
+          };
+          const sendActionItemParams = {
+            url: api.ActionItem,
+            data: SendActionItemPayload,
+            method: 'post',
+            baseURL: urlPython,
+            access_token: userInfo?.access_token,
+            // isConsole: true,
+            // isConsoleParams: true,
+          };
+          const actionItemResponse = await httpRequest(
+            sendActionItemParams,
+            setIsSending,
+          );
+
+          if (actionItemResponse.message) {
+            setActionItemName('');
+            setActionItemDescription('');
+            const params1 = {
+              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+              data: {
+                action_item_id: actionItemResponse.action_item_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(params1, setIsSending);
+            const params2 = {
+              url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlPython,
+              access_token: userInfo?.access_token,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(params2, setIsSending);
+          }
+        }
+
         socket?.emit('sendMessage', {
           notificationId: sendPayload.notification_id,
           sender: sendPayload.sender,
         });
-        toaster.show({message: response.message, type: 'success'});
+        toaster.show({message: notificationResponse.message, type: 'success'});
       }
       setTimeout(async () => {
         navigation.goBack();
@@ -182,7 +279,7 @@ const NewMessage = () => {
       url: api.Messages,
       data: draftPayload,
       method: 'post',
-      baseURL: url,
+      baseURL: urlNode,
       isConsole: true,
       isConsoleParams: true,
     };
@@ -216,6 +313,20 @@ const NewMessage = () => {
     const newRecievers = recivers.filter(r => r !== rcvr);
     setRecivers(newRecievers);
   };
+  const [selectedNotificationType, setSelectedNotificationType] =
+    useState('NOTIFICATION');
+  const [actionItemName, setActionItemName] = useState('');
+  const [actionItemDescription, setActionItemDescription] = useState('');
+  const [alertName, setAlertName] = useState('');
+  const [alertDescription, setAlertDescription] = useState('');
+  const handleNotificationType = (type: string) => {
+    setSelectedNotificationType(type);
+  };
+  const allNotificationType = [
+    {title: 'Notification', value: 'NOTIFICATION'},
+    {title: 'Action Item', value: 'ACTION ITEM'},
+    {title: 'Alert', value: 'ALERT'},
+  ];
   return (
     <ContainerNew
       isRefresh={false}
@@ -274,6 +385,13 @@ const NewMessage = () => {
           </TouchableOpacity>
         </View>
       }>
+      <View style={{marginHorizontal: 20}}>
+        <SelectStatusDropDown
+          defaultValue={allNotificationType[0]?.title}
+          data={allNotificationType}
+          handleSelectedStatus={handleNotificationType}
+        />
+      </View>
       <View style={{flex: 1, marginHorizontal: 20}}>
         {/*To*/}
         <View style={styles.lineContainerTo}>
@@ -332,7 +450,7 @@ const NewMessage = () => {
                     <Image
                       style={styles.profileImage}
                       source={{
-                        uri: `${url}/${usr.profile_picture.thumbnail}`,
+                        uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
                         // headers: {
                         //   Authorization: `Bearer ${userInfo?.access_token}`,
                         // },
@@ -363,7 +481,7 @@ const NewMessage = () => {
                 <Image
                   style={styles.profileImage}
                   source={{
-                    uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
+                    uri: `${urlNode}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
                     // headers: {
                     //   Authorization: `Bearer ${userInfo?.access_token}`,
                     // },
@@ -408,9 +526,83 @@ const NewMessage = () => {
             value={body}
             onChangeText={text => setBody(text)}
             multiline={true}
+            // numberOfLines={10}
             placeholderTextColor={COLORS.darkGray}
           />
         </View>
+
+        {selectedNotificationType.toLowerCase() !== 'notification' && (
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>
+              {toTitleCase(selectedNotificationType)}
+            </Text>
+            <View style={styles.dividerLine} />
+          </View>
+        )}
+        {/* Action Item   */}
+        {selectedNotificationType.toLowerCase() === 'action item' && (
+          <>
+            <View
+              style={[
+                styles.withinLineContainer,
+                {
+                  borderBottomWidth: 0.5,
+                  borderBottomColor: COLORS.lightGray5,
+                },
+              ]}>
+              <Text style={{color: COLORS.darkGray}}>Action Item Name</Text>
+              <TextInput
+                style={{height: 40, width: '90%', color: COLORS.black}}
+                value={actionItemName}
+                onChangeText={text => setActionItemName(text)}
+              />
+            </View>
+            <View style={styles.lineContainerBody}>
+              <TextInput
+                style={styles.textInputBody}
+                placeholder="Action Item Description"
+                value={actionItemDescription}
+                onChangeText={text => setActionItemDescription(text)}
+                multiline={true}
+                // numberOfLines={10}
+                placeholderTextColor={COLORS.darkGray}
+              />
+            </View>
+          </>
+        )}
+
+        {/* Alert  */}
+        {selectedNotificationType.toLowerCase() === 'alert' && (
+          <>
+            <View
+              style={[
+                styles.withinLineContainer,
+                {
+                  borderBottomWidth: 0.5,
+                  borderBottomColor: COLORS.lightGray5,
+                },
+              ]}>
+              <Text style={{color: COLORS.darkGray}}>Alert Name</Text>
+              <TextInput
+                style={{height: 40, width: '90%', color: COLORS.black}}
+                value={alertName}
+                onChangeText={text => setAlertName(text)}
+              />
+            </View>
+            <View style={styles.lineContainerBody}>
+              <TextInput
+                multiline={true}
+                // numberOfLines={10}
+                style={styles.textInputBody}
+                placeholder="Alert Description"
+                value={alertDescription}
+                onChangeText={text => setAlertDescription(text)}
+                placeholderTextColor={COLORS.darkGray}
+              />
+            </View>
+          </>
+        )}
       </View>
     </ContainerNew>
   );
@@ -589,4 +781,25 @@ const styles = StyleSheet.create({
     borderColor: COLORS.white,
   },
   loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}]},
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 16, // space above and below
+  },
+  dividerLine: {
+    flex: 1, // stretch line to fill space
+    height: 1, // thin line
+    backgroundColor: '#ccc', // light gray
+  },
+  dividerText: {
+    marginHorizontal: 10, // spacing between lines and text
+    fontWeight: '600', // bold text
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    backgroundColor: '#f0f0f0', // light background
+  },
 });
