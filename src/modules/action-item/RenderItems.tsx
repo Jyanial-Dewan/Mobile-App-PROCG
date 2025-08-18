@@ -13,6 +13,7 @@ import {ProcgURL2} from '../../../App';
 import {useRootStore} from '../../stores/rootStore';
 import {httpRequest} from '../../common/constant/httpRequest';
 import StatusUpdateButton from '../../common/components/StatusUpdateButton';
+import {useToast} from '../../common/components/CustomToast';
 interface Props {
   item: ActionItemsStoreSnapshotType;
   refSheet: any;
@@ -27,19 +28,25 @@ const RenderItems = ({
 }: Props) => {
   const url = ProcgURL2;
   const {userInfo, actionItems} = useRootStore();
-
+  const toaster = useToast();
   const handleStatusUpdate = async (action_item_id: number, status: string) => {
-    const api_params = {
-      url: `${api.UpdateActionItemAssignment}/${userInfo?.user_id}/${action_item_id}`,
-      baseURL: url,
-      method: 'put',
-      data: {status},
-      access_token: userInfo?.access_token,
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
-    await httpRequest(api_params, setIsLoading);
-    actionItems.updateActionItem(action_item_id, status);
+    try {
+      const api_params = {
+        url: `${api.UpdateActionItemAssignment}/${userInfo?.user_id}/${action_item_id}`,
+        baseURL: url,
+        method: 'put',
+        data: {status},
+        access_token: userInfo?.access_token,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      await httpRequest(api_params, setIsLoading);
+      actionItems.updateActionItem(action_item_id, status);
+    } catch (error) {
+      if (error instanceof Error) {
+        toaster.show({message: error.message, type: 'error'});
+      }
+    }
   };
 
   const onOpenSheet = (item: ActionItemsStoreSnapshotType) => {

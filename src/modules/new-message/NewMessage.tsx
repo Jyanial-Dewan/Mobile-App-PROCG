@@ -32,6 +32,7 @@ import {
   renderUserName,
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
+import {toTitleCase} from '../../common/utility/general';
 
 interface User {
   name: string;
@@ -533,7 +534,9 @@ const NewMessage = () => {
         {selectedNotificationType.toLowerCase() !== 'notification' && (
           <View style={styles.dividerContainer}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>{selectedNotificationType}</Text>
+            <Text style={styles.dividerText}>
+              {toTitleCase(selectedNotificationType)}
+            </Text>
             <View style={styles.dividerLine} />
           </View>
         )}
@@ -580,7 +583,7 @@ const NewMessage = () => {
                   borderBottomColor: COLORS.lightGray5,
                 },
               ]}>
-              <Text style={{color: COLORS.darkGray}}>Action Item Name</Text>
+              <Text style={{color: COLORS.darkGray}}>Alert Name</Text>
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={alertName}
@@ -592,7 +595,7 @@ const NewMessage = () => {
                 multiline={true}
                 // numberOfLines={10}
                 style={styles.textInputBody}
-                placeholder="Action Item Description"
+                placeholder="Alert Description"
                 value={alertDescription}
                 onChangeText={text => setAlertDescription(text)}
                 placeholderTextColor={COLORS.darkGray}
