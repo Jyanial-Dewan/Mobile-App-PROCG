@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Dimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -16,7 +17,7 @@ import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import MainHeader from '../../common/components/MainHeader';
 import {COLORS} from '../../common/constant/Themes';
 import {httpRequest} from '../../common/constant/httpRequest';
-import {ProcgURL} from '../../../App';
+import {ProcgURL, ProcgURL2} from '../../../App';
 import {api} from '../../common/api/api';
 import {useRootStore} from '../../stores/rootStore';
 import Feather from 'react-native-vector-icons/Feather';
@@ -34,8 +35,20 @@ import {
   renderProfilePicture,
   renderUserName,
 } from '../../common/utility/notifications.utility';
-import {MessageSnapshotType} from '~/stores/messageStore';
-
+import {MessageSnapshotType} from '../../stores/messageStore';
+import {AlertStoreSnapshotType} from '../../stores/alertsStore';
+import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
+import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
+import {toTitleCase} from '../../common/utility/general';
+interface IOldMsgTypes {
+  receivers?: number[];
+  subject?: string;
+  body?: string;
+  alertName?: string;
+  alertDescription?: string;
+  actionItemName?: string;
+  actionItemDescription?: string;
+}
 const DraftsDetails = observer(() => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -43,6 +56,7 @@ const DraftsDetails = observer(() => {
   const {socket} = useSocketContext();
   const [showModal, setShowModal] = useState(false);
   const [parentid, setParentid] = useState<string>('');
+  const [notificationId, setNotificationId] = useState('');
   const [status, setStatus] = useState<string>('');
   const [recivers, setRecivers] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
@@ -52,13 +66,18 @@ const DraftsDetails = observer(() => {
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [oldMsgState, setOldMsgState] = useState<any>({});
+  const [oldMsgState, setOldMsgState] = useState<IOldMsgTypes>({});
+  const [alert_id, setAlert_id] = useState<number | null>(null);
+  const [alertName, setAlertName] = useState<string>('');
+  const [alertDescription, setAlertDescription] = useState<string>('');
+  const [action_item_id, setAction_item_id] = useState<number | null>(null);
+  const [actionItemName, setActionItemName] = useState<string>('');
+  const [actionItemDescription, setActionItemDescription] =
+    useState<string>('');
   const [userChanged, setuserChanged] = useState<boolean>(false);
   const route = useRoute();
-  const notifcationType = 'REGULAR';
   const routeName = route.name;
   const {_id} = route.params as {_id: string};
-  const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
@@ -68,10 +87,13 @@ const DraftsDetails = observer(() => {
   const actualUsers = usersStore.users.filter(
     usr => usr.user_id !== userInfo?.user_id,
   );
-
+  const [notificationType, setNotificationType] = useState('');
+  console.log(notificationType, 'notificationType++++++++++');
   const filterdUser = actualUsers.filter(user =>
     user.user_name.toLowerCase().includes(query.toLowerCase()),
   );
+  const urlNode = selectedUrl || ProcgURL;
+  const urlPython = ProcgURL2;
   //Fetch SingleMessage
   useAsyncEffect(
     async isMounted => {
@@ -80,7 +102,7 @@ const DraftsDetails = observer(() => {
       }
       const api_params = {
         url: api.Messages + '/' + _id,
-        baseURL: ProcgURL,
+        baseURL: urlNode,
         // isConsole: true,
         // isConsoleParams: true,
       };
@@ -88,8 +110,10 @@ const DraftsDetails = observer(() => {
         api_params,
         setIsLoading,
       );
+      console.log(res, 'res ==============');
       if (res) {
         setParentid(res.parent_notification_id);
+        setNotificationId(res.notification_id);
         setStatus(res.status);
         setRecivers(res.recipients);
         setSubject(res.subject);
@@ -99,6 +123,9 @@ const DraftsDetails = observer(() => {
           subject: res?.subject,
           body: res?.notification_body,
         });
+        setNotificationType(res.notification_type);
+        setAlert_id(res.alert_id);
+        setAction_item_id(res.action_item_id);
       }
     },
     [isFocused, _id],
@@ -143,6 +170,54 @@ const DraftsDetails = observer(() => {
     handleUserChange();
   }, [recivers, oldMsgState?.receivers]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (notificationType.toLowerCase() === 'alert') {
+        const api_params = {
+          url: `${api.CreateAlert}/${alert_id}`,
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse: AlertStoreSnapshotType = await httpRequest(
+          api_params,
+          setIsLoading,
+        );
+        if (alertResponse) {
+          setOldMsgState((prev: any) => ({
+            ...prev,
+            alertName: alertResponse.alert_name,
+            alertDescription: alertResponse.description,
+          }));
+          setAlertName(alertResponse.alert_name);
+          setAlertDescription(alertResponse.description);
+        }
+      } else if (notificationType.toLowerCase() === 'action item') {
+        const api_params = {
+          url: `${api.ActionItem}/${action_item_id}`,
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const actionItemResponse: ActionItemsStoreSnapshotType =
+          await httpRequest(api_params, setIsLoading);
+
+        if (actionItemResponse) {
+          setOldMsgState(prev => ({
+            ...prev,
+            actionItemName: actionItemResponse.action_item_name,
+            actionItemDescription: actionItemResponse.description,
+          }));
+          setActionItemName(actionItemResponse.action_item_name);
+          setActionItemDescription(actionItemResponse.description);
+        }
+      }
+    };
+
+    fetchData();
+  }, [action_item_id, alert_id]);
+
   const handleReciever = (reciever: number) => {
     if (recivers.includes(reciever)) {
       const newArray = recivers.filter(rcvr => rcvr !== reciever);
@@ -173,33 +248,34 @@ const DraftsDetails = observer(() => {
 
   const handleSend = async () => {
     const sendPayload = {
-      notification_id: id,
-      notification_type: notifcationType,
+      // notification_id: id,
+      // notification_type: notificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
       notification_body: body,
       status: 'SENT',
       creation_date: new Date(),
-      parent_notification_id: id,
+      // parent_notification_id: id,
       involved_users: involvedusers,
       readers: recivers,
       holders: involvedusers,
       recycle_bin: [],
-      action_item_id: null,
-      alert_id: null,
+      // action_item_id: null,
+      // alert_id: null,
     };
+
     const sendParams = {
-      url: api.Messages,
+      url: `${api.Messages}/${notificationId}`,
       data: sendPayload,
-      method: 'post',
+      method: 'put',
       baseURL: selectedUrl || ProcgURL,
       // isConsole: true,
       // isConsoleParams: true,
     };
     const sendNotificationPayload = {
-      notificationID: id,
-      parentId: id,
+      notificationID: notificationId,
+      parentId: parentid,
       date: new Date(),
       sender: userInfo?.user_name,
       recipients: recivers,
@@ -215,28 +291,82 @@ const DraftsDetails = observer(() => {
       isConsoleParams: true,
     };
 
-    const deleteParams = {
-      url: api.Messages + '/' + _id,
-      method: 'delete',
-      baseURL: selectedUrl || ProcgURL,
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
     try {
-      const deleteMsg = await httpRequest(deleteParams, setIsSending);
-      const newMsg = await httpRequest(sendParams, setIsSending);
-      await httpRequest(sendNotificationParams, setIsSending);
-      if (deleteMsg && newMsg) {
-        socket?.emit('sendMessage', {
-          notificationId: sendPayload.notification_id,
-          sender: sendPayload.sender,
+      const updateResponse = await httpRequest(sendParams, setIsSending);
+      if (updateResponse) {
+        await httpRequest(sendNotificationParams, setIsSending);
+
+        if (notificationType.toLowerCase() === 'alert') {
+          const SendAlertPayload = {
+            alert_name: alertName,
+            description: alertDescription,
+            recepients: recivers,
+            // notification_id: id,
+            user_id: userInfo?.user_id,
+            last_updated_by: userInfo?.user_id,
+          };
+          const sendAlertParams = {
+            url: `${api.CreateAlert}/${alert_id}`,
+            data: SendAlertPayload,
+            method: 'put',
+            baseURL: urlNode,
+            isConsole: true,
+            isConsoleParams: true,
+          };
+          const alertResponse = await httpRequest(
+            sendAlertParams,
+            setIsSending,
+          );
+
+          if (alertResponse.message) {
+            setAlertName('');
+            setAlertDescription('');
+            socket.emit('SendAlert', {
+              alertId: alertResponse.result.alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+          }
+        }
+        if (notificationType.toLowerCase() === 'action item') {
+          const SendActionItemPayload = {
+            action_item_name: actionItemName,
+            description: actionItemDescription,
+            status: 'NEW',
+            user_ids: recivers,
+          };
+          const sendActionItemParams = {
+            url: `${api.ActionItem}/${action_item_id}`,
+            data: SendActionItemPayload,
+            method: 'put',
+            baseURL: urlPython,
+            access_token: userInfo?.access_token,
+            // isConsole: true,
+            // isConsoleParams: true,
+          };
+          const actionItemResponse = await httpRequest(
+            sendActionItemParams,
+            setIsSending,
+          );
+
+          if (actionItemResponse.message) {
+            setActionItemName('');
+            setActionItemDescription('');
+          }
+        }
+
+        socket?.emit('sendDraft', {
+          notificationId: parentid,
+          sender: userInfo?.user_id,
         });
         socket?.emit('draftMsgId', {
           notificationId: _id,
           sender: userInfo?.user_id,
         });
-        console.log(_id, 'Id in draft details screen');
-        toaster.show({message: newMsg.message, type: 'success'});
+        toaster.show({
+          message: updateResponse.message,
+          type: 'success',
+        });
         setTimeout(async () => {
           navigation.goBack();
         }, 500);
@@ -254,39 +384,88 @@ const DraftsDetails = observer(() => {
   // draft
   const handleDraft = async () => {
     const draftPayload = {
-      notification_id: _id,
-      notification_type: notifcationType,
+      // notification_id: _id,
+      // notification_type: notificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
       notification_body: body,
       status: 'DRAFT',
       creation_date: new Date(),
-      parent_notification_id: parentid,
+      // parent_notification_id: parentid,
       involved_users: involvedusers,
       readers: recivers,
-      holders: [userInfo?.user_id],
+      holders: involvedusers,
       recycle_bin: [],
-      action_item_id: null,
-      alert_id: null,
+      // action_item_id: null,
+      // alert_id: null,
     };
     const draftParams = {
-      url: api.Messages + '/' + _id,
+      url: `${api.Messages}/${notificationId}`,
       data: draftPayload,
       method: 'put',
       baseURL: selectedUrl || ProcgURL,
-      // isConsole: true,
-      // isConsoleParams: true,
+      isConsole: true,
+      isConsoleParams: true,
     };
     try {
-      const response = await httpRequest(draftParams, setIsDrafting);
-      if (response) {
+      const draftResponse = await httpRequest(draftParams, setIsDrafting);
+      console.log(draftResponse, 'draftResponse11111111111');
+      if (draftResponse.message) {
+        if (notificationType.toLowerCase() === 'alert') {
+          const SendAlertPayload = {
+            alert_name: alertName,
+            description: alertDescription,
+            last_updated_by: userInfo?.user_id,
+            recipients: recivers,
+          };
+          const draftAlertParams = {
+            url: `${api.CreateAlert}/${alert_id}`,
+            data: SendAlertPayload,
+            method: 'put',
+            baseURL: urlNode,
+            isConsole: true,
+            isConsoleParams: true,
+          };
+          console.log(draftAlertParams.url, 'draftAlertParams.url===');
+          const alertResponse = await httpRequest(
+            draftAlertParams,
+            setIsDrafting,
+          );
+          console.log(alertResponse, 'alertResponse222222222');
+          if (alertResponse.message) {
+            socket.emit('SendAlert', {
+              alertId: alertResponse.result.alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+          }
+        }
+        if (notificationType.toLowerCase() === 'action item') {
+          const SendActionItemPayload = {
+            action_item_name: actionItemName,
+            description: actionItemDescription,
+            status: 'NEW',
+            user_ids: recivers,
+          };
+          const sendActionItemParams = {
+            url: `${api.ActionItem}/${action_item_id}`,
+            data: SendActionItemPayload,
+            method: 'put',
+            baseURL: urlPython,
+            access_token: userInfo?.access_token,
+            // isConsole: true,
+            // isConsoleParams: true,
+          };
+          await httpRequest(sendActionItemParams, setIsDrafting);
+        }
+
         socket?.emit('sendDraft', {
-          notificationId: draftPayload.notification_id,
+          notificationId: parentid,
           sender: draftPayload.sender,
         });
         toaster.show({
-          message: 'Message Save to Drafts Successfully',
+          message: draftResponse.message,
           type: 'success',
         });
         setTimeout(async () => {
@@ -330,6 +509,11 @@ const DraftsDetails = observer(() => {
       }
     }
   };
+  useEffect(() => {
+    if (recivers.length === 0) {
+      setShowModal(false);
+    }
+  }, [recivers.length]);
 
   return (
     <ContainerNew
@@ -349,61 +533,160 @@ const DraftsDetails = observer(() => {
       }
       footer={
         <View>
-          <TouchableOpacity
-            onPress={handleSend}
-            style={[
-              styles.sentBtn,
-              (recivers.length === 0 || body === '' || subject === '') &&
-                styles.disabled,
-            ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              isSending
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size="small"
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleDraft}
-            disabled={
-              (!userChanged &&
-                oldMsgState?.subject === subject &&
-                oldMsgState?.body === body) ||
-              isDrafting
-            }
-            style={[
-              styles.draftBtn,
-              ((!userChanged &&
-                oldMsgState?.subject === subject &&
-                oldMsgState?.body === body) ||
-                isDrafting) &&
-                styles.disabled,
-            ]}>
-            {isDrafting ? (
-              <ActivityIndicator
-                size="small"
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Notebook-Pen" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+          {notificationType.toLowerCase() === 'action item' && (
+            <>
+              <TouchableOpacity
+                onPress={handleSend}
+                style={[
+                  styles.sentBtn,
+                  (recivers.length === 0 ||
+                    body === '' ||
+                    subject === '' ||
+                    (notificationType.toLowerCase() === 'action item' &&
+                      actionItemName === '') ||
+                    (notificationType.toLowerCase() === 'action item' &&
+                      actionItemDescription === '')) &&
+                    styles.disabled,
+                ]}
+                disabled={
+                  recivers.length === 0 ||
+                  body === '' ||
+                  subject === '' ||
+                  isSending ||
+                  (notificationType.toLowerCase() === 'action item' &&
+                    actionItemName === '') ||
+                  (notificationType.toLowerCase() === 'action item' &&
+                    actionItemDescription === '')
+                }>
+                {isSending ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={COLORS.white}
+                    style={styles.loadingStyle}
+                  />
+                ) : (
+                  <SVGController name="Send" color={COLORS.white} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDraft}
+                disabled={
+                  (!userChanged &&
+                    oldMsgState?.subject === subject &&
+                    oldMsgState?.body === body &&
+                    oldMsgState?.actionItemName === actionItemName &&
+                    oldMsgState?.actionItemDescription ===
+                      actionItemDescription) ||
+                  isDrafting
+                }
+                style={[
+                  styles.draftBtn,
+                  ((!userChanged &&
+                    oldMsgState?.subject === subject &&
+                    oldMsgState?.body === body &&
+                    oldMsgState?.actionItemName === actionItemName &&
+                    oldMsgState?.actionItemDescription ===
+                      actionItemDescription) ||
+                    isDrafting) &&
+                    styles.disabled,
+                ]}>
+                {isDrafting ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={COLORS.white}
+                    style={styles.loadingStyle}
+                  />
+                ) : (
+                  <SVGController name="Notebook-Pen" color={COLORS.white} />
+                )}
+              </TouchableOpacity>
+            </>
+          )}
+          {notificationType.toLowerCase() === 'alert' && (
+            <>
+              <TouchableOpacity
+                onPress={handleSend}
+                style={[
+                  styles.sentBtn,
+                  (recivers.length === 0 ||
+                    body === '' ||
+                    subject === '' ||
+                    (notificationType.toLowerCase() === 'alert' &&
+                      alertName === '') ||
+                    (notificationType.toLowerCase() === 'alert' &&
+                      alertDescription === '')) &&
+                    styles.disabled,
+                ]}
+                disabled={
+                  recivers.length === 0 ||
+                  body === '' ||
+                  subject === '' ||
+                  isSending ||
+                  (notificationType.toLowerCase() === 'alert' &&
+                    alertName === '') ||
+                  (notificationType.toLowerCase() === 'alert' &&
+                    alertDescription === '')
+                }>
+                {isSending ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={COLORS.white}
+                    style={styles.loadingStyle}
+                  />
+                ) : (
+                  <SVGController name="Send" color={COLORS.white} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDraft}
+                disabled={
+                  (!userChanged &&
+                    oldMsgState?.subject === subject &&
+                    oldMsgState?.body === body &&
+                    oldMsgState?.alertName === alertName &&
+                    oldMsgState?.alertDescription === alertDescription) ||
+                  isDrafting
+                }
+                style={[
+                  styles.draftBtn,
+                  ((!userChanged &&
+                    oldMsgState?.subject === subject &&
+                    oldMsgState?.body === body &&
+                    oldMsgState?.alertName === actionItemName &&
+                    oldMsgState?.alertDescription === alertDescription) ||
+                    isDrafting) &&
+                    styles.disabled,
+                ]}>
+                {isDrafting ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={COLORS.white}
+                    style={styles.loadingStyle}
+                  />
+                ) : (
+                  <SVGController name="Notebook-Pen" color={COLORS.white} />
+                )}
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       }>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
       ) : (
         <View style={{flex: 1, marginHorizontal: 20}}>
+          <View>
+            {/*Notification Type*/}
+            <SelectStatusDropDown
+              isDisabled={true}
+              width={Dimensions.get('screen').width - 40}
+              height={30}
+              defaultValue={toTitleCase(notificationType)}
+              data={[]}
+              handleSelectedStatus={() => {}}
+              border={true}
+            />
+          </View>
           {/*To*/}
           <View style={styles.lineContainerTo}>
             <View style={styles.withinLineContainer}>
@@ -540,6 +823,69 @@ const DraftsDetails = observer(() => {
               multiline={true}
             />
           </View>
+          {/* Action Item   */}
+          {notificationType.toLowerCase() === 'action item' && (
+            <>
+              <View
+                style={[
+                  styles.withinLineContainer,
+                  {
+                    borderBottomWidth: 0.5,
+                    borderBottomColor: COLORS.lightGray5,
+                  },
+                ]}>
+                <Text style={{color: COLORS.darkGray}}>Action Item Name</Text>
+                <TextInput
+                  style={{height: 40, width: '90%', color: COLORS.black}}
+                  value={actionItemName}
+                  onChangeText={text => setActionItemName(text)}
+                />
+              </View>
+              <View style={styles.lineContainerBody}>
+                <TextInput
+                  style={styles.textInputBody}
+                  placeholder="Action Item Description"
+                  value={actionItemDescription}
+                  onChangeText={text => setActionItemDescription(text)}
+                  multiline={true}
+                  // numberOfLines={10}
+                  placeholderTextColor={COLORS.darkGray}
+                />
+              </View>
+            </>
+          )}
+
+          {/* Alert  */}
+          {notificationType.toLowerCase() === 'alert' && (
+            <>
+              <View
+                style={[
+                  styles.withinLineContainer,
+                  {
+                    borderBottomWidth: 0.5,
+                    borderBottomColor: COLORS.lightGray5,
+                  },
+                ]}>
+                <Text style={{color: COLORS.darkGray}}>Alert Name</Text>
+                <TextInput
+                  style={{height: 40, width: '90%', color: COLORS.black}}
+                  value={alertName}
+                  onChangeText={text => setAlertName(text)}
+                />
+              </View>
+              <View style={styles.lineContainerBody}>
+                <TextInput
+                  multiline={true}
+                  // numberOfLines={10}
+                  style={styles.textInputBody}
+                  placeholder="Alert Description"
+                  value={alertDescription}
+                  onChangeText={text => setAlertDescription(text)}
+                  placeholderTextColor={COLORS.darkGray}
+                />
+              </View>
+            </>
+          )}
         </View>
       )}
     </ContainerNew>

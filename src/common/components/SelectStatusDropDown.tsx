@@ -3,6 +3,7 @@ import React from 'react';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 interface Props {
+  isDisabled?: boolean;
   width: number;
   height: number;
   defaultValue?: string;
@@ -12,6 +13,7 @@ interface Props {
   search?: boolean;
 }
 const SelectStatusDropDown = ({
+  isDisabled = false,
   width,
   height,
   defaultValue,
@@ -23,6 +25,7 @@ const SelectStatusDropDown = ({
   const defaultItem = data.find((item: any) => item.title === defaultValue);
   return (
     <SelectDropdown
+      disabled={isDisabled}
       data={data}
       // search={search}
       onSelect={(selectedItem, index) => {

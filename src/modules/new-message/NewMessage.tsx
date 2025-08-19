@@ -52,8 +52,13 @@ const NewMessage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
+  const [selectedNotificationType, setSelectedNotificationType] =
+    useState('NOTIFICATION');
+  const [actionItemName, setActionItemName] = useState('');
+  const [actionItemDescription, setActionItemDescription] = useState('');
+  const [alertName, setAlertName] = useState('');
+  const [alertDescription, setAlertDescription] = useState('');
   const navigation = useNavigation();
-  const notifcationType = 'REGULAR';
   const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
@@ -177,8 +182,8 @@ const NewMessage = () => {
               },
               method: 'put',
               baseURL: urlNode,
-              isConsole: true,
-              isConsoleParams: true,
+              // isConsole: true,
+              // isConsoleParams: true,
             };
             await httpRequest(params, setIsSending);
             socket.emit('SendAlert', {
@@ -261,7 +266,7 @@ const NewMessage = () => {
   const handleDraft = async () => {
     const draftPayload = {
       notification_id: id,
-      notification_type: notifcationType,
+      notification_type: selectedNotificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
@@ -281,18 +286,114 @@ const NewMessage = () => {
       data: draftPayload,
       method: 'post',
       baseURL: urlNode,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
     try {
-      const response = await httpRequest(draftParams, setIsDrafting);
-      if (response) {
+      const notificationResponse = await httpRequest(
+        draftParams,
+        setIsDrafting,
+      );
+      if (notificationResponse.message) {
+        if (selectedNotificationType.toLowerCase() === 'alert') {
+          const SendAlertPayload = {
+            alert_name: alertName,
+            description: alertDescription,
+            recepients: recivers,
+            notification_id: id,
+            created_by: userInfo?.user_id,
+            last_updated_by: userInfo?.user_id,
+          };
+          const sendAlertParams = {
+            url: api.CreateAlert,
+            data: SendAlertPayload,
+            method: 'post',
+            baseURL: urlNode,
+            isConsole: true,
+            isConsoleParams: true,
+          };
+          const alertResponse = await httpRequest(
+            sendAlertParams,
+            setIsSending,
+          );
+
+          if (alertResponse.message) {
+            setAlertName('');
+            setAlertDescription('');
+            const params = {
+              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+              data: {
+                alert_id: alertResponse.result.alert_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(params, setIsSending);
+            socket.emit('SendAlert', {
+              alertId: alertResponse.result.alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+          }
+        }
+        if (selectedNotificationType.toLowerCase() === 'action item') {
+          const SendActionItemPayload = {
+            action_item_name: actionItemName,
+            description: actionItemDescription,
+            status: 'NEW',
+            user_ids: recivers,
+          };
+          const sendActionItemParams = {
+            url: api.ActionItem,
+            data: SendActionItemPayload,
+            method: 'post',
+            baseURL: urlPython,
+            access_token: userInfo?.access_token,
+            // isConsole: true,
+            // isConsoleParams: true,
+          };
+          const actionItemResponse = await httpRequest(
+            sendActionItemParams,
+            setIsSending,
+          );
+
+          if (actionItemResponse.message) {
+            setActionItemName('');
+            setActionItemDescription('');
+            const params1 = {
+              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+              data: {
+                action_item_id: actionItemResponse.action_item_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(params1, setIsSending);
+            const params2 = {
+              url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlPython,
+              access_token: userInfo?.access_token,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(params2, setIsSending);
+          }
+        }
+
         socket?.emit('sendDraft', {
           notificationId: draftPayload.notification_id,
           sender: draftPayload.sender,
         });
         toaster.show({
-          message: response.message,
+          message: 'Message Save to Drafts Successfully',
           type: 'success',
         });
         setTimeout(async () => {
@@ -303,10 +404,6 @@ const NewMessage = () => {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
       }
-    } finally {
-      setRecivers([]);
-      setSubject('');
-      setBody('');
     }
   };
 
@@ -314,12 +411,7 @@ const NewMessage = () => {
     const newRecievers = recivers.filter(r => r !== rcvr);
     setRecivers(newRecievers);
   };
-  const [selectedNotificationType, setSelectedNotificationType] =
-    useState('NOTIFICATION');
-  const [actionItemName, setActionItemName] = useState('');
-  const [actionItemDescription, setActionItemDescription] = useState('');
-  const [alertName, setAlertName] = useState('');
-  const [alertDescription, setAlertDescription] = useState('');
+
   const handleNotificationType = (type: string) => {
     setSelectedNotificationType(type);
   };
