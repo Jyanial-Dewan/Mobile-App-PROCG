@@ -88,7 +88,6 @@ const DraftsDetails = observer(() => {
     usr => usr.user_id !== userInfo?.user_id,
   );
   const [notificationType, setNotificationType] = useState('');
-  console.log(notificationType, 'notificationType++++++++++');
   const filterdUser = actualUsers.filter(user =>
     user.user_name.toLowerCase().includes(query.toLowerCase()),
   );
@@ -110,7 +109,6 @@ const DraftsDetails = observer(() => {
         api_params,
         setIsLoading,
       );
-      console.log(res, 'res ==============');
       if (res) {
         setParentid(res.parent_notification_id);
         setNotificationId(res.notification_id);
@@ -247,21 +245,16 @@ const DraftsDetails = observer(() => {
 
   const handleSend = async () => {
     const sendPayload = {
-      // notification_id: id,
-      // notification_type: notificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
       notification_body: body,
       status: 'SENT',
       creation_date: new Date(),
-      // parent_notification_id: id,
       involved_users: involvedusers,
       readers: recivers,
       holders: involvedusers,
       recycle_bin: [],
-      // action_item_id: null,
-      // alert_id: null,
     };
 
     const sendParams = {
@@ -292,7 +285,6 @@ const DraftsDetails = observer(() => {
 
     try {
       const updateResponse = await httpRequest(sendParams, setIsSending);
-      console.log(updateResponse, 'updateResponse111111111111111');
       if (updateResponse) {
         await httpRequest(sendNotificationParams, setIsSending);
 
@@ -315,11 +307,9 @@ const DraftsDetails = observer(() => {
             sendAlertParams,
             setIsSending,
           );
-          if (alertResponse.message) {
-            setAlertName('');
-            setAlertDescription('');
+          if (alertResponse) {
             socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
+              alertId: alert_id,
               recipients: recivers,
               isAcknowledge: false,
             });
@@ -341,23 +331,15 @@ const DraftsDetails = observer(() => {
             // isConsole: true,
             // isConsoleParams: true,
           };
-          const actionItemResponse = await httpRequest(
-            sendActionItemParams,
-            setIsSending,
-          );
-
-          if (actionItemResponse.message) {
-            setActionItemName('');
-            setActionItemDescription('');
-          }
+          await httpRequest(sendActionItemParams, setIsSending);
         }
 
-        socket?.emit('sendDraft', {
-          notificationId: parentid,
+        socket?.emit('sendMessage', {
+          notificationId: notificationId,
           sender: userInfo?.user_id,
         });
         socket?.emit('draftMsgId', {
-          notificationId: _id,
+          notificationId: notificationId,
           sender: userInfo?.user_id,
         });
         toaster.show({
@@ -388,21 +370,16 @@ const DraftsDetails = observer(() => {
   // draft
   const handleDraft = async () => {
     const draftPayload = {
-      // notification_id: _id,
-      // notification_type: notificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
       notification_body: body,
       status: 'DRAFT',
       creation_date: new Date(),
-      // parent_notification_id: parentid,
       involved_users: involvedusers,
       readers: recivers,
       holders: involvedusers,
       recycle_bin: [],
-      // action_item_id: null,
-      // alert_id: null,
     };
     const draftParams = {
       url: `${api.Messages}/${notificationId}`,
@@ -414,7 +391,7 @@ const DraftsDetails = observer(() => {
     };
     try {
       const draftResponse = await httpRequest(draftParams, setIsDrafting);
-      console.log(draftResponse, 'draftResponse2222222222222222');
+
       if (draftResponse.message) {
         if (notificationType.toLowerCase() === 'alert') {
           const SendAlertPayload = {
@@ -463,7 +440,7 @@ const DraftsDetails = observer(() => {
         }
 
         socket?.emit('sendDraft', {
-          notificationId: parentid,
+          notificationId: notificationId,
           sender: draftPayload.sender,
         });
         toaster.show({
@@ -537,7 +514,9 @@ const DraftsDetails = observer(() => {
               child={<Feather name="trash" size={24} color="black" />}
             />
           }
-          routeName="Notification Details"
+          routeName={
+            isLoading ? 'Loading...' : `Edit ${toTitleCase(notificationType)}`
+          }
         />
       }
       footer={
@@ -643,6 +622,7 @@ const DraftsDetails = observer(() => {
               (recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
+                isSending ||
                 (notificationType.toLowerCase() === 'alert' &&
                   alertName === '') ||
                 (notificationType.toLowerCase() === 'alert' &&

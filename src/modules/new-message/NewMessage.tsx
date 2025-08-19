@@ -438,7 +438,11 @@ const NewMessage = () => {
       isRefresh={false}
       isKeyboardAware={true}
       isScrollView={false}
-      header={<MainHeader routeName={name} />}
+      header={
+        <MainHeader
+          routeName={`New ${toTitleCase(selectedNotificationType)}`}
+        />
+      }
       footer={
         <View>
           <TouchableOpacity
