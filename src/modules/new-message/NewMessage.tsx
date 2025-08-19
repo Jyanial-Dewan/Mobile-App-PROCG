@@ -387,12 +387,14 @@ const NewMessage = () => {
         </View>
       }>
       <View style={{marginHorizontal: 20}}>
+        {/*Notification Type*/}
         <SelectStatusDropDown
           width={Dimensions.get('screen').width - 40}
-          height={40}
+          height={30}
           defaultValue={allNotificationType[0]?.title}
           data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
+          border={true}
         />
       </View>
       <View style={{flex: 1, marginHorizontal: 20}}>

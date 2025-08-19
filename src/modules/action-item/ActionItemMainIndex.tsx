@@ -153,8 +153,9 @@ const ActionItemMainIndex = () => {
           customStyle={{width: 180}}
         />
         <SelectStatusDropDown
-          width={170}
+          width={130}
           height={50}
+          border={false}
           defaultValue={allStatus[0].title}
           data={allStatus}
           handleSelectedStatus={handleSelectedStatus}

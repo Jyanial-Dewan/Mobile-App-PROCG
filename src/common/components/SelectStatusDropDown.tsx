@@ -8,6 +8,8 @@ interface Props {
   defaultValue?: string;
   data: any;
   handleSelectedStatus: (status: string) => void;
+  border?: boolean;
+  search?: boolean;
 }
 const SelectStatusDropDown = ({
   width,
@@ -15,18 +17,30 @@ const SelectStatusDropDown = ({
   defaultValue,
   data,
   handleSelectedStatus,
+  border = false,
+  search = false,
 }: Props) => {
   const defaultItem = data.find((item: any) => item.title === defaultValue);
   return (
     <SelectDropdown
       data={data}
+      // search={search}
       onSelect={(selectedItem, index) => {
         handleSelectedStatus(selectedItem.value);
       }}
       defaultValue={defaultItem}
       renderButton={(selectedItem, isOpened) => {
         return (
-          <View style={[styles.dropdownButtonStyle, {width, height}]}>
+          <View
+            style={[
+              styles.dropdownButtonStyle,
+              {
+                width,
+                height,
+                borderBlockColor: border ? '#7b7b7bff' : '',
+                borderWidth: border ? 0.5 : 0,
+              },
+            ]}>
             {selectedItem && (
               <Icon
                 name={selectedItem.icon}
@@ -68,8 +82,6 @@ const styles = StyleSheet.create({
     // width: 170,
     // height: 50,
     backgroundColor: '#fff',
-    borderBlockColor: '#7b7b7bff',
-    borderWidth: 0.5,
     borderRadius: 5,
     flexDirection: 'row',
     justifyContent: 'center',

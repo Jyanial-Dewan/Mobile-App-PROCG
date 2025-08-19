@@ -60,6 +60,12 @@ const RenderItems = ({
       : item.status.toLowerCase() === 'in progress'
         ? '#fef9c3'
         : '#ffedd5';
+  const iconName =
+    item.status.toLowerCase() === 'completed'
+      ? 'Circle-Check-Big'
+      : item.status.toLowerCase() === 'in progress'
+        ? 'Circle-Check'
+        : 'Circle';
 
   return (
     <View style={styles.itemContainer}>
@@ -72,16 +78,7 @@ const RenderItems = ({
                 backgroundColor: bgColor,
               },
             ]}>
-            <SVGController
-              name={
-                item.status.toLowerCase() === 'completed'
-                  ? 'Circle-Check-Big'
-                  : item.status.toLowerCase() === 'in progress'
-                    ? 'Circle-Check'
-                    : 'Circle'
-              }
-              color={COLORS.black}
-            />
+            <SVGController name={iconName} color={COLORS.black} />
           </View>
 
           <Column>
