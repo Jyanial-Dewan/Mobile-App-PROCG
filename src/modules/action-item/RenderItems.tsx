@@ -74,9 +74,9 @@ const RenderItems = ({
             ]}>
             <SVGController
               name={
-                item.status === 'Completed'
+                item.status.toLowerCase() === 'completed'
                   ? 'Circle-Check-Big'
-                  : item.status === 'In Progress'
+                  : item.status.toLowerCase() === 'in progress'
                     ? 'Circle-Check'
                     : 'Circle'
               }
