@@ -3,11 +3,15 @@ import React from 'react';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 interface Props {
+  width: number;
+  height: number;
   defaultValue?: string;
   data: any;
   handleSelectedStatus: (status: string) => void;
 }
 const SelectStatusDropDown = ({
+  width,
+  height,
   defaultValue,
   data,
   handleSelectedStatus,
@@ -22,7 +26,7 @@ const SelectStatusDropDown = ({
       defaultValue={defaultItem}
       renderButton={(selectedItem, isOpened) => {
         return (
-          <View style={styles.dropdownButtonStyle}>
+          <View style={[styles.dropdownButtonStyle, {width, height}]}>
             {selectedItem && (
               <Icon
                 name={selectedItem.icon}
@@ -61,14 +65,16 @@ export default SelectStatusDropDown;
 
 const styles = StyleSheet.create({
   dropdownButtonStyle: {
-    width: 170,
-    height: 50,
-    backgroundColor: '#E9ECEF',
-    borderRadius: 12,
+    // width: 170,
+    // height: 50,
+    backgroundColor: '#fff',
+    borderBlockColor: '#7b7b7bff',
+    borderWidth: 0.5,
+    borderRadius: 5,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
   },
   dropdownButtonTxtStyle: {
     flex: 1,
@@ -78,6 +84,7 @@ const styles = StyleSheet.create({
   },
   dropdownButtonArrowStyle: {
     fontSize: 28,
+    color: '#000',
   },
   dropdownButtonIconStyle: {
     fontSize: 28,
@@ -90,10 +97,10 @@ const styles = StyleSheet.create({
   dropdownItemStyle: {
     width: '100%',
     flexDirection: 'row',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 5,
   },
   dropdownItemTxtStyle: {
     flex: 1,

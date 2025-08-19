@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Dimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -387,6 +388,8 @@ const NewMessage = () => {
       }>
       <View style={{marginHorizontal: 20}}>
         <SelectStatusDropDown
+          width={Dimensions.get('screen').width - 40}
+          height={40}
           defaultValue={allNotificationType[0]?.title}
           data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
@@ -800,6 +803,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
-    backgroundColor: '#f0f0f0', // light background
+    backgroundColor: '#ffffffff',
+    color: COLORS.black,
   },
 });
