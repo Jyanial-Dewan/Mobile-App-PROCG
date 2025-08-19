@@ -292,6 +292,7 @@ const DraftsDetails = observer(() => {
 
     try {
       const updateResponse = await httpRequest(sendParams, setIsSending);
+      console.log(updateResponse, 'updateResponse111111111111111');
       if (updateResponse) {
         await httpRequest(sendNotificationParams, setIsSending);
 
@@ -299,9 +300,7 @@ const DraftsDetails = observer(() => {
           const SendAlertPayload = {
             alert_name: alertName,
             description: alertDescription,
-            recepients: recivers,
-            // notification_id: id,
-            user_id: userInfo?.user_id,
+            recipients: recivers,
             last_updated_by: userInfo?.user_id,
           };
           const sendAlertParams = {
@@ -316,7 +315,6 @@ const DraftsDetails = observer(() => {
             sendAlertParams,
             setIsSending,
           );
-
           if (alertResponse.message) {
             setAlertName('');
             setAlertDescription('');
@@ -367,6 +365,13 @@ const DraftsDetails = observer(() => {
           type: 'success',
         });
         setTimeout(async () => {
+          setSubject('');
+          setRecivers([]);
+          setBody('');
+          setActionItemName('');
+          setActionItemDescription('');
+          setAlertName('');
+          setAlertDescription('');
           navigation.goBack();
         }, 500);
       }
@@ -409,7 +414,7 @@ const DraftsDetails = observer(() => {
     };
     try {
       const draftResponse = await httpRequest(draftParams, setIsDrafting);
-      console.log(draftResponse, 'draftResponse11111111111');
+      console.log(draftResponse, 'draftResponse2222222222222222');
       if (draftResponse.message) {
         if (notificationType.toLowerCase() === 'alert') {
           const SendAlertPayload = {
@@ -426,12 +431,10 @@ const DraftsDetails = observer(() => {
             isConsole: true,
             isConsoleParams: true,
           };
-          console.log(draftAlertParams.url, 'draftAlertParams.url===');
           const alertResponse = await httpRequest(
             draftAlertParams,
             setIsDrafting,
           );
-          console.log(alertResponse, 'alertResponse222222222');
           if (alertResponse.message) {
             socket.emit('SendAlert', {
               alertId: alertResponse.result.alert_id,
@@ -468,6 +471,13 @@ const DraftsDetails = observer(() => {
           type: 'success',
         });
         setTimeout(async () => {
+          setSubject('');
+          setRecivers([]);
+          setBody('');
+          setActionItemName('');
+          setActionItemDescription('');
+          setAlertName('');
+          setAlertDescription('');
           navigation.goBack();
         }, 500);
       }
@@ -927,7 +937,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textInputBody: {
-    minHeight: 200,
+    minHeight: 160,
     textAlignVertical: 'top',
     width: '100%',
     color: COLORS.black,

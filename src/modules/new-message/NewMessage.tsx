@@ -250,6 +250,14 @@ const NewMessage = () => {
         toaster.show({message: notificationResponse.message, type: 'success'});
       }
       setTimeout(async () => {
+        setSubject('');
+        setRecivers([]);
+        setBody('');
+        setActionItemName('');
+        setActionItemDescription('');
+        setAlertName('');
+        setAlertDescription('');
+        // setSelectedNotificationType('NOTIFICATION');
         navigation.goBack();
       }, 500);
     } catch (error) {
@@ -314,7 +322,7 @@ const NewMessage = () => {
           };
           const alertResponse = await httpRequest(
             sendAlertParams,
-            setIsSending,
+            setIsDrafting,
           );
 
           if (alertResponse.message) {
@@ -330,7 +338,7 @@ const NewMessage = () => {
               // isConsole: true,
               // isConsoleParams: true,
             };
-            await httpRequest(params, setIsSending);
+            await httpRequest(params, setIsDrafting);
             socket.emit('SendAlert', {
               alertId: alertResponse.result.alert_id,
               recipients: recivers,
@@ -351,17 +359,14 @@ const NewMessage = () => {
             method: 'post',
             baseURL: urlPython,
             access_token: userInfo?.access_token,
-            // isConsole: true,
-            // isConsoleParams: true,
+            isConsole: true,
+            isConsoleParams: true,
           };
           const actionItemResponse = await httpRequest(
             sendActionItemParams,
-            setIsSending,
+            setIsDrafting,
           );
-
           if (actionItemResponse.message) {
-            setActionItemName('');
-            setActionItemDescription('');
             const params1 = {
               url: `${api.Messages}/${notificationResponse.result.notification_id}`,
               data: {
@@ -369,10 +374,10 @@ const NewMessage = () => {
               },
               method: 'put',
               baseURL: urlNode,
-              // isConsole: true,
-              // isConsoleParams: true,
+              isConsole: true,
+              isConsoleParams: true,
             };
-            await httpRequest(params1, setIsSending);
+            await httpRequest(params1, setIsDrafting);
             const params2 = {
               url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
               data: {
@@ -381,10 +386,10 @@ const NewMessage = () => {
               method: 'put',
               baseURL: urlPython,
               access_token: userInfo?.access_token,
-              // isConsole: true,
-              // isConsoleParams: true,
+              isConsole: true,
+              isConsoleParams: true,
             };
-            await httpRequest(params2, setIsSending);
+            await httpRequest(params2, setIsDrafting);
           }
         }
 
@@ -397,6 +402,14 @@ const NewMessage = () => {
           type: 'success',
         });
         setTimeout(async () => {
+          setSubject('');
+          setRecivers([]);
+          setBody('');
+          setActionItemName('');
+          setActionItemDescription('');
+          setAlertName('');
+          setAlertDescription('');
+          // setSelectedNotificationType('NOTIFICATION');
           navigation.goBack();
         }, 500);
       }
@@ -628,7 +641,7 @@ const NewMessage = () => {
           />
         </View>
 
-        {selectedNotificationType.toLowerCase() !== 'notification' && (
+        {/* {selectedNotificationType.toLowerCase() !== 'notification' && (
           <View style={styles.dividerContainer}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>
@@ -636,7 +649,7 @@ const NewMessage = () => {
             </Text>
             <View style={styles.dividerLine} />
           </View>
-        )}
+        )} */}
         {/* Action Item   */}
         {selectedNotificationType.toLowerCase() === 'action item' && (
           <>
@@ -648,7 +661,7 @@ const NewMessage = () => {
                   borderBottomColor: COLORS.lightGray5,
                 },
               ]}>
-              <Text style={{color: COLORS.darkGray}}>Action Item Name</Text>
+              <Text style={{color: COLORS.darkGray}}>Name</Text>
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={actionItemName}
@@ -658,7 +671,7 @@ const NewMessage = () => {
             <View style={styles.lineContainerBody}>
               <TextInput
                 style={styles.textInputBody}
-                placeholder="Action Item Description"
+                placeholder="Description"
                 value={actionItemDescription}
                 onChangeText={text => setActionItemDescription(text)}
                 multiline={true}
@@ -680,7 +693,7 @@ const NewMessage = () => {
                   borderBottomColor: COLORS.lightGray5,
                 },
               ]}>
-              <Text style={{color: COLORS.darkGray}}>Alert Name</Text>
+              <Text style={{color: COLORS.darkGray}}>Name</Text>
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={alertName}
@@ -692,7 +705,7 @@ const NewMessage = () => {
                 multiline={true}
                 // numberOfLines={10}
                 style={styles.textInputBody}
-                placeholder="Alert Description"
+                placeholder="Description"
                 value={alertDescription}
                 onChangeText={text => setAlertDescription(text)}
                 placeholderTextColor={COLORS.darkGray}
@@ -746,6 +759,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     width: '100%',
     color: COLORS.black,
+    // borderBottomColor: COLORS.lightGray5,
+    // borderBottomWidth: 0.5,
   },
   sentBtn: {
     position: 'absolute',

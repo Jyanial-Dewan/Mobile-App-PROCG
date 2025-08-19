@@ -2,6 +2,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {observer} from 'mobx-react-lite';
 interface Props {
   isDisabled?: boolean;
   width: number;
@@ -50,12 +51,19 @@ const SelectStatusDropDown = ({
                 style={styles.dropdownButtonIconStyle}
               />
             )}
-            <Text style={styles.dropdownButtonTxtStyle}>
+            <Text
+              style={[
+                styles.dropdownButtonTxtStyle,
+                {color: isDisabled ? '#7b7b7bff' : '#000'},
+              ]}>
               {(selectedItem && selectedItem.title) || defaultValue}
             </Text>
             <Icon
               name={isOpened ? 'menu-up' : 'menu-down'}
-              style={styles.dropdownButtonArrowStyle}
+              style={[
+                styles.dropdownButtonArrowStyle,
+                {color: isDisabled ? '#7b7b7bff' : '#000'},
+              ]}
             />
           </View>
         );
@@ -78,7 +86,7 @@ const SelectStatusDropDown = ({
   );
 };
 
-export default SelectStatusDropDown;
+export default observer(SelectStatusDropDown);
 
 const styles = StyleSheet.create({
   dropdownButtonStyle: {
@@ -94,7 +102,7 @@ const styles = StyleSheet.create({
   dropdownButtonTxtStyle: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '500',
+    // fontWeight: '500',
     color: '#151E26',
   },
   dropdownButtonArrowStyle: {
