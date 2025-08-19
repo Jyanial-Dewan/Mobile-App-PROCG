@@ -126,6 +126,47 @@ const DraftsDetails = observer(() => {
         setNotificationType(res.notification_type);
         setAlert_id(res.alert_id);
         setAction_item_id(res.action_item_id);
+        if (res.notification_type.toLowerCase() === 'alert') {
+          const api_params = {
+            url: `${api.CreateAlert}/${res.alert_id}`,
+            baseURL: urlNode,
+            // isConsole: true,
+            // isConsoleParams: true,
+          };
+          const alertResponse: AlertStoreSnapshotType = await httpRequest(
+            api_params,
+            setIsLoading,
+          );
+          if (alertResponse) {
+            setOldMsgState((prev: any) => ({
+              ...prev,
+              alertName: alertResponse.alert_name,
+              alertDescription: alertResponse.description,
+            }));
+            setAlertName(alertResponse.alert_name);
+            setAlertDescription(alertResponse.description);
+          }
+        } else if (res.notification_type.toLowerCase() === 'action item') {
+          const api_params = {
+            url: `${api.ActionItem}/${res.action_item_id}`,
+            baseURL: urlPython,
+            access_token: userInfo?.access_token,
+            // isConsole: true,
+            // isConsoleParams: true,
+          };
+          const actionItemResponse: ActionItemsStoreSnapshotType =
+            await httpRequest(api_params, setIsLoading);
+
+          if (actionItemResponse) {
+            setOldMsgState(prev => ({
+              ...prev,
+              actionItemName: actionItemResponse.action_item_name,
+              actionItemDescription: actionItemResponse.description,
+            }));
+            setActionItemName(actionItemResponse.action_item_name);
+            setActionItemDescription(actionItemResponse.description);
+          }
+        }
       }
     },
     [isFocused, _id],
@@ -171,49 +212,7 @@ const DraftsDetails = observer(() => {
   }, [recivers, oldMsgState?.receivers]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (notificationType.toLowerCase() === 'alert') {
-        const api_params = {
-          url: `${api.CreateAlert}/${alert_id}`,
-          baseURL: urlNode,
-          // isConsole: true,
-          // isConsoleParams: true,
-        };
-        const alertResponse: AlertStoreSnapshotType = await httpRequest(
-          api_params,
-          setIsLoading,
-        );
-        if (alertResponse) {
-          setOldMsgState((prev: any) => ({
-            ...prev,
-            alertName: alertResponse.alert_name,
-            alertDescription: alertResponse.description,
-          }));
-          setAlertName(alertResponse.alert_name);
-          setAlertDescription(alertResponse.description);
-        }
-      } else if (notificationType.toLowerCase() === 'action item') {
-        const api_params = {
-          url: `${api.ActionItem}/${action_item_id}`,
-          baseURL: urlPython,
-          access_token: userInfo?.access_token,
-          // isConsole: true,
-          // isConsoleParams: true,
-        };
-        const actionItemResponse: ActionItemsStoreSnapshotType =
-          await httpRequest(api_params, setIsLoading);
-
-        if (actionItemResponse) {
-          setOldMsgState(prev => ({
-            ...prev,
-            actionItemName: actionItemResponse.action_item_name,
-            actionItemDescription: actionItemResponse.description,
-          }));
-          setActionItemName(actionItemResponse.action_item_name);
-          setActionItemDescription(actionItemResponse.description);
-        }
-      }
-    };
+    const fetchData = async () => {};
 
     fetchData();
   }, [action_item_id, alert_id]);
@@ -533,142 +532,141 @@ const DraftsDetails = observer(() => {
       }
       footer={
         <View>
-          {notificationType.toLowerCase() === 'action item' && (
-            <>
-              <TouchableOpacity
-                onPress={handleSend}
-                style={[
-                  styles.sentBtn,
-                  (recivers.length === 0 ||
-                    body === '' ||
-                    subject === '' ||
-                    (notificationType.toLowerCase() === 'action item' &&
-                      actionItemName === '') ||
-                    (notificationType.toLowerCase() === 'action item' &&
-                      actionItemDescription === '')) &&
-                    styles.disabled,
-                ]}
-                disabled={
-                  recivers.length === 0 ||
-                  body === '' ||
-                  subject === '' ||
-                  isSending ||
-                  (notificationType.toLowerCase() === 'action item' &&
-                    actionItemName === '') ||
-                  (notificationType.toLowerCase() === 'action item' &&
-                    actionItemDescription === '')
-                }>
-                {isSending ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={COLORS.white}
-                    style={styles.loadingStyle}
-                  />
-                ) : (
-                  <SVGController name="Send" color={COLORS.white} />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleDraft}
-                disabled={
-                  (!userChanged &&
-                    oldMsgState?.subject === subject &&
-                    oldMsgState?.body === body &&
-                    oldMsgState?.actionItemName === actionItemName &&
-                    oldMsgState?.actionItemDescription ===
-                      actionItemDescription) ||
-                  isDrafting
-                }
-                style={[
-                  styles.draftBtn,
-                  ((!userChanged &&
-                    oldMsgState?.subject === subject &&
-                    oldMsgState?.body === body &&
-                    oldMsgState?.actionItemName === actionItemName &&
-                    oldMsgState?.actionItemDescription ===
-                      actionItemDescription) ||
-                    isDrafting) &&
-                    styles.disabled,
-                ]}>
-                {isDrafting ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={COLORS.white}
-                    style={styles.loadingStyle}
-                  />
-                ) : (
-                  <SVGController name="Notebook-Pen" color={COLORS.white} />
-                )}
-              </TouchableOpacity>
-            </>
-          )}
           {notificationType.toLowerCase() === 'alert' && (
-            <>
-              <TouchableOpacity
-                onPress={handleSend}
-                style={[
-                  styles.sentBtn,
-                  (recivers.length === 0 ||
-                    body === '' ||
-                    subject === '' ||
-                    (notificationType.toLowerCase() === 'alert' &&
-                      alertName === '') ||
-                    (notificationType.toLowerCase() === 'alert' &&
-                      alertDescription === '')) &&
-                    styles.disabled,
-                ]}
-                disabled={
-                  recivers.length === 0 ||
-                  body === '' ||
-                  subject === '' ||
-                  isSending ||
-                  (notificationType.toLowerCase() === 'alert' &&
-                    alertName === '') ||
-                  (notificationType.toLowerCase() === 'alert' &&
-                    alertDescription === '')
-                }>
-                {isSending ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={COLORS.white}
-                    style={styles.loadingStyle}
-                  />
-                ) : (
-                  <SVGController name="Send" color={COLORS.white} />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleDraft}
-                disabled={
-                  (!userChanged &&
-                    oldMsgState?.subject === subject &&
-                    oldMsgState?.body === body &&
-                    oldMsgState?.alertName === alertName &&
-                    oldMsgState?.alertDescription === alertDescription) ||
-                  isDrafting
-                }
-                style={[
-                  styles.draftBtn,
-                  ((!userChanged &&
-                    oldMsgState?.subject === subject &&
-                    oldMsgState?.body === body &&
-                    oldMsgState?.alertName === actionItemName &&
-                    oldMsgState?.alertDescription === alertDescription) ||
-                    isDrafting) &&
-                    styles.disabled,
-                ]}>
-                {isDrafting ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={COLORS.white}
-                    style={styles.loadingStyle}
-                  />
-                ) : (
-                  <SVGController name="Notebook-Pen" color={COLORS.white} />
-                )}
-              </TouchableOpacity>
-            </>
+            <TouchableOpacity
+              onPress={handleDraft}
+              disabled={
+                (!userChanged &&
+                  oldMsgState?.subject === subject &&
+                  oldMsgState?.body === body &&
+                  oldMsgState?.alertName === alertName &&
+                  oldMsgState?.alertDescription === alertDescription) ||
+                isDrafting
+              }
+              style={[
+                styles.draftBtn,
+                ((!userChanged &&
+                  oldMsgState?.subject === subject &&
+                  oldMsgState?.body === body &&
+                  oldMsgState?.alertName === alertName &&
+                  oldMsgState?.alertDescription === alertDescription) ||
+                  isDrafting) &&
+                  styles.disabled,
+              ]}>
+              {isDrafting ? (
+                <ActivityIndicator
+                  size="small"
+                  color={COLORS.white}
+                  style={styles.loadingStyle}
+                />
+              ) : (
+                <SVGController name="Notebook-Pen" color={COLORS.white} />
+              )}
+            </TouchableOpacity>
           )}
+          {notificationType.toLowerCase() === 'action item' && (
+            <TouchableOpacity
+              onPress={handleDraft}
+              disabled={
+                (!userChanged &&
+                  oldMsgState?.subject === subject &&
+                  oldMsgState?.body === body &&
+                  oldMsgState?.actionItemName === actionItemName &&
+                  oldMsgState?.actionItemDescription ===
+                    actionItemDescription) ||
+                isDrafting
+              }
+              style={[
+                styles.draftBtn,
+                ((!userChanged &&
+                  oldMsgState?.subject === subject &&
+                  oldMsgState?.body === body &&
+                  oldMsgState?.actionItemName === actionItemName &&
+                  oldMsgState?.actionItemDescription ===
+                    actionItemDescription) ||
+                  isDrafting) &&
+                  styles.disabled,
+              ]}>
+              {isDrafting ? (
+                <ActivityIndicator
+                  size="small"
+                  color={COLORS.white}
+                  style={styles.loadingStyle}
+                />
+              ) : (
+                <SVGController name="Notebook-Pen" color={COLORS.white} />
+              )}
+            </TouchableOpacity>
+          )}
+          {notificationType.toLowerCase() === 'notification' && (
+            <TouchableOpacity
+              onPress={handleDraft}
+              disabled={
+                (!userChanged &&
+                  oldMsgState?.subject === subject &&
+                  oldMsgState?.body === body) ||
+                isDrafting
+              }
+              style={[
+                styles.draftBtn,
+                ((!userChanged &&
+                  oldMsgState?.subject === subject &&
+                  oldMsgState?.body === body) ||
+                  isDrafting) &&
+                  styles.disabled,
+              ]}>
+              {isDrafting ? (
+                <ActivityIndicator
+                  size="small"
+                  color={COLORS.white}
+                  style={styles.loadingStyle}
+                />
+              ) : (
+                <SVGController name="Notebook-Pen" color={COLORS.white} />
+              )}
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={handleSend}
+            style={[
+              styles.sentBtn,
+              (recivers.length === 0 ||
+                body === '' ||
+                subject === '' ||
+                (notificationType.toLowerCase() === 'alert' &&
+                  alertName === '') ||
+                (notificationType.toLowerCase() === 'alert' &&
+                  alertDescription === '') ||
+                (notificationType.toLowerCase() === 'action item' &&
+                  actionItemName === '') ||
+                (notificationType.toLowerCase() === 'action item' &&
+                  actionItemDescription === '')) &&
+                styles.disabled,
+            ]}
+            disabled={
+              recivers.length === 0 ||
+              body === '' ||
+              subject === '' ||
+              isSending ||
+              (notificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (notificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
+              (notificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (notificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '')
+            }>
+            {isSending ? (
+              <ActivityIndicator
+                size="small"
+                color={COLORS.white}
+                style={styles.loadingStyle}
+              />
+            ) : (
+              <SVGController name="Send" color={COLORS.white} />
+            )}
+          </TouchableOpacity>
         </View>
       }>
       {isLoading ? (
@@ -834,7 +832,7 @@ const DraftsDetails = observer(() => {
                     borderBottomColor: COLORS.lightGray5,
                   },
                 ]}>
-                <Text style={{color: COLORS.darkGray}}>Action Item Name</Text>
+                <Text style={{color: COLORS.darkGray}}>Name</Text>
                 <TextInput
                   style={{height: 40, width: '90%', color: COLORS.black}}
                   value={actionItemName}
@@ -844,7 +842,7 @@ const DraftsDetails = observer(() => {
               <View style={styles.lineContainerBody}>
                 <TextInput
                   style={styles.textInputBody}
-                  placeholder="Action Item Description"
+                  placeholder="Description"
                   value={actionItemDescription}
                   onChangeText={text => setActionItemDescription(text)}
                   multiline={true}
@@ -866,7 +864,7 @@ const DraftsDetails = observer(() => {
                     borderBottomColor: COLORS.lightGray5,
                   },
                 ]}>
-                <Text style={{color: COLORS.darkGray}}>Alert Name</Text>
+                <Text style={{color: COLORS.darkGray}}>Name</Text>
                 <TextInput
                   style={{height: 40, width: '90%', color: COLORS.black}}
                   value={alertName}
@@ -878,7 +876,7 @@ const DraftsDetails = observer(() => {
                   multiline={true}
                   // numberOfLines={10}
                   style={styles.textInputBody}
-                  placeholder="Alert Description"
+                  placeholder="Description"
                   value={alertDescription}
                   onChangeText={text => setAlertDescription(text)}
                   placeholderTextColor={COLORS.darkGray}
