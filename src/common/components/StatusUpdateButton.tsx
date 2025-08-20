@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -58,90 +58,111 @@ const StatusUpdateButton: React.FC<Props> = ({
     },
   ];
   const handlePress = (status: string) => {
+    if (status === actionItem.status) return;
     handleStatusUpdate(actionItem?.action_item_id, status);
+    setIsModalShow(false);
   };
 
-  // const isNew = actionItem.status.toLowerCase() === 'new';
-  // const isCompleted = actionItem.status.toLowerCase() === 'completed';
-  // const isInProgress = actionItem.status.toLowerCase() === 'in progress';
   const currentIndex = Math.max(
     0,
     status.findIndex(
       s => s.label.toLowerCase() === actionItem.status.toLowerCase(),
     ),
   );
+  const [buttonPosition, setButtonPosition] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const buttonRef = useRef<TouchableOpacity>(null);
+  const showModal = () => {
+    if (buttonRef.current) {
+      buttonRef.current.measure((fx, fy, width, height, px, py) => {
+        setButtonPosition({x: px, y: py, width, height});
+        setIsModalShow(true);
+      });
+    }
+  };
 
   return (
     <>
-      {isModalShow && (
-        <TouchableWithoutFeedback onPress={() => setIsModalShow(!isModalShow)}>
-          <View style={styles.modalContent}>
-            <TouchableWithoutFeedback>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.stepperRow}>
-                  {/* one continuous gray track */}
-                  <View style={styles.track}>
-                    {/* green filled part of the track */}
-                    <View
-                      style={[
-                        styles.trackFill,
-                        {
-                          width: `${(currentIndex / (status.length - 1)) * 100}%`,
-                        },
-                      ]}
-                    />
+      <Modal
+        visible={isModalShow}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsModalShow(false)}>
+        <TouchableWithoutFeedback onPress={() => setIsModalShow(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View
+                style={[
+                  styles.modalContent,
+                  {
+                    position: 'absolute',
+                    top: buttonPosition.y - 63,
+                    left: buttonPosition.x - 120,
+                  },
+                ]}>
+                <View style={{flexDirection: 'row'}}>
+                  <View style={styles.stepperRow}>
+                    {/* Track */}
+                    <View style={styles.track}>
+                      <View
+                        style={[
+                          styles.trackFill,
+                          {
+                            width: `${(currentIndex / (status.length - 1)) * 100}%`,
+                          },
+                        ]}
+                      />
+                    </View>
+
+                    {/* Status Steps */}
+                    {status.map((item, index) => {
+                      const isActive = index === currentIndex;
+                      const isCompleted = index < currentIndex;
+
+                      return (
+                        <TouchableOpacity
+                          key={item.id}
+                          disabled={item.label.toLowerCase() === 'new'}
+                          onPress={() => handlePress(item.value)}
+                          style={styles.step}
+                          activeOpacity={1}>
+                          <View
+                            style={[
+                              styles.circle,
+                              (isActive || isCompleted) && {
+                                borderColor: '#16a34a',
+                                backgroundColor: '#fff',
+                              },
+                            ]}>
+                            {(isActive || isCompleted) && (
+                              <Icon name="check" size={16} color={'#16a34a'} />
+                            )}
+                          </View>
+                          <Text style={styles.label}>{item.label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
-
-                  {/* circles */}
-                  {status.map((item, index) => {
-                    const isActive = index === currentIndex;
-                    const isCompleted = index < currentIndex;
-
-                    return (
-                      <TouchableOpacity
-                        key={item.id}
-                        disabled={item.label.toLowerCase() === 'new'}
-                        onPress={() => handlePress(item.value)}
-                        style={styles.step}
-                        activeOpacity={1}>
-                        <View
-                          style={[
-                            styles.circle,
-                            (isActive || isCompleted) && {
-                              borderColor: '#16a34a',
-                              backgroundColor: '#fff',
-                            },
-                            // isCompleted && {backgroundColor: '#16a34a'},
-                          ]}>
-                          {(isActive || isCompleted) && (
-                            <Icon name="check" size={16} color={'#16a34a'} />
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.label,
-                            // isActive && {color: '#16a34a', fontWeight: '600'},
-                          ]}>
-                          {item.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
                 </View>
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
-      )}
+      </Modal>
 
       <TouchableOpacity
+        ref={buttonRef}
         disabled={disabled}
         style={[
           styles.btnStyle,
           {backgroundColor: disabled ? COLORS.lightGray : bgColor},
           btnstyle || {},
         ]}
-        onPress={() => setIsModalShow(!isModalShow)}>
+        onPress={showModal}>
         <View
           style={[
             styles.btnContentWrapperView,
@@ -168,12 +189,19 @@ const StatusUpdateButton: React.FC<Props> = ({
 export default observer(StatusUpdateButton);
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
+
   modalContent: {
     backgroundColor: 'white',
-    width: 'auto',
+    width: 290,
     padding: 6,
     borderRadius: 10,
-    maxHeight: 350,
+    maxHeight: 60,
     position: 'absolute',
     bottom: 45,
     right: 0,

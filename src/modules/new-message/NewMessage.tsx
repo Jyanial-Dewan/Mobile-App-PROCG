@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Dimensions,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -8,9 +9,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
 import MainHeader from '../../common/components/MainHeader';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -34,6 +36,7 @@ import {
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
+import UserSelection from '../../common/components/UserSelection';
 
 interface User {
   name: string;
@@ -433,6 +436,27 @@ const NewMessage = () => {
     {title: 'Action Item', value: 'ACTION ITEM'},
     {title: 'Alert', value: 'ALERT'},
   ];
+  const [isModalShow, setIsModalShow] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const buttonRef = useRef<TouchableOpacity>(null);
+  const showModalNow = () => {
+    if (buttonRef.current) {
+      buttonRef.current.measure((fx, fy, width, height, px, py) => {
+        setButtonPosition({x: px, y: py, width, height});
+        setIsModalShow(true);
+      });
+    }
+  };
+  useEffect(() => {
+    if (recivers.length === 0) {
+      setShowModal(false);
+    }
+  }, [recivers.length]);
   return (
     <ContainerNew
       isRefresh={false}
@@ -519,10 +543,9 @@ const NewMessage = () => {
           />
           <View style={styles.withinLineContainer}>
             <Text style={{color: COLORS.darkGray}}>To</Text>
-            <TextInput
-              style={{height: 40, width: '90%', color: COLORS.black}}
-              value={query}
-              onChangeText={text => setQuery(text)}
+            <Pressable
+              onPress={() => setIsModalShow(true)}
+              style={{width: '90%', height: 40}}
             />
           </View>
           {recivers.length > 1 && (
@@ -537,57 +560,110 @@ const NewMessage = () => {
             </Pressable>
           )}
         </View>
-        {query !== '' && (
-          <ScrollView style={styles.modal}>
-            <Pressable style={styles.selectPress} onPress={handleSelectAll}>
-              <Text style={[styles.item]}>All</Text>
-              {isAllClicked && (
-                <AntDesign name="check" size={20} color="#3632A6" />
-              )}
-            </Pressable>
-            {filterdUser.map(usr => (
-              <TouchableOpacity
-                onPress={() => handleReciever(usr.user_id)}
-                key={usr.user_id}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: 6,
-                      alignItems: 'center',
-                    }}>
-                    <Image
-                      style={styles.profileImage}
-                      source={{
-                        uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
-                        // headers: {
-                        //   Authorization: `Bearer ${userInfo?.access_token}`,
-                        // },
-                      }}
-                      fallback={fallbacks}
-                    />
-                    <Text style={[styles.item]}>{usr?.user_name}</Text>
-                  </View>
-                  <View style={styles.itemListWrapper} />
-                  {recivers.includes(usr.user_id) && (
-                    <AntDesign name="check" size={20} color="#3632A6" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
 
-            {filterdUser?.length === 0 && (
-              <View style={styles.noData}>
-                <Text style={[styles.noItem]}>No Data Found</Text>
-              </View>
-            )}
-          </ScrollView>
-        )}
+        <Modal
+          visible={isModalShow}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsModalShow(false)}>
+          <TouchableWithoutFeedback onPress={() => setIsModalShow(false)}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback onPress={() => {}}>
+                <View
+                  style={[
+                    styles.modalContent,
+                    {
+                      position: 'absolute',
+                      top: buttonPosition.y + 140, // Adjust height of popup
+                      left: buttonPosition.x + 20,
+                    },
+                  ]}>
+                  <TextInput
+                    autoFocus
+                    style={{
+                      fontSize: 16,
+                      height: 40,
+                      width: '90%',
+                      color: COLORS.black,
+                    }}
+                    placeholder="Search recipient"
+                    placeholderTextColor={COLORS.black}
+                    value={query}
+                    onChangeText={text => {
+                      setQuery(text), showModalNow();
+                    }}
+                  />
+                  <ScrollView scrollEnabled={true} style={{height: 300}}>
+                    <Pressable
+                      style={styles.selectPress}
+                      onPress={handleSelectAll}>
+                      <Text style={[styles.item]}>All</Text>
+                      {isAllClicked && (
+                        <AntDesign
+                          name="check"
+                          size={20}
+                          color={COLORS.black}
+                        />
+                      )}
+                    </Pressable>
+
+                    {filterdUser.map(usr => (
+                      <TouchableOpacity
+                        onPress={() => handleReciever(usr.user_id)}
+                        key={usr.user_id}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              gap: 6,
+                              alignItems: 'center',
+                            }}>
+                            <Image
+                              style={styles.profileImage}
+                              source={{
+                                uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
+                                // headers: {
+                                //   Authorization: `Bearer ${userInfo?.access_token}`,
+                                // },
+                              }}
+                              fallback={fallbacks}
+                            />
+                            <Text style={[styles.item]}>{usr?.user_name}</Text>
+                          </View>
+                          <View style={styles.itemListWrapper} />
+                          {recivers.includes(usr.user_id) && (
+                            <AntDesign
+                              name="check"
+                              size={20}
+                              color={COLORS.black}
+                            />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+
+                    {filterdUser?.length === 0 && (
+                      <View style={styles.noData}>
+                        <Text style={[styles.noItem]}>No Data Found</Text>
+                      </View>
+                    )}
+                  </ScrollView>
+                  <ScrollView scrollEnabled={true}>
+                    {/* {query !== '' && ( */}
+
+                    {/* )} */}
+                  </ScrollView>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
         {recivers.length !== 0 ? (
           <View style={{flexDirection: 'row'}}>
             <View style={styles.singleRcvr}>
@@ -918,5 +994,25 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#ffffffff',
     color: COLORS.black,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    // width: 333,
+    width: '60%',
+    padding: 6,
+    borderRadius: 10,
+    // maxHeight: 60,
+    position: 'absolute',
+    top: 66,
+    left: 20,
+    zIndex: 99999,
+    borderBlockColor: '#b1b1b1ff',
+    borderWidth: 0.5,
   },
 });
