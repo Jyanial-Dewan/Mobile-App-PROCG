@@ -42,6 +42,11 @@ const StatusUpdateButton: React.FC<Props> = ({
   const [isModalShow, setIsModalShow] = useState(false);
   const status = [
     {
+      id: 0,
+      label: 'New',
+      value: 'NEW',
+    },
+    {
       id: 1,
       label: 'In Progress',
       value: 'IN PROGRESS',
@@ -56,10 +61,63 @@ const StatusUpdateButton: React.FC<Props> = ({
     handleStatusUpdate(actionItem?.action_item_id, status);
   };
 
+  const isNew = actionItem.status.toLowerCase() === 'new';
   const isCompleted = actionItem.status.toLowerCase() === 'completed';
   const isInProgress = actionItem.status.toLowerCase() === 'in progress';
   return (
     <>
+      {isModalShow && (
+        // <Modal visible={isModalShow} transparent={true} animationType="fade">
+
+        <TouchableWithoutFeedback onPress={() => setIsModalShow(!isModalShow)}>
+          <View style={styles.modalContent}>
+            <TouchableWithoutFeedback>
+              <View
+                // style={styles.modalOverlay}
+                style={{flexDirection: 'row'}}>
+                {status.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handlePress(item.value)}>
+                    <View style={{padding: 10}}>
+                      {/* isCompleted || (isInProgress && item?.label.toLowerCase()
+                      === 'in progress') */}
+                      {item?.label.toLowerCase() === 'new' ? (
+                        <Icon
+                          name="checkbox-marked-circle"
+                          size={20}
+                          color="#16a34a"
+                        />
+                      ) : (
+                        <>
+                          {isCompleted ||
+                          (isInProgress &&
+                            item?.label.toLowerCase() === 'in progress') ? (
+                            <Icon
+                              name="checkbox-marked-circle"
+                              size={20}
+                              color="#16a34a"
+                            />
+                          ) : (
+                            <Icon
+                              name="checkbox-blank-circle"
+                              size={20}
+                              color="#878787ff"
+                            />
+                          )}
+                        </>
+                      )}
+
+                      <Text style={{color: COLORS.black}}>{item.label}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+        // </Modal>
+      )}
       <TouchableOpacity
         disabled={disabled}
         style={[
@@ -87,53 +145,6 @@ const StatusUpdateButton: React.FC<Props> = ({
           )}
         </View>
       </TouchableOpacity>
-      <Modal visible={isModalShow} transparent={true} animationType="fade">
-        <TouchableWithoutFeedback onPress={() => setIsModalShow(!isModalShow)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <FlatList
-                  data={status}
-                  renderItem={({item}) => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        handlePress(item.value), setIsModalShow(!isModalShow);
-                      }}
-                      disabled={
-                        isCompleted ||
-                        (isInProgress &&
-                          item?.label.toLowerCase() === 'in progress')
-                      }>
-                      <View style={[styles.item]}>
-                        {isCompleted ||
-                        (isInProgress &&
-                          item?.label.toLowerCase() === 'in progress') ? (
-                          <Icon name="check" />
-                        ) : (
-                          <View />
-                        )}
-
-                        <Text
-                          style={[
-                            isCompleted ||
-                            (isInProgress &&
-                              item?.label.toLowerCase() === 'in progress')
-                              ? styles.selected
-                              : {color: COLORS.black},
-                            ,
-                          ]}>
-                          {item?.label}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                  keyExtractor={(item, index) => (item.id + index).toString()}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
     </>
   );
 };
@@ -150,13 +161,16 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: 'white',
-    width: 130,
+    width: 'auto',
     padding: 6,
     borderRadius: 10,
     maxHeight: 350,
     position: 'absolute',
-    top: 135,
-    right: 45,
+    bottom: 45,
+    right: 0,
+    zIndex: 99999,
+    borderBlockColor: '#b1b1b1ff',
+    borderWidth: 0.5,
   },
   header: {
     fontSize: 18,
@@ -212,5 +226,27 @@ const styles = StyleSheet.create({
   loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}], paddingLeft: 10},
   selected: {
     color: COLORS.textGray,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 16, // space above and below
+  },
+  dividerLine: {
+    flex: 1, // stretch line to fill space
+    height: 1, // thin line
+    backgroundColor: '#ccc', // light gray
+  },
+  dividerText: {
+    marginHorizontal: 10, // spacing between lines and text
+    fontWeight: '600', // bold text
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    backgroundColor: '#ffffffff',
+    color: COLORS.black,
   },
 });
