@@ -133,7 +133,18 @@ const ActionItemMainIndex = () => {
       setSelectedStatusQuery(status);
     }
   };
-
+  const EmptyListItem = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <CustomTextNew text={'No action item found'} txtColor={COLORS.black} />
+      </View>
+    );
+  };
   return (
     <ContainerNew
       edges={edges}
@@ -174,17 +185,11 @@ const ActionItemMainIndex = () => {
             setIsLoading={setIsLoading}
           />
         )}
-        emptyItem={() => {
-          return (
-            <CustomTextNew
-              style={{
-                textAlign: 'center',
-                marginTop: height / 3,
-              }}
-              text="No data found"
-            />
-          );
-        }}
+        emptyItem={
+          !isLoading && actionItems.actionItems.length === 0
+            ? EmptyListItem
+            : null
+        }
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}

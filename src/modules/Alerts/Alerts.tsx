@@ -3,6 +3,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
@@ -111,6 +112,18 @@ const Alerts = () => {
     alertsStore.setRefreshing(true);
     setCurrentPage(1);
   };
+  const EmptyListItem = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <CustomTextNew text={'No alert found'} txtColor={COLORS.black} />
+      </View>
+    );
+  };
   return (
     <ContainerNew
       edges={edges}
@@ -132,19 +145,9 @@ const Alerts = () => {
             setSelectedItem={setSelectedItem}
           />
         )}
-        emptyItem={() => {
-          if (!isLoading && alertsStore.alerts.length === 0) {
-            return (
-              <CustomTextNew
-                style={{
-                  textAlign: 'center',
-                  marginTop: height / 3,
-                }}
-                text="No data found"
-              />
-            );
-          }
-        }}
+        emptyItem={
+          !isLoading && alertsStore.alerts.length === 0 ? EmptyListItem : null
+        }
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}

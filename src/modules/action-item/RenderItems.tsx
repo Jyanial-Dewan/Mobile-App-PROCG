@@ -42,6 +42,7 @@ const RenderItems = ({
       };
       await httpRequest(api_params, setIsLoading);
       actionItems.updateActionItem(action_item_id, status);
+      toaster.show({message: `Status updated.`, type: 'success'});
     } catch (error) {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});

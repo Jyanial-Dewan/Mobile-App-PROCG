@@ -126,11 +126,13 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
           {/* Button here */}
           <Row justify="flex-start">
             <CustomButtonNew
-              disabled={false}
+              disabled={item.acknowledge === false ? false : true}
               btnText={'Acknowledge'}
               // isLoading={false}
               onBtnPress={handleAcknowledge}
-              btnstyle={styles.btn}
+              btnstyle={
+                item.acknowledge === false ? styles.btn : styles.btnDisable
+              }
             />
           </Row>
         </Column>
@@ -173,5 +175,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.newGray,
+  },
+  btnDisable: {
+    width: '35%',
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#B1B1B1',
   },
 });

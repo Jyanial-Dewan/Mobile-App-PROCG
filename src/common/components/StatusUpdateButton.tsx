@@ -61,63 +61,79 @@ const StatusUpdateButton: React.FC<Props> = ({
     handleStatusUpdate(actionItem?.action_item_id, status);
   };
 
-  const isNew = actionItem.status.toLowerCase() === 'new';
-  const isCompleted = actionItem.status.toLowerCase() === 'completed';
-  const isInProgress = actionItem.status.toLowerCase() === 'in progress';
+  // const isNew = actionItem.status.toLowerCase() === 'new';
+  // const isCompleted = actionItem.status.toLowerCase() === 'completed';
+  // const isInProgress = actionItem.status.toLowerCase() === 'in progress';
+  const currentIndex = Math.max(
+    0,
+    status.findIndex(
+      s => s.label.toLowerCase() === actionItem.status.toLowerCase(),
+    ),
+  );
+
   return (
     <>
       {isModalShow && (
-        // <Modal visible={isModalShow} transparent={true} animationType="fade">
-
         <TouchableWithoutFeedback onPress={() => setIsModalShow(!isModalShow)}>
           <View style={styles.modalContent}>
             <TouchableWithoutFeedback>
-              <View
-                // style={styles.modalOverlay}
-                style={{flexDirection: 'row'}}>
-                {status.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => handlePress(item.value)}>
-                    <View style={{padding: 10}}>
-                      {/* isCompleted || (isInProgress && item?.label.toLowerCase()
-                      === 'in progress') */}
-                      {item?.label.toLowerCase() === 'new' ? (
-                        <Icon
-                          name="checkbox-marked-circle"
-                          size={20}
-                          color="#16a34a"
-                        />
-                      ) : (
-                        <>
-                          {isCompleted ||
-                          (isInProgress &&
-                            item?.label.toLowerCase() === 'in progress') ? (
-                            <Icon
-                              name="checkbox-marked-circle"
-                              size={20}
-                              color="#16a34a"
-                            />
-                          ) : (
-                            <Icon
-                              name="checkbox-blank-circle"
-                              size={20}
-                              color="#878787ff"
-                            />
-                          )}
-                        </>
-                      )}
+              <View style={{flexDirection: 'row'}}>
+                <View style={styles.stepperRow}>
+                  {/* one continuous gray track */}
+                  <View style={styles.track}>
+                    {/* green filled part of the track */}
+                    <View
+                      style={[
+                        styles.trackFill,
+                        {
+                          width: `${(currentIndex / (status.length - 1)) * 100}%`,
+                        },
+                      ]}
+                    />
+                  </View>
 
-                      <Text style={{color: COLORS.black}}>{item.label}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                  {/* circles */}
+                  {status.map((item, index) => {
+                    const isActive = index === currentIndex;
+                    const isCompleted = index < currentIndex;
+
+                    return (
+                      <TouchableOpacity
+                        key={item.id}
+                        disabled={item.label.toLowerCase() === 'new'}
+                        onPress={() => handlePress(item.value)}
+                        style={styles.step}
+                        activeOpacity={1}>
+                        <View
+                          style={[
+                            styles.circle,
+                            (isActive || isCompleted) && {
+                              borderColor: '#16a34a',
+                              backgroundColor: '#fff',
+                            },
+                            // isCompleted && {backgroundColor: '#16a34a'},
+                          ]}>
+                          {(isActive || isCompleted) && (
+                            <Icon name="check" size={16} color={'#16a34a'} />
+                          )}
+                        </View>
+                        <Text
+                          style={[
+                            styles.label,
+                            // isActive && {color: '#16a34a', fontWeight: '600'},
+                          ]}>
+                          {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
-        // </Modal>
       )}
+
       <TouchableOpacity
         disabled={disabled}
         style={[
@@ -152,13 +168,6 @@ const StatusUpdateButton: React.FC<Props> = ({
 export default observer(StatusUpdateButton);
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
   modalContent: {
     backgroundColor: 'white',
     width: 'auto',
@@ -171,40 +180,6 @@ const styles = StyleSheet.create({
     zIndex: 99999,
     borderBlockColor: '#b1b1b1ff',
     borderWidth: 0.5,
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  item: {
-    padding: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#ddd',
-  },
-  closeButton: {
-    marginTop: 10,
-    backgroundColor: 'red',
-    padding: 10,
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  profileImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 50,
-  },
-  listConatainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    // backgroundColor: COLORS.lightBackground,
-    marginBottom: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
   },
   btnText: {
     color: COLORS.white,
@@ -224,29 +199,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}], paddingLeft: 10},
-  selected: {
-    color: COLORS.textGray,
+
+  circle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: '#878787',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
   },
-  dividerContainer: {
+  // line: {
+  //   height: 2,
+  //   width: 40,
+  //   backgroundColor: '#ccc',
+  //   marginHorizontal: 4,
+  // },
+  label: {
+    marginTop: 4,
+    fontSize: 12,
+    color: COLORS.black,
+  },
+  stepperRow: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: 16, // space above and below
-  },
-  dividerLine: {
-    flex: 1, // stretch line to fill space
-    height: 1, // thin line
-    backgroundColor: '#ccc', // light gray
-  },
-  dividerText: {
-    marginHorizontal: 10, // spacing between lines and text
-    fontWeight: '600', // bold text
+    minWidth: 280, // optional, keeps good spacing
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    backgroundColor: '#ffffffff',
-    color: COLORS.black,
+  },
+  track: {
+    position: 'absolute',
+    left: 14, // = circle radius -> line starts at circle center
+    right: 25, // = circle radius -> line ends at circle center
+    top: 14, // vertically center with circle
+    height: 2,
+    backgroundColor: '#ccc',
+  },
+  trackFill: {
+    position: 'absolute',
+    left: 0,
+    height: 2,
+    backgroundColor: '#16a34a',
+  },
+  step: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1, // keep circles above the track
   },
 });
