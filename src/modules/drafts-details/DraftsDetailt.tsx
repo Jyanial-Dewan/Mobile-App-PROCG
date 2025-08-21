@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Dimensions,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -8,6 +9,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import Image from 'react-native-image-fallback';
@@ -75,6 +77,7 @@ const DraftsDetails = observer(() => {
   const [actionItemDescription, setActionItemDescription] =
     useState<string>('');
   const [userChanged, setuserChanged] = useState<boolean>(false);
+  const [isUsersModalShow, setIsUsersModalShow] = useState(false);
   const route = useRoute();
   const routeName = route.name;
   const {_id} = route.params as {_id: string};
@@ -495,6 +498,7 @@ const DraftsDetails = observer(() => {
       }
     }
   };
+
   useEffect(() => {
     if (recivers.length === 0) {
       setShowModal(false);
@@ -678,11 +682,14 @@ const DraftsDetails = observer(() => {
           {/*To*/}
           <View style={styles.lineContainerTo}>
             <View style={styles.withinLineContainer}>
-              <Text style={{color: COLORS.darkGray}}>To</Text>
-              <TextInput
-                style={{height: 40, width: '90%', color: COLORS.black}}
-                value={query}
-                onChangeText={text => setQuery(text)}
+              <Text
+                style={{color: COLORS.darkGray}}
+                onPress={() => setIsUsersModalShow(true)}>
+                To
+              </Text>
+              <Pressable
+                onPress={() => setIsUsersModalShow(true)}
+                style={{width: '90%', height: 40}}
               />
             </View>
             {recivers.length > 1 && (
@@ -705,57 +712,107 @@ const DraftsDetails = observer(() => {
               isHandleX={true}
             />
           </View>
-          {query !== '' && (
-            <ScrollView style={styles.modal}>
-              <Pressable style={styles.selectPress} onPress={handleSelectAll}>
-                <Text style={[styles.item]}>All</Text>
-                {isAllClicked && (
-                  <AntDesign name="check" size={20} color="#3632A6" />
-                )}
-              </Pressable>
-              {filterdUser.map(usr => (
-                <TouchableOpacity
-                  onPress={() => handleReciever(usr.user_id)}
-                  key={usr.user_id}>
+          <Modal
+            visible={isUsersModalShow}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsUsersModalShow(false)}>
+            <TouchableWithoutFeedback
+              onPress={() => setIsUsersModalShow(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback onPress={() => {}}>
                   <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <View
+                    style={[
+                      styles.modalContent,
+                      {
+                        position: 'absolute',
+                        top: 140,
+                        left: 20,
+                      },
+                    ]}>
+                    <TextInput
+                      autoFocus
                       style={{
-                        flexDirection: 'row',
-                        gap: 6,
-                        alignItems: 'center',
-                      }}>
-                      <Image
-                        style={styles.profileImage}
-                        source={{
-                          uri: `${url}/${usr.profile_picture.thumbnail}`,
-                          // headers: {
-                          //   Authorization: `Bearer ${userInfo?.access_token}`,
-                          // },
-                        }}
-                        fallback={fallbacks}
-                      />
-                      <Text style={[styles.item]}>{usr?.user_name}</Text>
-                    </View>
-                    <View style={styles.itemListWrapper} />
-                    {recivers.includes(usr.user_id) && (
-                      <AntDesign name="check" size={20} color="#3632A6" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
+                        fontSize: 16,
+                        height: 40,
+                        width: '90%',
+                        color: COLORS.black,
+                      }}
+                      placeholder="Search recipient"
+                      placeholderTextColor={COLORS.black}
+                      value={query}
+                      onChangeText={text => {
+                        setQuery(text);
+                      }}
+                    />
+                    <ScrollView scrollEnabled={true} style={{height: 300}}>
+                      <Pressable
+                        style={styles.selectPress}
+                        onPress={handleSelectAll}>
+                        <Text style={[styles.item]}>Select All</Text>
+                        {isAllClicked && (
+                          <AntDesign
+                            name="check"
+                            size={20}
+                            color={COLORS.black}
+                          />
+                        )}
+                      </Pressable>
 
-              {filterdUser?.length === 0 && (
-                <View style={styles.noData}>
-                  <Text style={[styles.noItem]}>No Data Found</Text>
-                </View>
-              )}
-            </ScrollView>
-          )}
+                      {filterdUser.map(usr => (
+                        <TouchableOpacity
+                          onPress={() => handleReciever(usr.user_id)}
+                          key={usr.user_id}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                            }}>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                gap: 6,
+                                alignItems: 'center',
+                              }}>
+                              <Image
+                                style={styles.profileImage}
+                                source={{
+                                  uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
+                                  // headers: {
+                                  //   Authorization: `Bearer ${userInfo?.access_token}`,
+                                  // },
+                                }}
+                                fallback={fallbacks}
+                              />
+                              <Text style={[styles.item]}>
+                                {usr?.user_name}
+                              </Text>
+                            </View>
+                            <View style={styles.itemListWrapper} />
+                            {recivers.includes(usr.user_id) && (
+                              <AntDesign
+                                name="check"
+                                size={20}
+                                color={COLORS.black}
+                              />
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+
+                      {filterdUser?.length === 0 && (
+                        <View style={styles.noData}>
+                          <Text style={[styles.noItem]}>No Data Found</Text>
+                        </View>
+                      )}
+                    </ScrollView>
+                    <ScrollView scrollEnabled={true}></ScrollView>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
           {recivers.length !== 0 ? (
             <View style={{flexDirection: 'row'}}>
               <View style={styles.singleRcvr}>
@@ -957,19 +1014,19 @@ const styles = StyleSheet.create({
     // Android Shadow
     // elevation: 5,
   },
-  modal: {
-    paddingHorizontal: 15,
-    paddingVertical: 20,
-    borderWidth: 1,
-    borderColor: COLORS.lightGray6,
-    width: Platform.OS === 'ios' ? '100%' : '100%',
-    maxHeight: Platform.OS === 'ios' ? '90%' : 350,
-    backgroundColor: COLORS.lightBackground,
-    borderRadius: 6,
-    position: 'absolute',
-    top: 40,
-    zIndex: 10,
-  },
+  // modal: {
+  //   paddingHorizontal: 15,
+  //   paddingVertical: 20,
+  //   borderWidth: 1,
+  //   borderColor: COLORS.lightGray6,
+  //   width: Platform.OS === 'ios' ? '100%' : '100%',
+  //   maxHeight: Platform.OS === 'ios' ? '90%' : 350,
+  //   backgroundColor: COLORS.lightBackground,
+  //   borderRadius: 6,
+  //   position: 'absolute',
+  //   top: 40,
+  //   zIndex: 10,
+  // },
   noData: {alignItems: 'center', justifyContent: 'center'},
   noItem: {
     paddingVertical: 15,
@@ -1000,34 +1057,34 @@ const styles = StyleSheet.create({
     gap: 20,
     borderRadius: 6,
   },
-  singleRcvrScroll: {
-    width: '100%',
+  // singleRcvrScroll: {
+  //   width: '100%',
 
-    backgroundColor: COLORS.lightBackground,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 20,
-    borderRadius: 6,
-    marginBottom: 10,
-  },
-  receiversContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 10,
-    flexWrap: 'wrap',
-    borderBottomWidth: 0.5,
-    borderBottomColor: COLORS.lightGray5,
-    paddingBottom: 10,
-  },
-  imageStyle: {
-    height: 20,
-    width: 20,
-    borderRadius: 99,
-    objectFit: 'cover',
-  },
+  //   backgroundColor: COLORS.lightBackground,
+  //   paddingVertical: 4,
+  //   paddingHorizontal: 10,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  //   gap: 20,
+  //   borderRadius: 6,
+  //   marginBottom: 10,
+  // },
+  // receiversContainer: {
+  //   flex: 1,
+  //   flexDirection: 'row',
+  //   gap: 10,
+  //   flexWrap: 'wrap',
+  //   borderBottomWidth: 0.5,
+  //   borderBottomColor: COLORS.lightGray5,
+  //   paddingBottom: 10,
+  // },
+  // imageStyle: {
+  //   height: 20,
+  //   width: 20,
+  //   borderRadius: 99,
+  //   objectFit: 'cover',
+  // },
   withinSinglRcve: {flexDirection: 'row', gap: 5, alignItems: 'center'},
   textGreen: {
     color: COLORS.textGreen,
@@ -1055,4 +1112,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}]},
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    // width: 333,
+    width: '70%',
+    padding: 6,
+    borderRadius: 10,
+    // maxHeight: 60,
+    position: 'absolute',
+    top: 66,
+    left: 20,
+    zIndex: 99999,
+    borderBlockColor: '#b1b1b1ff',
+    borderWidth: 0.5,
+  },
 });

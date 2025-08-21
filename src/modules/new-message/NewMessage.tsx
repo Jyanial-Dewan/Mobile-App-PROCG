@@ -12,7 +12,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
 import MainHeader from '../../common/components/MainHeader';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -36,7 +36,6 @@ import {
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
-import UserSelection from '../../common/components/UserSelection';
 
 interface User {
   name: string;
@@ -61,6 +60,12 @@ const NewMessage = () => {
   const [actionItemDescription, setActionItemDescription] = useState('');
   const [alertName, setAlertName] = useState('');
   const [alertDescription, setAlertDescription] = useState('');
+  const [isUsersModalShow, setIsUsersModalShow] = useState(false);
+  const allNotificationType = [
+    {title: 'Notification', value: 'NOTIFICATION'},
+    {title: 'Action Item', value: 'ACTION ITEM'},
+    {title: 'Alert', value: 'ALERT'},
+  ];
   const navigation = useNavigation();
   const id = uuidv4();
   const date = new Date();
@@ -431,27 +436,7 @@ const NewMessage = () => {
   const handleNotificationType = (type: string) => {
     setSelectedNotificationType(type);
   };
-  const allNotificationType = [
-    {title: 'Notification', value: 'NOTIFICATION'},
-    {title: 'Action Item', value: 'ACTION ITEM'},
-    {title: 'Alert', value: 'ALERT'},
-  ];
-  const [isModalShow, setIsModalShow] = useState(false);
-  const [buttonPosition, setButtonPosition] = useState({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  });
-  const buttonRef = useRef<TouchableOpacity>(null);
-  const showModalNow = () => {
-    if (buttonRef.current) {
-      buttonRef.current.measure((fx, fy, width, height, px, py) => {
-        setButtonPosition({x: px, y: py, width, height});
-        setIsModalShow(true);
-      });
-    }
-  };
+
   useEffect(() => {
     if (recivers.length === 0) {
       setShowModal(false);
@@ -542,9 +527,13 @@ const NewMessage = () => {
             isHandleX={true}
           />
           <View style={styles.withinLineContainer}>
-            <Text style={{color: COLORS.darkGray}}>To</Text>
+            <Text
+              style={{color: COLORS.darkGray}}
+              onPress={() => setIsUsersModalShow(true)}>
+              To
+            </Text>
             <Pressable
-              onPress={() => setIsModalShow(true)}
+              onPress={() => setIsUsersModalShow(true)}
               style={{width: '90%', height: 40}}
             />
           </View>
@@ -562,11 +551,11 @@ const NewMessage = () => {
         </View>
 
         <Modal
-          visible={isModalShow}
+          visible={isUsersModalShow}
           transparent
           animationType="fade"
-          onRequestClose={() => setIsModalShow(false)}>
-          <TouchableWithoutFeedback onPress={() => setIsModalShow(false)}>
+          onRequestClose={() => setIsUsersModalShow(false)}>
+          <TouchableWithoutFeedback onPress={() => setIsUsersModalShow(false)}>
             <View style={styles.modalOverlay}>
               <TouchableWithoutFeedback onPress={() => {}}>
                 <View
@@ -574,8 +563,8 @@ const NewMessage = () => {
                     styles.modalContent,
                     {
                       position: 'absolute',
-                      top: buttonPosition.y + 140, // Adjust height of popup
-                      left: buttonPosition.x + 20,
+                      top: 140,
+                      left: 20,
                     },
                   ]}>
                   <TextInput
@@ -590,14 +579,14 @@ const NewMessage = () => {
                     placeholderTextColor={COLORS.black}
                     value={query}
                     onChangeText={text => {
-                      setQuery(text), showModalNow();
+                      setQuery(text);
                     }}
                   />
                   <ScrollView scrollEnabled={true} style={{height: 300}}>
                     <Pressable
                       style={styles.selectPress}
                       onPress={handleSelectAll}>
-                      <Text style={[styles.item]}>All</Text>
+                      <Text style={[styles.item]}>Select All</Text>
                       {isAllClicked && (
                         <AntDesign
                           name="check"
@@ -1004,7 +993,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     // width: 333,
-    width: '60%',
+    width: '70%',
     padding: 6,
     borderRadius: 10,
     // maxHeight: 60,
