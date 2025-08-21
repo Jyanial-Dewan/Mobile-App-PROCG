@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.newGray,
+    backgroundColor: COLORS.darkGray,
   },
   btnDisable: {
     width: '35%',

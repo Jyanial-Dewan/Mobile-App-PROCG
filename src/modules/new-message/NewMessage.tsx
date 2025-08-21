@@ -454,41 +454,28 @@ const NewMessage = () => {
       }
       footer={
         <View>
-          <TouchableOpacity
-            onPress={handleSend}
-            style={[
-              styles.sentBtn,
-              (recivers.length === 0 ||
-                body === '' ||
-                subject === '' ||
-                isSending) &&
-                styles.disabled,
-            ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              isSending
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+          {/* // draft */}
           <TouchableOpacity
             onPress={handleDraft}
             disabled={
-              (recivers.length === 0 && body === '' && subject === '') ||
+              (recivers.length === 0 &&
+                body === '' &&
+                subject === '' &&
+                actionItemName === '' &&
+                actionItemDescription === '' &&
+                alertName === '' &&
+                alertDescription === '') ||
               isDrafting
             }
             style={[
               styles.draftBtn,
-              ((recivers.length === 0 && body === '' && subject === '') ||
+              ((recivers.length === 0 &&
+                body === '' &&
+                subject === '' &&
+                actionItemName === '' &&
+                actionItemDescription === '' &&
+                alertName === '' &&
+                alertDescription === '') ||
                 isDrafting) &&
                 styles.disabled,
             ]}>
@@ -500,6 +487,41 @@ const NewMessage = () => {
               />
             ) : (
               <SVGController name="Notebook-Pen" color={COLORS.white} />
+            )}
+          </TouchableOpacity>
+          {/* // send */}
+          <TouchableOpacity
+            onPress={handleSend}
+            style={[
+              styles.sentBtn,
+              (recivers.length === 0 ||
+                body === '' ||
+                subject === '' ||
+                actionItemName === '' ||
+                actionItemDescription === '' ||
+                alertName === '' ||
+                alertDescription === '' ||
+                isSending) &&
+                styles.disabled,
+            ]}
+            disabled={
+              recivers.length === 0 ||
+              body === '' ||
+              subject === '' ||
+              actionItemName === '' ||
+              actionItemDescription === '' ||
+              alertName === '' ||
+              alertDescription === '' ||
+              isSending
+            }>
+            {isSending ? (
+              <ActivityIndicator
+                size={24}
+                color={COLORS.white}
+                style={styles.loadingStyle}
+              />
+            ) : (
+              <SVGController name="Send" color={COLORS.white} />
             )}
           </TouchableOpacity>
         </View>
@@ -734,6 +756,7 @@ const NewMessage = () => {
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={actionItemName}
+                maxLength={150}
                 onChangeText={text => setActionItemName(text)}
               />
             </View>
@@ -766,6 +789,7 @@ const NewMessage = () => {
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={alertName}
+                maxLength={100}
                 onChangeText={text => setAlertName(text)}
               />
             </View>

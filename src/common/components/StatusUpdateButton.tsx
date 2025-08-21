@@ -101,7 +101,7 @@ const StatusUpdateButton: React.FC<Props> = ({
                   {
                     position: 'absolute',
                     top: buttonPosition.y - 63,
-                    left: buttonPosition.x - 120,
+                    left: buttonPosition.x - 140,
                   },
                 ]}>
                 <View style={{flexDirection: 'row'}}>

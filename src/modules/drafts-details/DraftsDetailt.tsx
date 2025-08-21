@@ -525,6 +525,50 @@ const DraftsDetails = observer(() => {
       }
       footer={
         <View>
+          {/* // send */}
+          <TouchableOpacity
+            onPress={handleSend}
+            style={[
+              styles.sentBtn,
+              (recivers.length === 0 ||
+                body === '' ||
+                subject === '' ||
+                isSending ||
+                (notificationType.toLowerCase() === 'alert' &&
+                  alertName === '') ||
+                (notificationType.toLowerCase() === 'alert' &&
+                  alertDescription === '') ||
+                (notificationType.toLowerCase() === 'action item' &&
+                  actionItemName === '') ||
+                (notificationType.toLowerCase() === 'action item' &&
+                  actionItemDescription === '')) &&
+                styles.disabled,
+            ]}
+            disabled={
+              recivers.length === 0 ||
+              body === '' ||
+              subject === '' ||
+              isSending ||
+              (notificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (notificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
+              (notificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (notificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '')
+            }>
+            {isSending ? (
+              <ActivityIndicator
+                size="small"
+                color={COLORS.white}
+                style={styles.loadingStyle}
+              />
+            ) : (
+              <SVGController name="Send" color={COLORS.white} />
+            )}
+          </TouchableOpacity>
+          {/* // draft */}
           {notificationType.toLowerCase() === 'alert' && (
             <TouchableOpacity
               onPress={handleDraft}
@@ -619,48 +663,6 @@ const DraftsDetails = observer(() => {
               )}
             </TouchableOpacity>
           )}
-          <TouchableOpacity
-            onPress={handleSend}
-            style={[
-              styles.sentBtn,
-              (recivers.length === 0 ||
-                body === '' ||
-                subject === '' ||
-                isSending ||
-                (notificationType.toLowerCase() === 'alert' &&
-                  alertName === '') ||
-                (notificationType.toLowerCase() === 'alert' &&
-                  alertDescription === '') ||
-                (notificationType.toLowerCase() === 'action item' &&
-                  actionItemName === '') ||
-                (notificationType.toLowerCase() === 'action item' &&
-                  actionItemDescription === '')) &&
-                styles.disabled,
-            ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              isSending ||
-              (notificationType.toLowerCase() === 'alert' &&
-                alertName === '') ||
-              (notificationType.toLowerCase() === 'alert' &&
-                alertDescription === '') ||
-              (notificationType.toLowerCase() === 'action item' &&
-                actionItemName === '') ||
-              (notificationType.toLowerCase() === 'action item' &&
-                actionItemDescription === '')
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size="small"
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
         </View>
       }>
       {isLoading ? (
@@ -883,6 +885,7 @@ const DraftsDetails = observer(() => {
                 <TextInput
                   style={{height: 40, width: '90%', color: COLORS.black}}
                   value={actionItemName}
+                  maxLength={150}
                   onChangeText={text => setActionItemName(text)}
                 />
               </View>
@@ -915,6 +918,7 @@ const DraftsDetails = observer(() => {
                 <TextInput
                   style={{height: 40, width: '90%', color: COLORS.black}}
                   value={alertName}
+                  maxLength={100}
                   onChangeText={text => setAlertName(text)}
                 />
               </View>

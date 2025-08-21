@@ -14,6 +14,7 @@ import {useRootStore} from '../../stores/rootStore';
 import {httpRequest} from '../../common/constant/httpRequest';
 import StatusUpdateButton from '../../common/components/StatusUpdateButton';
 import {useToast} from '../../common/components/CustomToast';
+import {toTitleCase} from '../../common/utility/general';
 interface Props {
   item: ActionItemsStoreSnapshotType;
   refSheet: any;
@@ -71,7 +72,7 @@ const RenderItems = ({
   return (
     <View style={styles.itemContainer}>
       <Row justify="space-between" align="center">
-        <Row rowWidth="90%" align="center" rowStyle={{marginBottom: 5, gap: 5}}>
+        <Row justify="space-between" rowStyle={{gap: 10}}>
           <View
             style={[
               styles.iconContainer,
@@ -81,15 +82,18 @@ const RenderItems = ({
             ]}>
             <SVGController name={iconName} color={COLORS.black} />
           </View>
-
-          <Column>
-            <CustomTextNew
-              text={item.action_item_name}
-              // txtColor={COLORS.black}
-              style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
-            />
-            <Row align="center" justify="space-between">
-              <View style={{flexDirection: 'row'}}>
+          <Column colWidth="100%">
+            <Column colWidth="90%">
+              <CustomTextNew
+                text={item.action_item_name}
+                // txtColor={COLORS.black}
+                style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
+              />
+              <CustomTextNew
+                text={convertDate(item.last_update_date as any)}
+                style={{color: COLORS.textNewBold}}
+              />
+              <Row>
                 <View
                   style={{
                     backgroundColor: bgColor,
@@ -98,44 +102,50 @@ const RenderItems = ({
                     alignItems: 'center',
                   }}>
                   <CustomTextNew
-                    text={item.status
-                      .toLowerCase()
-                      .split(' ')
-                      .map(
-                        (word: string) =>
-                          word.charAt(0).toUpperCase() + word.slice(1),
-                      )
-                      .join(' ')}
+                    text={toTitleCase(item.status)}
                     txtColor={COLORS.black}
                   />
                 </View>
-              </View>
-              <CustomTextNew
-                text={convertDate(item.last_update_date as any)}
-                style={{color: COLORS.textNewBold}}
-              />
-            </Row>
+              </Row>
+              <Column colStyle={styles.colStyle}>
+                <CustomTextNew
+                  text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
+                  txtColor={COLORS.blackish}
+                  txtSize={14}
+                />
+                {item.description.length > 180 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      onOpenSheet(item);
+                    }}>
+                    <CustomTextNew
+                      text="View Details"
+                      style={{fontWeight: 'bold', color: COLORS.primary}}
+                    />
+                  </TouchableOpacity>
+                )}
+              </Column>
+              <Row justify="space-between">
+                <CustomButtonNew
+                  disabled={false}
+                  btnText={'Item 1'}
+                  // isLoading={false}
+                  // onBtnPress={handleOpenSheet}
+                  btnstyle={styles.btn}
+                />
+                <StatusUpdateButton
+                  disabled={false}
+                  actionItem={item}
+                  btnText={'Update Status'}
+                  handleStatusUpdate={handleStatusUpdate}
+                  btnstyle={styles.btn}
+                />
+              </Row>
+            </Column>
           </Column>
         </Row>
       </Row>
-      <Column colStyle={styles.colStyle}>
-        <CustomTextNew
-          text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
-          txtColor={COLORS.blackish}
-          txtSize={14}
-        />
-        {item.description.length > 180 && (
-          <TouchableOpacity
-            onPress={() => {
-              onOpenSheet(item);
-            }}>
-            <CustomTextNew
-              text="View Details"
-              style={{fontWeight: 'bold', color: COLORS.primary}}
-            />
-          </TouchableOpacity>
-        )}
-      </Column>
+
       {/* View Details Modal */}
       {/* <ViewDetailsModal
         data={item.description}
@@ -147,22 +157,6 @@ const RenderItems = ({
       /> */}
       {/* End View Details Modal */}
       {/* Button here */}
-      <Row justify="space-between">
-        <CustomButtonNew
-          disabled={false}
-          btnText={'Item 1'}
-          // isLoading={false}
-          // onBtnPress={handleOpenSheet}
-          btnstyle={styles.btn}
-        />
-        <StatusUpdateButton
-          disabled={false}
-          actionItem={item}
-          btnText={'Update Status'}
-          handleStatusUpdate={handleStatusUpdate}
-          btnstyle={styles.btn}
-        />
-      </Row>
     </View>
   );
 };
@@ -178,9 +172,9 @@ const styles = StyleSheet.create({
     // elevation: 1,
   },
   iconContainer: {
-    backgroundColor: COLORS.primary,
     padding: 5,
     borderRadius: 50,
+    alignSelf: 'flex-start',
   },
   colStyle: {
     // borderBottomColor: COLORS.borderBottom,
