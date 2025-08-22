@@ -133,31 +133,31 @@ const HomeMainIndex = () => {
   );
 
   //Fetch Devices
-  useAsyncEffect(
-    async isMounted => {
-      if (!isMounted()) {
-        return null;
-      }
-      const api_params = {
-        url: `${api.getDevices}/${userInfo?.user_id}`,
-        baseURL: url,
-        headers: {Authorization: `Bearer ${userInfo?.access_token}`},
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-      const res = await httpRequest(api_params, setIsLoading);
+  // useAsyncEffect(
+  //   async isMounted => {
+  //     if (!isMounted()) {
+  //       return null;
+  //     }
+  //     const api_params = {
+  //       url: `${api.getDevices}/${userInfo?.user_id}`,
+  //       baseURL: url,
+  //       headers: {Authorization: `Bearer ${userInfo?.access_token}`},
+  //       // isConsole: true,
+  //       // isConsoleParams: true,
+  //     };
+  //     const res = await httpRequest(api_params, setIsLoading);
 
-      const formattedWithUsername = res.map((item: any) => {
-        return {
-          ...item,
-          user: userInfo?.user_name,
-        };
-      });
+  //     const formattedWithUsername = res.map((item: any) => {
+  //       return {
+  //         ...item,
+  //         user: userInfo?.user_name,
+  //       };
+  //     });
 
-      devicesStore.setDevices(formattedWithUsername);
-    },
-    [isFocused],
-  );
+  //     devicesStore.setDevices(formattedWithUsername);
+  //   },
+  //   [isFocused],
+  // );
 
   //Post_Notification Permission
   useEffect(() => {

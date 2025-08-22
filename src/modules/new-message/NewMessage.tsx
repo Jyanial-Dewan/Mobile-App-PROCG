@@ -131,10 +131,9 @@ const NewMessage = () => {
       data: sendPayload,
       method: 'post',
       baseURL: urlNode,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-    // notificationID, parentId, date, sender, recipients, subject, body;
     const sendNotificationPayload = {
       notificationID: id,
       parentId: id,
@@ -149,93 +148,50 @@ const NewMessage = () => {
       data: sendNotificationPayload,
       method: 'post',
       baseURL: urlNode,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-
     try {
-      const notificationResponse = await httpRequest(sendParams, setIsSending);
-      await httpRequest(sendNotificationParams, setIsSending);
+      if (selectedNotificationType.toLowerCase() === 'action item') {
+        const SendActionItemPayload = {
+          action_item_name: actionItemName,
+          description: actionItemDescription,
+          status: 'NEW',
+          user_ids: recivers,
+        };
+        const sendActionItemParams = {
+          url: api.ActionItem,
+          data: SendActionItemPayload,
+          method: 'post',
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const actionItemResponse = await httpRequest(
+          sendActionItemParams,
+          setIsSending,
+        );
 
-      if (notificationResponse.message) {
-        if (selectedNotificationType.toLowerCase() === 'alert') {
-          const SendAlertPayload = {
-            alert_name: alertName,
-            description: alertDescription,
-            recepients: recivers,
-            notification_id: id,
-            created_by: userInfo?.user_id,
-            last_updated_by: userInfo?.user_id,
-          };
-          const sendAlertParams = {
-            url: api.CreateAlert,
-            data: SendAlertPayload,
-            method: 'post',
-            baseURL: urlNode,
-            isConsole: true,
-            isConsoleParams: true,
-          };
-          const alertResponse = await httpRequest(
-            sendAlertParams,
+        if (actionItemResponse.message) {
+          sendPayload.action_item_id = actionItemResponse.action_item_id;
+          const notificationResponse = await httpRequest(
+            sendParams,
             setIsSending,
           );
-
-          if (alertResponse.message) {
-            setAlertName('');
-            setAlertDescription('');
-            const params = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                alert_id: alertResponse.result.alert_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            await httpRequest(params, setIsSending);
-            socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-          }
-        }
-        if (selectedNotificationType.toLowerCase() === 'action item') {
-          const SendActionItemPayload = {
-            action_item_name: actionItemName,
-            description: actionItemDescription,
-            status: 'NEW',
-            user_ids: recivers,
-          };
-          const sendActionItemParams = {
-            url: api.ActionItem,
-            data: SendActionItemPayload,
-            method: 'post',
-            baseURL: urlPython,
-            access_token: userInfo?.access_token,
-            // isConsole: true,
-            // isConsoleParams: true,
-          };
-          const actionItemResponse = await httpRequest(
-            sendActionItemParams,
-            setIsSending,
-          );
-
-          if (actionItemResponse.message) {
-            setActionItemName('');
-            setActionItemDescription('');
-            const params1 = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                action_item_id: actionItemResponse.action_item_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            await httpRequest(params1, setIsSending);
+          if (notificationResponse) {
+            await httpRequest(sendNotificationParams, setIsSending);
+            // const params1 = {
+            //   url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+            //   data: {
+            //     action_item_id: actionItemResponse.action_item_id,
+            //   },
+            //   method: 'put',
+            //   baseURL: urlNode,
+            //   // isConsole: true,
+            //   // isConsoleParams: true,
+            // };
+            // await httpRequest(params1, setIsSending);
             const params2 = {
               url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
               data: {
@@ -248,14 +204,98 @@ const NewMessage = () => {
               // isConsoleParams: true,
             };
             await httpRequest(params2, setIsSending);
+            socket?.emit('sendMessage', {
+              notificationId: sendPayload.notification_id,
+              sender: sendPayload.sender,
+            });
+            toaster.show({
+              message: notificationResponse.message,
+              type: 'success',
+            });
           }
         }
+      } else if (selectedNotificationType.toLowerCase() === 'alert') {
+        const SendAlertPayload = {
+          alert_name: alertName,
+          description: alertDescription,
+          recepients: recivers,
+          // notification_id: id,
+          created_by: userInfo?.user_id,
+          last_updated_by: userInfo?.user_id,
+        };
+        const sendAlertParams = {
+          url: api.CreateAlert,
+          data: SendAlertPayload,
+          method: 'post',
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse = await httpRequest(sendAlertParams, setIsSending);
 
-        socket?.emit('sendMessage', {
-          notificationId: sendPayload.notification_id,
-          sender: sendPayload.sender,
-        });
-        toaster.show({message: notificationResponse.message, type: 'success'});
+        if (alertResponse) {
+          sendPayload.alert_id = alertResponse.result.alert_id;
+          const notificationResponse = await httpRequest(
+            sendParams,
+            setIsSending,
+          );
+          if (notificationResponse) {
+            //update alert
+            const updateAlertParams = {
+              url: `${api.CreateAlert}/${alertResponse.result.alert_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(updateAlertParams, setIsSending);
+            // send notification
+            await httpRequest(sendNotificationParams, setIsSending);
+            // const params = {
+            //   url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+            //   data: {
+            //     alert_id: alertResponse.result.alert_id,
+            //   },
+            //   method: 'put',
+            //   baseURL: urlNode,
+            //   // isConsole: true,
+            //   // isConsoleParams: true,
+            // };
+            // await httpRequest(params, setIsSending);
+            socket.emit('SendAlert', {
+              alertId: alertResponse.result.alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+            socket?.emit('sendMessage', {
+              notificationId: sendPayload.notification_id,
+              sender: sendPayload.sender,
+            });
+            toaster.show({
+              message: notificationResponse.message,
+              type: 'success',
+            });
+          }
+        }
+      } else {
+        const notificationResponse = await httpRequest(
+          sendParams,
+          setIsSending,
+        );
+        if (notificationResponse) {
+          await httpRequest(sendNotificationParams, setIsSending);
+          socket?.emit('sendMessage', {
+            notificationId: sendPayload.notification_id,
+            sender: sendPayload.sender,
+          });
+          toaster.show({
+            message: notificationResponse.message,
+            type: 'success',
+          });
+        }
       }
       setTimeout(async () => {
         setSubject('');
@@ -272,10 +312,6 @@ const NewMessage = () => {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
       }
-    } finally {
-      setRecivers([]);
-      setSubject('');
-      setBody('');
     }
   };
   // draft
@@ -306,86 +342,44 @@ const NewMessage = () => {
       // isConsoleParams: true,
     };
     try {
-      const notificationResponse = await httpRequest(
-        draftParams,
-        setIsDrafting,
-      );
-      if (notificationResponse.message) {
-        if (selectedNotificationType.toLowerCase() === 'alert') {
-          const SendAlertPayload = {
-            alert_name: alertName,
-            description: alertDescription,
-            recepients: recivers,
-            notification_id: id,
-            created_by: userInfo?.user_id,
-            last_updated_by: userInfo?.user_id,
-          };
-          const sendAlertParams = {
-            url: api.CreateAlert,
-            data: SendAlertPayload,
-            method: 'post',
-            baseURL: urlNode,
-            isConsole: true,
-            isConsoleParams: true,
-          };
-          const alertResponse = await httpRequest(
-            sendAlertParams,
+      if (selectedNotificationType.toLowerCase() === 'action item') {
+        const SendActionItemPayload = {
+          action_item_name: actionItemName,
+          description: actionItemDescription,
+          status: 'NEW',
+          user_ids: recivers,
+        };
+        const sendActionItemParams = {
+          url: api.ActionItem,
+          data: SendActionItemPayload,
+          method: 'post',
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const actionItemResponse = await httpRequest(
+          sendActionItemParams,
+          setIsDrafting,
+        );
+        if (actionItemResponse.message) {
+          draftPayload.action_item_id = actionItemResponse.action_item_id;
+          const notificationResponse = await httpRequest(
+            draftParams,
             setIsDrafting,
           );
-
-          if (alertResponse.message) {
-            setAlertName('');
-            setAlertDescription('');
-            const params = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                alert_id: alertResponse.result.alert_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            await httpRequest(params, setIsDrafting);
-            socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-          }
-        }
-        if (selectedNotificationType.toLowerCase() === 'action item') {
-          const SendActionItemPayload = {
-            action_item_name: actionItemName,
-            description: actionItemDescription,
-            status: 'NEW',
-            user_ids: recivers,
-          };
-          const sendActionItemParams = {
-            url: api.ActionItem,
-            data: SendActionItemPayload,
-            method: 'post',
-            baseURL: urlPython,
-            access_token: userInfo?.access_token,
-            isConsole: true,
-            isConsoleParams: true,
-          };
-          const actionItemResponse = await httpRequest(
-            sendActionItemParams,
-            setIsDrafting,
-          );
-          if (actionItemResponse.message) {
-            const params1 = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                action_item_id: actionItemResponse.action_item_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              isConsole: true,
-              isConsoleParams: true,
-            };
-            await httpRequest(params1, setIsDrafting);
+          if (notificationResponse) {
+            // const params1 = {
+            //   url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+            //   data: {
+            //     action_item_id: actionItemResponse.action_item_id,
+            //   },
+            //   method: 'put',
+            //   baseURL: urlNode,
+            //   isConsole: true,
+            //   isConsoleParams: true,
+            // };
+            // await httpRequest(params1, setIsDrafting);
             const params2 = {
               url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
               data: {
@@ -394,36 +388,106 @@ const NewMessage = () => {
               method: 'put',
               baseURL: urlPython,
               access_token: userInfo?.access_token,
-              isConsole: true,
-              isConsoleParams: true,
+              // isConsole: true,
+              // isConsoleParams: true,
             };
             await httpRequest(params2, setIsDrafting);
+            socket?.emit('sendDraft', {
+              notificationId: draftPayload.notification_id,
+              sender: draftPayload.sender,
+            });
+            toaster.show({
+              message: 'Message Save to Drafts Successfully',
+              type: 'success',
+            });
           }
         }
-
-        socket?.emit('sendDraft', {
-          notificationId: draftPayload.notification_id,
-          sender: draftPayload.sender,
-        });
-        toaster.show({
-          message: 'Message Save to Drafts Successfully',
-          type: 'success',
-        });
-        setTimeout(async () => {
-          setSubject('');
-          setRecivers([]);
-          setBody('');
-          setActionItemName('');
-          setActionItemDescription('');
-          setAlertName('');
-          setAlertDescription('');
-          // setSelectedNotificationType('NOTIFICATION');
-          navigation.goBack();
-        }, 500);
       }
+      if (selectedNotificationType.toLowerCase() === 'alert') {
+        const SendAlertPayload = {
+          alert_name: alertName,
+          description: alertDescription,
+          recepients: recivers,
+          // notification_id: id,
+          created_by: userInfo?.user_id,
+          last_updated_by: userInfo?.user_id,
+        };
+        const sendAlertParams = {
+          url: api.CreateAlert,
+          data: SendAlertPayload,
+          method: 'post',
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse = await httpRequest(sendAlertParams, setIsDrafting);
+        if (alertResponse.message) {
+          draftPayload.alert_id = alertResponse.result.alert_id;
+          const notificationResponse = await httpRequest(
+            draftParams,
+            setIsDrafting,
+          );
+          if (notificationResponse) {
+            const updateAlertParams = {
+              url: `${api.CreateAlert}/${alertResponse.result.alert_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(updateAlertParams, setIsSending);
+            socket.emit('SendAlert', {
+              alertId: alertResponse.result.alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+            socket?.emit('sendDraft', {
+              notificationId: draftPayload.notification_id,
+              sender: draftPayload.sender,
+            });
+            toaster.show({
+              message: 'Message Save to Drafts Successfully',
+              type: 'success',
+            });
+          }
+        }
+      } else {
+        const notificationResponse = await httpRequest(
+          draftParams,
+          setIsDrafting,
+        );
+        if (notificationResponse) {
+          socket?.emit('sendDraft', {
+            notificationId: draftPayload.notification_id,
+            sender: draftPayload.sender,
+          });
+          toaster.show({
+            message: notificationResponse.message,
+            type: 'success',
+          });
+        }
+      }
+
+      setTimeout(async () => {
+        setSubject('');
+        setRecivers([]);
+        setBody('');
+        setActionItemName('');
+        setActionItemDescription('');
+        setAlertName('');
+        setAlertDescription('');
+        // setSelectedNotificationType('NOTIFICATION');
+        navigation.goBack();
+      }, 500);
     } catch (error) {
       if (error instanceof Error) {
-        toaster.show({message: error.message, type: 'error'});
+        toaster.show({
+          message: `${(error && error.message) ?? 'Action item name already exists'}`,
+          type: 'error',
+        });
       }
     }
   };
@@ -454,7 +518,7 @@ const NewMessage = () => {
       }
       footer={
         <View>
-          {/* // draft */}
+          {/* draft */}
           <TouchableOpacity
             onPress={handleDraft}
             disabled={
@@ -489,7 +553,7 @@ const NewMessage = () => {
               <SVGController name="Notebook-Pen" color={COLORS.white} />
             )}
           </TouchableOpacity>
-          {/* // send */}
+          {/* send */}
           <TouchableOpacity
             onPress={handleSend}
             style={[
@@ -497,10 +561,14 @@ const NewMessage = () => {
               (recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
-                actionItemName === '' ||
-                actionItemDescription === '' ||
-                alertName === '' ||
-                alertDescription === '' ||
+                (selectedNotificationType.toLowerCase() === 'action item' &&
+                  actionItemName === '') ||
+                (selectedNotificationType.toLowerCase() === 'action item' &&
+                  actionItemDescription === '') ||
+                (selectedNotificationType.toLowerCase() === 'alert' &&
+                  alertName === '') ||
+                (selectedNotificationType.toLowerCase() === 'alert' &&
+                  alertDescription === '') ||
                 isSending) &&
                 styles.disabled,
             ]}
@@ -508,10 +576,14 @@ const NewMessage = () => {
               recivers.length === 0 ||
               body === '' ||
               subject === '' ||
-              actionItemName === '' ||
-              actionItemDescription === '' ||
-              alertName === '' ||
-              alertDescription === '' ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
               isSending
             }>
             {isSending ? (

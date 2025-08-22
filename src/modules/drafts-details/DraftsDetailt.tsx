@@ -172,7 +172,6 @@ const DraftsDetails = observer(() => {
     },
     [isFocused, _id],
   );
-
   useEffect(() => {
     const handleUserChange = async () => {
       if (oldMsgState?.receivers?.length ?? 0 > 0) {
@@ -282,92 +281,122 @@ const DraftsDetails = observer(() => {
       data: sendNotificationPayload,
       method: 'post',
       baseURL: selectedUrl || ProcgURL,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-
     try {
-      const updateResponse = await httpRequest(sendParams, setIsSending);
-      if (updateResponse) {
-        await httpRequest(sendNotificationParams, setIsSending);
+      if (notificationType.toLowerCase() === 'action item') {
+        const SendActionItemPayload = {
+          action_item_id: action_item_id,
+          action_item_name: actionItemName,
+          description: actionItemDescription,
+          status: 'NEW',
+          user_ids: recivers,
+        };
+        const sendActionItemParams = {
+          url: `${api.ActionItem}/upsert`,
+          data: SendActionItemPayload,
+          method: 'post',
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const resSendAction = await httpRequest(
+          sendActionItemParams,
+          setIsSending,
+        );
+        if (resSendAction) {
+          const updateResponse = await httpRequest(sendParams, setIsSending);
+          if (updateResponse) {
+            await httpRequest(sendNotificationParams, setIsSending);
 
-        if (notificationType.toLowerCase() === 'alert') {
-          const SendAlertPayload = {
-            alert_name: alertName,
-            description: alertDescription,
-            recipients: recivers,
-            last_updated_by: userInfo?.user_id,
-          };
-          const sendAlertParams = {
-            url: `${api.CreateAlert}/${alert_id}`,
-            data: SendAlertPayload,
-            method: 'put',
-            baseURL: urlNode,
-            isConsole: true,
-            isConsoleParams: true,
-          };
-          const alertResponse = await httpRequest(
-            sendAlertParams,
-            setIsSending,
-          );
-          if (alertResponse) {
+            socket?.emit('sendMessage', {
+              notificationId: notificationId,
+              sender: userInfo?.user_id,
+            });
+            socket?.emit('draftMsgId', {
+              notificationId: notificationId,
+              sender: userInfo?.user_id,
+            });
+            toaster.show({
+              message: updateResponse.message,
+              type: 'success',
+            });
+          }
+        }
+      } else if (notificationType.toLowerCase() === 'alert') {
+        const SendAlertPayload = {
+          alert_name: alertName,
+          description: alertDescription,
+          recipients: recivers,
+          last_updated_by: userInfo?.user_id,
+        };
+        const sendAlertParams = {
+          url: `${api.CreateAlert}/${alert_id}`,
+          data: SendAlertPayload,
+          method: 'put',
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse = await httpRequest(sendAlertParams, setIsSending);
+        if (alertResponse) {
+          const updateResponse = await httpRequest(sendParams, setIsSending);
+          if (updateResponse) {
+            await httpRequest(sendNotificationParams, setIsSending);
+
             socket.emit('SendAlert', {
               alertId: alert_id,
               recipients: recivers,
               isAcknowledge: false,
             });
+            socket?.emit('sendMessage', {
+              notificationId: notificationId,
+              sender: userInfo?.user_id,
+            });
+            socket?.emit('draftMsgId', {
+              notificationId: notificationId,
+              sender: userInfo?.user_id,
+            });
+            toaster.show({
+              message: updateResponse.message,
+              type: 'success',
+            });
           }
         }
-        if (notificationType.toLowerCase() === 'action item') {
-          const SendActionItemPayload = {
-            action_item_name: actionItemName,
-            description: actionItemDescription,
-            status: 'NEW',
-            user_ids: recivers,
-          };
-          const sendActionItemParams = {
-            url: `${api.ActionItem}/${action_item_id}`,
-            data: SendActionItemPayload,
-            method: 'put',
-            baseURL: urlPython,
-            access_token: userInfo?.access_token,
-            // isConsole: true,
-            // isConsoleParams: true,
-          };
-          await httpRequest(sendActionItemParams, setIsSending);
+      } else {
+        const updateResponse = await httpRequest(sendParams, setIsSending);
+        if (updateResponse) {
+          await httpRequest(sendNotificationParams, setIsSending);
+          socket?.emit('sendMessage', {
+            notificationId: notificationId,
+            sender: userInfo?.user_id,
+          });
+          socket?.emit('draftMsgId', {
+            notificationId: notificationId,
+            sender: userInfo?.user_id,
+          });
+          toaster.show({
+            message: updateResponse.message,
+            type: 'success',
+          });
         }
-
-        socket?.emit('sendMessage', {
-          notificationId: notificationId,
-          sender: userInfo?.user_id,
-        });
-        socket?.emit('draftMsgId', {
-          notificationId: notificationId,
-          sender: userInfo?.user_id,
-        });
-        toaster.show({
-          message: updateResponse.message,
-          type: 'success',
-        });
-        setTimeout(async () => {
-          setSubject('');
-          setRecivers([]);
-          setBody('');
-          setActionItemName('');
-          setActionItemDescription('');
-          setAlertName('');
-          setAlertDescription('');
-          navigation.goBack();
-        }, 500);
       }
+      setTimeout(async () => {
+        setSubject('');
+        setRecivers([]);
+        setBody('');
+        setActionItemName('');
+        setActionItemDescription('');
+        setAlertName('');
+        setAlertDescription('');
+        navigation.goBack();
+      }, 500);
     } catch (error) {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
       }
-    } finally {
-      setRecivers([]);
-      setSubject('');
-      setBody('');
     }
   };
   // draft
@@ -389,78 +418,104 @@ const DraftsDetails = observer(() => {
       data: draftPayload,
       method: 'put',
       baseURL: selectedUrl || ProcgURL,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
     try {
-      const draftResponse = await httpRequest(draftParams, setIsDrafting);
-
-      if (draftResponse.message) {
-        if (notificationType.toLowerCase() === 'alert') {
-          const SendAlertPayload = {
-            alert_name: alertName,
-            description: alertDescription,
-            last_updated_by: userInfo?.user_id,
-            recipients: recivers,
-          };
-          const draftAlertParams = {
-            url: `${api.CreateAlert}/${alert_id}`,
-            data: SendAlertPayload,
-            method: 'put',
-            baseURL: urlNode,
-            isConsole: true,
-            isConsoleParams: true,
-          };
-          const alertResponse = await httpRequest(
-            draftAlertParams,
-            setIsDrafting,
-          );
-          if (alertResponse.message) {
-            socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
+      if (notificationType.toLowerCase() === 'action item') {
+        const SendActionItemPayload = {
+          action_item_name: actionItemName,
+          description: actionItemDescription,
+          status: 'NEW',
+          user_ids: recivers,
+        };
+        const sendActionItemParams = {
+          url: `${api.ActionItem}/${action_item_id}`,
+          data: SendActionItemPayload,
+          method: 'put',
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const resAction = await httpRequest(
+          sendActionItemParams,
+          setIsDrafting,
+        );
+        if (resAction) {
+          const draftResponse = await httpRequest(draftParams, setIsDrafting);
+          if (draftResponse.message) {
+            socket?.emit('sendDraft', {
+              notificationId: notificationId,
+              sender: draftPayload.sender,
+            });
+            toaster.show({
+              message: draftResponse.message,
+              type: 'success',
             });
           }
         }
-        if (notificationType.toLowerCase() === 'action item') {
-          const SendActionItemPayload = {
-            action_item_name: actionItemName,
-            description: actionItemDescription,
-            status: 'NEW',
-            user_ids: recivers,
-          };
-          const sendActionItemParams = {
-            url: `${api.ActionItem}/${action_item_id}`,
-            data: SendActionItemPayload,
-            method: 'put',
-            baseURL: urlPython,
-            access_token: userInfo?.access_token,
-            // isConsole: true,
-            // isConsoleParams: true,
-          };
-          await httpRequest(sendActionItemParams, setIsDrafting);
+      } else if (notificationType.toLowerCase() === 'alert') {
+        const SendAlertPayload = {
+          alert_name: alertName,
+          description: alertDescription,
+          last_updated_by: userInfo?.user_id,
+          recipients: recivers,
+        };
+        const draftAlertParams = {
+          url: `${api.CreateAlert}/${alert_id}`,
+          data: SendAlertPayload,
+          method: 'put',
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse = await httpRequest(
+          draftAlertParams,
+          setIsDrafting,
+        );
+        if (alertResponse) {
+          const draftResponse = await httpRequest(draftParams, setIsDrafting);
+          if (draftResponse) {
+            socket.emit('SendAlert', {
+              alertId: alert_id,
+              recipients: recivers,
+              isAcknowledge: false,
+            });
+            socket?.emit('sendDraft', {
+              notificationId: notificationId,
+              sender: draftPayload.sender,
+            });
+            toaster.show({
+              message: draftResponse.message,
+              type: 'success',
+            });
+          }
         }
-
-        socket?.emit('sendDraft', {
-          notificationId: notificationId,
-          sender: draftPayload.sender,
-        });
-        toaster.show({
-          message: draftResponse.message,
-          type: 'success',
-        });
-        setTimeout(async () => {
-          setSubject('');
-          setRecivers([]);
-          setBody('');
-          setActionItemName('');
-          setActionItemDescription('');
-          setAlertName('');
-          setAlertDescription('');
-          navigation.goBack();
-        }, 500);
+      } else {
+        const draftResponse = await httpRequest(draftParams, setIsDrafting);
+        if (draftResponse) {
+          socket?.emit('sendDraft', {
+            notificationId: notificationId,
+            sender: draftPayload.sender,
+          });
+          toaster.show({
+            message: draftResponse.message,
+            type: 'success',
+          });
+        }
       }
+
+      setTimeout(async () => {
+        setSubject('');
+        setRecivers([]);
+        setBody('');
+        setActionItemName('');
+        setActionItemDescription('');
+        setAlertName('');
+        setAlertDescription('');
+        navigation.goBack();
+      }, 500);
     } catch (error) {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
@@ -473,8 +528,8 @@ const DraftsDetails = observer(() => {
       url: api.DeleteMessage + msgId + `/${userInfo?.user_id}`,
       method: 'put',
       baseURL: selectedUrl || ProcgURL,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
     try {
       setIsLoading(true);
@@ -525,7 +580,7 @@ const DraftsDetails = observer(() => {
       }
       footer={
         <View>
-          {/* // send */}
+          {/* send */}
           <TouchableOpacity
             onPress={handleSend}
             style={[
@@ -534,6 +589,7 @@ const DraftsDetails = observer(() => {
                 body === '' ||
                 subject === '' ||
                 isSending ||
+                isLoading ||
                 (notificationType.toLowerCase() === 'alert' &&
                   alertName === '') ||
                 (notificationType.toLowerCase() === 'alert' &&
@@ -549,6 +605,7 @@ const DraftsDetails = observer(() => {
               body === '' ||
               subject === '' ||
               isSending ||
+              isLoading ||
               (notificationType.toLowerCase() === 'alert' &&
                 alertName === '') ||
               (notificationType.toLowerCase() === 'alert' &&
@@ -568,7 +625,7 @@ const DraftsDetails = observer(() => {
               <SVGController name="Send" color={COLORS.white} />
             )}
           </TouchableOpacity>
-          {/* // draft */}
+          {/* draft */}
           {notificationType.toLowerCase() === 'alert' && (
             <TouchableOpacity
               onPress={handleDraft}
@@ -578,6 +635,7 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.body === body &&
                   oldMsgState?.alertName === alertName &&
                   oldMsgState?.alertDescription === alertDescription) ||
+                isLoading ||
                 isDrafting
               }
               style={[
@@ -587,6 +645,7 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.body === body &&
                   oldMsgState?.alertName === alertName &&
                   oldMsgState?.alertDescription === alertDescription) ||
+                  isLoading ||
                   isDrafting) &&
                   styles.disabled,
               ]}>

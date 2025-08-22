@@ -120,7 +120,7 @@ const Alerts = () => {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <CustomTextNew text={'No alert found'} txtColor={COLORS.black} />
+        <CustomTextNew text={'No alerts found'} txtColor={COLORS.black} />
       </View>
     );
   };

@@ -17,12 +17,9 @@ import CustomHeader from '../../common/components/CustomHeader';
 import CustomTextNew from '../../common/components/CustomText';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
 import {useRootStore} from '../../stores/rootStore';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {COLORS} from '../../common/constant/Themes';
 import Column from '../../common/components/Column';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import Row from '../../common/components/Row';
-import {_todayDate, dateFormater} from '../../common/services/todayDate';
+import {_todayDate} from '../../common/services/todayDate';
 import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
 import RBSheet from '../../common/packages/RBSheet/RBSheet';
 import MainHeader from '../../common/components/MainHeader';
@@ -47,13 +44,9 @@ const ActionItemMainIndex = () => {
   const {userInfo, actionItems} = useRootStore();
   const refRBSheet = useRef<RBSheet>(null);
   const [data, setData] = useState<ActionItemsStoreSnapshotType[]>([]);
-  const [search, setSearch] = useState('');
-  const [noResult, setNoResult] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const height = useWindowDimensions().height;
-  // const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState({
-  //   id: 0,
-  //   visible: false,
-  // });
+
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
@@ -63,29 +56,40 @@ const ActionItemMainIndex = () => {
     ActionItemsStoreSnapshotType | undefined
   >(undefined);
   const [selectedStatusQuery, setSelectedStatusQuery] = useState('');
-  const [updateStatus, setUpdateStatus] = useState('');
+
+  const searchActionItems = async () => {
+    setIsLoading(true);
+    const api_params = {
+      url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}&action_item_name=${searchQuery}`,
+      baseURL: url,
+      access_token: userInfo?.access_token,
+      // isConsole: true,
+      // isConsoleParams: true,
+    };
+    const res = await httpRequest(api_params, setIsLoading);
+
+    if (res) {
+      setHasMore(res.items.length);
+      setData(res.items);
+      actionItems.saveActionItems(res.items);
+      actionItems.setRefreshing(false);
+    }
+  };
 
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
         return null;
       }
-      //api call here
-      setIsLoading(true);
-      const api_params = {
-        url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}`,
-        baseURL: url,
-        access_token: userInfo?.access_token,
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-      const res = await httpRequest(api_params, setIsLoading);
+      if (!searchQuery) {
+        searchActionItems();
+      } else {
+        // Debounce only when query changes
+        const delayDebounce = setTimeout(async () => {
+          searchActionItems();
+        }, 1000);
 
-      if (res) {
-        setHasMore(res.items.length);
-        setData(res.items);
-        actionItems.saveActionItems(res.items);
-        actionItems.setRefreshing(false);
+        return () => clearTimeout(delayDebounce);
       }
     },
     [
@@ -94,27 +98,9 @@ const ActionItemMainIndex = () => {
       actionItems.refreshing,
       actionItems.actionItems,
       selectedStatusQuery,
+      searchQuery,
     ],
   );
-
-  // useEffect(() => {
-  //   const searchActionItems = () => {
-  //     const filteredItems = actionItems.actionItems.filter(item =>
-  //       item.action_item_name.toLowerCase().includes(search.toLowerCase()),
-  //     );
-  //     if (filteredItems.length) {
-  //       setData(filteredItems);
-  //     } else {
-  //       setData([]);
-  //       setNoResult(true);
-  //     }
-  //   };
-  //   if (search) {
-  //     searchActionItems();
-  //   } else {
-  //     setData(actionItems.actionItems);
-  //   }
-  // }, [search]);
 
   const handleRefresh = () => {
     actionItems.setRefreshing(true);
@@ -141,7 +127,7 @@ const ActionItemMainIndex = () => {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <CustomTextNew text={'No action item found'} txtColor={COLORS.black} />
+        <CustomTextNew text={'No action items found'} txtColor={COLORS.black} />
       </View>
     );
   };
@@ -159,8 +145,8 @@ const ActionItemMainIndex = () => {
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <SearchBar
           placeholder="Search item"
-          value={search}
-          onChangeText={setSearch}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
           customStyle={{width: 180}}
         />
         <SelectStatusDropDown
