@@ -28,7 +28,7 @@ import Receivers from '../../common/components/Receivers';
 const RecycleBinDetail = observer(() => {
   const isFocused = useIsFocused();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, deleteMessage} = useSocketContext();
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [parrentMessage, setParrentMessage] = useState<
@@ -92,10 +92,11 @@ const RecycleBinDetail = observer(() => {
       if (holdersNumber > 0) {
         const response = await httpRequest(putParams, setIsLoading);
         if (response) {
-          socket?.emit('deleteMessage', {
-            notificationId: msg.id,
-            sender: userInfo?.user_id,
-          });
+          deleteMessage(msg.id);
+          // socket?.emit('deleteMessage', {
+          //   notificationId: msg.id,
+          //   sender: userInfo?.user_id,
+          // });
           toaster.show({
             message: 'Message has been deleted.',
             type: 'success',
@@ -108,10 +109,11 @@ const RecycleBinDetail = observer(() => {
         if (recycleBinNumber > 1) {
           const response = await httpRequest(putParams, setIsLoading);
           if (response) {
-            socket?.emit('deleteMessage', {
-              notificationId: msg.id,
-              sender: userInfo?.user_id,
-            });
+            deleteMessage(msg.id);
+            // socket?.emit('deleteMessage', {
+            //   notificationId: msg.id,
+            //   sender: userInfo?.user_id,
+            // });
             toaster.show({
               message: 'Message has been deleted.',
               type: 'success',
@@ -123,10 +125,11 @@ const RecycleBinDetail = observer(() => {
         } else if (recycleBinNumber === 1) {
           const response = await httpRequest(deleteParams, setIsLoading);
           if (response) {
-            socket?.emit('deleteMessage', {
-              notificationId: msg.id,
-              sender: userInfo?.user_id,
-            });
+            deleteMessage(msg.id);
+            // socket?.emit('deleteMessage', {
+            //   notificationId: msg.id,
+            //   sender: userInfo?.user_id,
+            // });
             toaster.show({
               message: 'Message has been deleted.',
               type: 'success',

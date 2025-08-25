@@ -45,7 +45,7 @@ interface User {
 const NewMessage = () => {
   const {name} = useRoute();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {SendAlert, sendMessage, sendDraft} = useSocketContext();
   const [showModal, setShowModal] = useState(false);
   const [recivers, setRecivers] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
@@ -204,10 +204,11 @@ const NewMessage = () => {
               // isConsoleParams: true,
             };
             await httpRequest(params2, setIsSending);
-            socket?.emit('sendMessage', {
-              notificationId: sendPayload.notification_id,
-              sender: sendPayload.sender,
-            });
+            sendMessage(sendPayload.notification_id);
+            // socket?.emit('sendMessage', {
+            //   notificationId: sendPayload.notification_id,
+            //   sender: sendPayload.sender,
+            // });
             toaster.show({
               message: notificationResponse.message,
               type: 'success',
@@ -265,15 +266,17 @@ const NewMessage = () => {
             //   // isConsoleParams: true,
             // };
             // await httpRequest(params, setIsSending);
-            socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-            socket?.emit('sendMessage', {
-              notificationId: sendPayload.notification_id,
-              sender: sendPayload.sender,
-            });
+            SendAlert(alertResponse.result.alert_id, recivers, false);
+            // socket.emit('SendAlert', {
+            //   alertId: alertResponse.result.alert_id,
+            //   recipients: recivers,
+            //   isAcknowledge: false,
+            // });
+            sendMessage(sendPayload.notification_id);
+            // socket?.emit('sendMessage', {
+            //   notificationId: sendPayload.notification_id,
+            //   sender: sendPayload.sender,
+            // });
             toaster.show({
               message: notificationResponse.message,
               type: 'success',
@@ -287,10 +290,11 @@ const NewMessage = () => {
         );
         if (notificationResponse) {
           await httpRequest(sendNotificationParams, setIsSending);
-          socket?.emit('sendMessage', {
-            notificationId: sendPayload.notification_id,
-            sender: sendPayload.sender,
-          });
+          sendMessage(sendPayload.notification_id);
+          // socket?.emit('sendMessage', {
+          //   notificationId: sendPayload.notification_id,
+          //   sender: sendPayload.sender,
+          // });
           toaster.show({
             message: notificationResponse.message,
             type: 'success',
@@ -392,10 +396,11 @@ const NewMessage = () => {
               // isConsoleParams: true,
             };
             await httpRequest(params2, setIsDrafting);
-            socket?.emit('sendDraft', {
-              notificationId: draftPayload.notification_id,
-              sender: draftPayload.sender,
-            });
+            sendDraft(draftPayload.notification_id);
+            // socket?.emit('sendDraft', {
+            //   notificationId: draftPayload.notification_id,
+            //   sender: draftPayload.sender,
+            // });
             toaster.show({
               message: 'Message Save to Drafts Successfully',
               type: 'success',
@@ -439,15 +444,17 @@ const NewMessage = () => {
               // isConsoleParams: true,
             };
             await httpRequest(updateAlertParams, setIsSending);
-            socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-            socket?.emit('sendDraft', {
-              notificationId: draftPayload.notification_id,
-              sender: draftPayload.sender,
-            });
+            SendAlert(alertResponse.result.alert_id, recivers, false);
+            // socket.emit('SendAlert', {
+            //   alertId: alertResponse.result.alert_id,
+            //   recipients: recivers,
+            //   isAcknowledge: false,
+            // });
+            sendDraft(draftPayload.notification_id);
+            // socket?.emit('sendDraft', {
+            //   notificationId: draftPayload.notification_id,
+            //   sender: draftPayload.sender,
+            // });
             toaster.show({
               message: 'Message Save to Drafts Successfully',
               type: 'success',
@@ -460,10 +467,11 @@ const NewMessage = () => {
           setIsDrafting,
         );
         if (notificationResponse) {
-          socket?.emit('sendDraft', {
-            notificationId: draftPayload.notification_id,
-            sender: draftPayload.sender,
-          });
+          sendDraft(draftPayload.notification_id);
+          // socket?.emit('sendDraft', {
+          //   notificationId: draftPayload.notification_id,
+          //   sender: draftPayload.sender,
+          // });
           toaster.show({
             message: notificationResponse.message,
             type: 'success',

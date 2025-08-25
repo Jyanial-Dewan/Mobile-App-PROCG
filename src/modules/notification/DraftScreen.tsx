@@ -306,7 +306,7 @@ const DraftScreen = observer(() => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackScreensParms>>();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, deleteMessage, multipleDeleteMessage} = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
   const [isModalShow, setIsModalShow] = useState(false);
   const {control, setValue} = useForm();
@@ -412,10 +412,11 @@ const DraftScreen = observer(() => {
     try {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
-      socket?.emit('deleteMessage', {
-        notificationId: msgId,
-        sender: userInfo?.user_id,
-      });
+      deleteMessage(msgId);
+      // socket?.emit('deleteMessage', {
+      //   notificationId: msgId,
+      //   sender: userInfo?.user_id,
+      // });
       if (response) {
         toaster.show({
           message: response.message,
@@ -441,10 +442,11 @@ const DraftScreen = observer(() => {
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        socket?.emit('multipleDelete', {
-          ids: selectedIds,
-          user: userInfo?.user_id,
-        });
+        multipleDeleteMessage(selectedIds);
+        // socket?.emit('multipleDelete', {
+        //   ids: selectedIds,
+        //   user: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',

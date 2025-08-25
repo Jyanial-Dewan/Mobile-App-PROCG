@@ -55,7 +55,8 @@ const DraftsDetails = observer(() => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {SendAlert, sendMessage, sendDraft, draftMessageId, deleteMessage} =
+    useSocketContext();
   const [showModal, setShowModal] = useState(false);
   const [parentid, setParentid] = useState<string>('');
   const [notificationId, setNotificationId] = useState('');
@@ -310,15 +311,16 @@ const DraftsDetails = observer(() => {
           const updateResponse = await httpRequest(sendParams, setIsSending);
           if (updateResponse) {
             await httpRequest(sendNotificationParams, setIsSending);
-
-            socket?.emit('sendMessage', {
-              notificationId: notificationId,
-              sender: userInfo?.user_id,
-            });
-            socket?.emit('draftMsgId', {
-              notificationId: notificationId,
-              sender: userInfo?.user_id,
-            });
+            sendMessage(notificationId);
+            draftMessageId(notificationId);
+            // socket?.emit('sendMessage', {
+            //   notificationId: notificationId,
+            //   sender: userInfo?.user_id,
+            // });
+            // socket?.emit('draftMsgId', {
+            //   notificationId: notificationId,
+            //   sender: userInfo?.user_id,
+            // });
             toaster.show({
               message: updateResponse.message,
               type: 'success',
@@ -345,20 +347,22 @@ const DraftsDetails = observer(() => {
           const updateResponse = await httpRequest(sendParams, setIsSending);
           if (updateResponse) {
             await httpRequest(sendNotificationParams, setIsSending);
-
-            socket.emit('SendAlert', {
-              alertId: alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-            socket?.emit('sendMessage', {
-              notificationId: notificationId,
-              sender: userInfo?.user_id,
-            });
-            socket?.emit('draftMsgId', {
-              notificationId: notificationId,
-              sender: userInfo?.user_id,
-            });
+            SendAlert(alert_id!, recivers, false);
+            // socket.emit('SendAlert', {
+            //   alertId: alert_id,
+            //   recipients: recivers,
+            //   isAcknowledge: false,
+            // });
+            sendMessage(notificationId);
+            draftMessageId(notificationId);
+            // socket?.emit('sendMessage', {
+            //   notificationId: notificationId,
+            //   sender: userInfo?.user_id,
+            // });
+            // socket?.emit('draftMsgId', {
+            //   notificationId: notificationId,
+            //   sender: userInfo?.user_id,
+            // });
             toaster.show({
               message: updateResponse.message,
               type: 'success',
@@ -369,14 +373,16 @@ const DraftsDetails = observer(() => {
         const updateResponse = await httpRequest(sendParams, setIsSending);
         if (updateResponse) {
           await httpRequest(sendNotificationParams, setIsSending);
-          socket?.emit('sendMessage', {
-            notificationId: notificationId,
-            sender: userInfo?.user_id,
-          });
-          socket?.emit('draftMsgId', {
-            notificationId: notificationId,
-            sender: userInfo?.user_id,
-          });
+          sendMessage(notificationId);
+          draftMessageId(notificationId);
+          // socket?.emit('sendMessage', {
+          //   notificationId: notificationId,
+          //   sender: userInfo?.user_id,
+          // });
+          // socket?.emit('draftMsgId', {
+          //   notificationId: notificationId,
+          //   sender: userInfo?.user_id,
+          // });
           toaster.show({
             message: updateResponse.message,
             type: 'success',
@@ -445,10 +451,11 @@ const DraftsDetails = observer(() => {
         if (resAction) {
           const draftResponse = await httpRequest(draftParams, setIsDrafting);
           if (draftResponse.message) {
-            socket?.emit('sendDraft', {
-              notificationId: notificationId,
-              sender: draftPayload.sender,
-            });
+            sendDraft(notificationId);
+            // socket?.emit('sendDraft', {
+            //   notificationId: notificationId,
+            //   sender: draftPayload.sender,
+            // });
             toaster.show({
               message: draftResponse.message,
               type: 'success',
@@ -477,15 +484,17 @@ const DraftsDetails = observer(() => {
         if (alertResponse) {
           const draftResponse = await httpRequest(draftParams, setIsDrafting);
           if (draftResponse) {
-            socket.emit('SendAlert', {
-              alertId: alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-            socket?.emit('sendDraft', {
-              notificationId: notificationId,
-              sender: draftPayload.sender,
-            });
+            SendAlert(alert_id!, recivers, false);
+            // socket.emit('SendAlert', {
+            //   alertId: alert_id,
+            //   recipients: recivers,
+            //   isAcknowledge: false,
+            // });
+            sendDraft(notificationId);
+            // socket?.emit('sendDraft', {
+            //   notificationId: notificationId,
+            //   sender: draftPayload.sender,
+            // });
             toaster.show({
               message: draftResponse.message,
               type: 'success',
@@ -495,10 +504,11 @@ const DraftsDetails = observer(() => {
       } else {
         const draftResponse = await httpRequest(draftParams, setIsDrafting);
         if (draftResponse) {
-          socket?.emit('sendDraft', {
-            notificationId: notificationId,
-            sender: draftPayload.sender,
-          });
+          sendDraft(notificationId);
+          // socket?.emit('sendDraft', {
+          //   notificationId: notificationId,
+          //   sender: draftPayload.sender,
+          // });
           toaster.show({
             message: draftResponse.message,
             type: 'success',
@@ -535,10 +545,11 @@ const DraftsDetails = observer(() => {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        socket?.emit('deleteMessage', {
-          notificationId: msgId,
-          sender: userInfo?.user_id,
-        });
+        deleteMessage(notificationId);
+        // socket?.emit('deleteMessage', {
+        //   notificationId: msgId,
+        //   sender: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',

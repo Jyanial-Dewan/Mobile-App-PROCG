@@ -1,5 +1,5 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useRef, useState} from 'react';
 import Row from '../../common/components/Row';
 import SVGController from '../../common/components/SVGController';
 import {COLORS} from '../../common/constant/Themes';
@@ -12,26 +12,37 @@ import {api} from '../../common/api/api';
 import {ProcgURL2} from '../../../App';
 import {useRootStore} from '../../stores/rootStore';
 import {httpRequest} from '../../common/constant/httpRequest';
-import StatusUpdateButton from '../../common/components/StatusUpdateButton';
 import {useToast} from '../../common/components/CustomToast';
 import {toTitleCase} from '../../common/utility/general';
+import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import RBSheet from '../../common/packages/RBSheet/RBSheet';
+
 interface Props {
   item: ActionItemsStoreSnapshotType;
-  refSheet: any;
-  setSelectedItem: (item: ActionItemsStoreSnapshotType) => void;
+  refSheetViewDetails: any;
+  setSelectedItem: (item: ActionItemsStoreSnapshotType | undefined) => void;
+  isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
+  allStatus: {id: number; title: string; value: string}[];
 }
 const RenderItems = ({
   item,
-  refSheet,
+  refSheetViewDetails,
   setSelectedItem,
+  isLoading,
   setIsLoading,
+  allStatus,
 }: Props) => {
   const url = ProcgURL2;
   const {userInfo, actionItems} = useRootStore();
   const toaster = useToast();
+
+  const refRBSheetUpdateStaus = useRef<RBSheet>(null);
+  const [selectedStatusForUpdate, setSelectedStatusForUpdate] = useState('');
   const handleStatusUpdate = async (action_item_id: number, status: string) => {
     try {
+      // setIsLoading(true);
       const api_params = {
         url: `${api.UpdateActionItemAssignment}/${userInfo?.user_id}/${action_item_id}`,
         baseURL: url,
@@ -48,12 +59,18 @@ const RenderItems = ({
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
       }
+    } finally {
+      refRBSheetUpdateStaus.current?.close();
+      setSelectedStatusForUpdate('');
     }
   };
 
-  const onOpenSheet = (item: ActionItemsStoreSnapshotType) => {
-    refSheet.current?.open();
+  const onOpenViewDetailsSheet = (item: ActionItemsStoreSnapshotType) => {
+    refSheetViewDetails.current?.open();
     setSelectedItem(item);
+  };
+  const onOpenUpdateStatusSheet = () => {
+    refRBSheetUpdateStaus.current?.open();
   };
 
   const bgColor =
@@ -69,6 +86,10 @@ const RenderItems = ({
         ? 'Circle-Check'
         : 'Circle';
 
+  const handleUpdateStatusRef = () => {
+    refRBSheetUpdateStaus.current?.open();
+  };
+
   return (
     <View style={styles.itemContainer}>
       <Row justify="space-between" align="center">
@@ -82,6 +103,7 @@ const RenderItems = ({
             ]}>
             <SVGController name={iconName} color={COLORS.black} />
           </View>
+          {/* item */}
           <Column colWidth="100%">
             <Column colWidth="90%">
               <CustomTextNew
@@ -116,7 +138,7 @@ const RenderItems = ({
                 {item.description.length > 180 && (
                   <TouchableOpacity
                     onPress={() => {
-                      onOpenSheet(item);
+                      onOpenViewDetailsSheet(item);
                     }}>
                     <CustomTextNew
                       text="View Details"
@@ -133,30 +155,151 @@ const RenderItems = ({
                   // onBtnPress={handleOpenSheet}
                   btnstyle={styles.btn}
                 />
-                <StatusUpdateButton
+                <CustomButtonNew
+                  ref={handleUpdateStatusRef}
+                  disabled={false}
+                  btnText={'Update Status'}
+                  // isLoading={false}
+                  onBtnPress={onOpenUpdateStatusSheet}
+                  btnstyle={styles.btn}
+                />
+                {/* <StatusUpdateButton
                   disabled={false}
                   actionItem={item}
                   btnText={'Update Status'}
                   handleStatusUpdate={handleStatusUpdate}
                   btnstyle={styles.btn}
-                />
+                /> */}
               </Row>
             </Column>
           </Column>
         </Row>
       </Row>
 
-      {/* View Details Modal */}
-      {/* <ViewDetailsModal
-        data={item.description}
-        isVisible={
-          viewDetailsModalVisible.id === item.id &&
-          viewDetailsModalVisible.visible
-        }
-        setIsVisible={setViewDetailsModalVisible}
-      /> */}
-      {/* End View Details Modal */}
       {/* Button here */}
+      {/* <StatusUpdateButtonTwo
+        item={item}
+        refRBSheetStatusUpdate={refSheetStatusUpdate}
+        handleStatusUpdate={handleStatusUpdate}
+      /> */}
+      {/* bottom sheet */}
+      <CustomBottomSheetNew
+        refRBSheet={refRBSheetUpdateStaus}
+        sheetHeight={330}
+        onClose={() => setSelectedStatusForUpdate('')}>
+        <View style={{padding: 10, gap: 10}}>
+          {/* action item name */}
+          <CustomTextNew
+            text={'Update Status'}
+            txtColor={COLORS.black}
+            txtStyle={{fontSize: 20, fontWeight: 'bold'}}
+          />
+          {/* status items */}
+          <View>
+            {allStatus.slice(1).map((statusItem: any, index: number) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() =>
+                  setSelectedStatusForUpdate(prev => {
+                    if (prev === statusItem.value) {
+                      return '';
+                    } else {
+                      return statusItem.value;
+                    }
+                  })
+                }
+                style={[
+                  item.status.toLowerCase() === 'completed' ||
+                  statusItem.value.toLowerCase() === 'new' ||
+                  statusItem.value.toLowerCase() === item.status.toLowerCase()
+                    ? {borderColor: COLORS.green}
+                    : {borderColor: '#767676ff'},
+                  statusItem.value.toLowerCase() ===
+                    selectedStatusForUpdate.toLowerCase() && {
+                    backgroundColor: COLORS.grayBgColor,
+                  },
+                  {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    borderWidth: 1,
+                    padding: 10,
+                    borderRadius: 5,
+                    marginBottom: 5,
+                  },
+                ]}>
+                {item.status.toLowerCase() === 'completed' ||
+                statusItem.value.toLowerCase() === 'new' ||
+                statusItem.value.toLowerCase() === item.status.toLowerCase() ? (
+                  <Icon name="check" color={COLORS.green} size={20} />
+                ) : (
+                  <>
+                    {statusItem.value.toLowerCase() ===
+                    selectedStatusForUpdate.toLowerCase() ? (
+                      <Icon name="check" color={COLORS.green} size={20} />
+                    ) : (
+                      <>
+                        {item.status.toLowerCase() === 'new' &&
+                        selectedStatusForUpdate.toLowerCase() ===
+                          'completed' ? (
+                          <Icon name="check" color={COLORS.green} size={20} />
+                        ) : (
+                          <View style={{width: 20}} />
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+                <CustomTextNew
+                  text={statusItem.title}
+                  txtColor={COLORS.black}
+                  txtSize={20}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+          {/* button here */}
+          <View
+            style={{
+              marginTop: 10,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            <CustomButtonNew
+              disabled={false}
+              btnText={'Cancel'}
+              // isLoading={false}
+              onBtnPress={() => refRBSheetUpdateStaus.current?.close()}
+              btnstyle={styles.btn}
+            />
+            <CustomButtonNew
+              disabled={
+                selectedStatusForUpdate === '' ||
+                isLoading ||
+                item.status.toLowerCase() ===
+                  selectedStatusForUpdate.toLowerCase()
+              }
+              btnText={'Update'}
+              isLoading={isLoading}
+              onBtnPress={() =>
+                handleStatusUpdate(item.action_item_id, selectedStatusForUpdate)
+              }
+              btnstyle={[
+                styles.btn,
+                {
+                  backgroundColor:
+                    selectedStatusForUpdate !== ''
+                      ? item.status.toLowerCase() ===
+                        selectedStatusForUpdate.toLowerCase()
+                        ? COLORS.lightGray
+                        : COLORS.primary
+                      : COLORS.lightGray,
+                },
+              ]}
+            />
+          </View>
+        </View>
+      </CustomBottomSheetNew>
     </View>
   );
 };

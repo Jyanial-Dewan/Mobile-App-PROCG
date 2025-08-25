@@ -21,7 +21,7 @@ interface Props {
 
 const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
   const {userInfo, alertsStore} = useRootStore();
-  const {socket} = useSocketContext();
+  const {SendAlert} = useSocketContext();
   const [isLoading, setIsLoading] = useState(false);
   const notificationIds = alertsStore.notificationAlerts.map(
     item => item.alert_id,
@@ -45,11 +45,12 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
         toaster.show({message: `Alert acknowledged.`, type: 'success'});
-        socket.emit('SendAlert', {
-          alertId: item.alert_id,
-          recipients: [userInfo?.user_id],
-          isAcknowledge: true,
-        });
+        SendAlert(item.alert_id, [userInfo?.user_id!], true);
+        // socket.emit('SendAlert', {
+        //   alertId: item.alert_id,
+        //   recipients: [userInfo?.user_id],
+        //   isAcknowledge: true,
+        // });
         alertsStore.readAlert(item.alert_id);
       }
     } catch (error) {
