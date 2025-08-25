@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -156,39 +157,47 @@ const Alerts = () => {
         onRefresh={handleRefresh}
       />
 
-      {/* Bottom Sheet */}
+      {/* Bottom Sheet View details*/}
       <CustomBottomSheetNew
         refRBSheet={refRBSheet}
         sheetHeight={600}
         onClose={() => setSelectedItem(undefined)}>
         {selectedItem && (
-          <ScrollView style={styles.itemContainer}>
-            <CustomTextNew
-              text={selectedItem.alert_name}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <CustomTextNew
-              text={convertDate(selectedItem.last_update_date as any)}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <Column colStyle={styles.colStyle}>
-              <CustomTextNew
-                text={selectedItem.description}
-                txtColor={COLORS.blackish}
-                txtSize={14}
-              />
-            </Column>
-          </ScrollView>
+          <TouchableWithoutFeedback>
+            <View>
+              <ScrollView
+                style={styles.itemContainer}
+                contentContainerStyle={{flexGrow: 1}}>
+                <TouchableOpacity activeOpacity={1}>
+                  <CustomTextNew
+                    text={selectedItem.alert_name}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 'bold',
+                      color: COLORS.black,
+                      marginTop: 5,
+                    }}
+                  />
+                  <CustomTextNew
+                    text={convertDate(selectedItem.last_update_date as any)}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 'bold',
+                      color: COLORS.black,
+                      marginTop: 5,
+                    }}
+                  />
+                  <Column colStyle={styles.colStyle}>
+                    <CustomTextNew
+                      text={selectedItem.description}
+                      txtColor={COLORS.blackish}
+                      txtSize={14}
+                    />
+                  </Column>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </TouchableWithoutFeedback>
         )}
       </CustomBottomSheetNew>
     </ContainerNew>
@@ -205,7 +214,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    // padding: 15,
     borderRadius: 15,
     paddingVertical: 10,
     marginBottom: 20,

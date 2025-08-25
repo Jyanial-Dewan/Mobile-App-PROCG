@@ -1,8 +1,6 @@
 import {
   ActivityIndicator,
-  Dimensions,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -42,6 +40,7 @@ import {AlertStoreSnapshotType} from '../../stores/alertsStore';
 import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
+import CustomTextNew from '../../common/components/CustomText';
 interface IOldMsgTypes {
   receivers?: number[];
   subject?: string;
@@ -211,12 +210,6 @@ const DraftsDetails = observer(() => {
     };
     handleUserChange();
   }, [recivers, oldMsgState?.receivers]);
-
-  useEffect(() => {
-    const fetchData = async () => {};
-
-    fetchData();
-  }, [action_item_id, alert_id]);
 
   const handleReciever = (reciever: number) => {
     if (recivers.includes(reciever)) {
@@ -450,7 +443,7 @@ const DraftsDetails = observer(() => {
         );
         if (resAction) {
           const draftResponse = await httpRequest(draftParams, setIsDrafting);
-          if (draftResponse.message) {
+          if (draftResponse) {
             sendDraft(notificationId);
             // socket?.emit('sendDraft', {
             //   notificationId: notificationId,
@@ -739,11 +732,19 @@ const DraftsDetails = observer(() => {
         <ActivityIndicator size="large" color={COLORS.primary} />
       ) : (
         <View style={{flex: 1, marginHorizontal: 20}}>
-          <View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 10,
+            }}>
             {/*Notification Type*/}
+            <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
             <SelectStatusDropDown
               isDisabled={true}
-              width={Dimensions.get('screen').width - 40}
+              width={210}
+              // width={Dimensions.get('screen').width - 40}
               height={30}
               defaultValue={toTitleCase(notificationType)}
               data={[]}
@@ -926,6 +927,7 @@ const DraftsDetails = observer(() => {
             <TextInput
               style={{height: 40, width: '80%', color: COLORS.black}}
               value={subject}
+              maxLength={100}
               onChangeText={text => setSubject(text)}
             />
           </View>
@@ -955,7 +957,7 @@ const DraftsDetails = observer(() => {
                 <TextInput
                   style={{height: 40, width: '90%', color: COLORS.black}}
                   value={actionItemName}
-                  maxLength={150}
+                  maxLength={100}
                   onChangeText={text => setActionItemName(text)}
                 />
               </View>

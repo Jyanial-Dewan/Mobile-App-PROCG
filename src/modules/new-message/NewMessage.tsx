@@ -36,6 +36,7 @@ import {
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
+import CustomTextNew from '../../common/components/CustomText';
 
 interface User {
   name: string;
@@ -173,7 +174,7 @@ const NewMessage = () => {
           setIsSending,
         );
 
-        if (actionItemResponse.message) {
+        if (actionItemResponse) {
           sendPayload.action_item_id = actionItemResponse.action_item_id;
           const notificationResponse = await httpRequest(
             sendParams,
@@ -348,10 +349,10 @@ const NewMessage = () => {
     try {
       if (selectedNotificationType.toLowerCase() === 'action item') {
         const SendActionItemPayload = {
-          action_item_name: actionItemName,
-          description: actionItemDescription,
+          action_item_name: actionItemName ?? ' ',
+          description: actionItemDescription ?? ' ',
           status: 'NEW',
-          user_ids: recivers,
+          user_ids: recivers ?? [],
         };
         const sendActionItemParams = {
           url: api.ActionItem,
@@ -366,7 +367,7 @@ const NewMessage = () => {
           sendActionItemParams,
           setIsDrafting,
         );
-        if (actionItemResponse.message) {
+        if (actionItemResponse) {
           draftPayload.action_item_id = actionItemResponse.action_item_id;
           const notificationResponse = await httpRequest(
             draftParams,
@@ -410,9 +411,9 @@ const NewMessage = () => {
       }
       if (selectedNotificationType.toLowerCase() === 'alert') {
         const SendAlertPayload = {
-          alert_name: alertName,
-          description: alertDescription,
-          recepients: recivers,
+          alert_name: alertName ?? ' ',
+          description: alertDescription ?? ' ',
+          recepients: recivers ?? [],
           // notification_id: id,
           created_by: userInfo?.user_id,
           last_updated_by: userInfo?.user_id,
@@ -426,7 +427,7 @@ const NewMessage = () => {
           // isConsoleParams: true,
         };
         const alertResponse = await httpRequest(sendAlertParams, setIsDrafting);
-        if (alertResponse.message) {
+        if (alertResponse) {
           draftPayload.alert_id = alertResponse.result.alert_id;
           const notificationResponse = await httpRequest(
             draftParams,
@@ -443,7 +444,7 @@ const NewMessage = () => {
               // isConsole: true,
               // isConsoleParams: true,
             };
-            await httpRequest(updateAlertParams, setIsSending);
+            await httpRequest(updateAlertParams, setIsDrafting);
             SendAlert(alertResponse.result.alert_id, recivers, false);
             // socket.emit('SendAlert', {
             //   alertId: alertResponse.result.alert_id,
@@ -530,26 +531,27 @@ const NewMessage = () => {
           <TouchableOpacity
             onPress={handleDraft}
             disabled={
-              (recivers.length === 0 &&
-                body === '' &&
-                subject === '' &&
-                actionItemName === '' &&
-                actionItemDescription === '' &&
-                alertName === '' &&
-                alertDescription === '') ||
-              isDrafting
+              selectedNotificationType.toLowerCase() === 'notification'
+                ? (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting
+                : (actionItemName === '' &&
+                    actionItemDescription === '' &&
+                    alertName === '' &&
+                    alertDescription === '') ||
+                  (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting
             }
             style={[
               styles.draftBtn,
-              ((recivers.length === 0 &&
-                body === '' &&
-                subject === '' &&
-                actionItemName === '' &&
-                actionItemDescription === '' &&
-                alertName === '' &&
-                alertDescription === '') ||
-                isDrafting) &&
-                styles.disabled,
+              (selectedNotificationType.toLowerCase() === 'notification'
+                ? (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting
+                : (actionItemName === '' &&
+                    actionItemDescription === '' &&
+                    alertName === '' &&
+                    alertDescription === '') ||
+                  (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting) && styles.disabled,
             ]}>
             {isDrafting ? (
               <ActivityIndicator
@@ -606,10 +608,19 @@ const NewMessage = () => {
           </TouchableOpacity>
         </View>
       }>
-      <View style={{marginHorizontal: 20}}>
+      <View
+        style={{
+          marginHorizontal: 20,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 10,
+        }}>
         {/*Notification Type*/}
+        <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
         <SelectStatusDropDown
-          width={Dimensions.get('screen').width - 40}
+          width={210}
+          // width={Dimensions.get('screen').width - 40}
           height={30}
           defaultValue={allNotificationType[0]?.title}
           data={allNotificationType}
@@ -796,6 +807,7 @@ const NewMessage = () => {
           <TextInput
             style={{height: 40, width: '80%', color: COLORS.black}}
             value={subject}
+            maxLength={100}
             onChangeText={text => setSubject(text)}
           />
         </View>
@@ -836,7 +848,7 @@ const NewMessage = () => {
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={actionItemName}
-                maxLength={150}
+                maxLength={100}
                 onChangeText={text => setActionItemName(text)}
               />
             </View>

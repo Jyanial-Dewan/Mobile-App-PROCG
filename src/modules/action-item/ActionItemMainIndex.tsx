@@ -1,11 +1,8 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
-  Modal,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableNativeFeedback,
   TouchableOpacity,
   TouchableWithoutFeedback,
   useWindowDimensions,
@@ -13,20 +10,16 @@ import {
 } from 'react-native';
 import {Edge} from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
-import CustomHeader from '../../common/components/CustomHeader';
 import CustomTextNew from '../../common/components/CustomText';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
 import {useRootStore} from '../../stores/rootStore';
 import {COLORS} from '../../common/constant/Themes';
-import Column from '../../common/components/Column';
 import {_todayDate} from '../../common/services/todayDate';
 import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
 import RBSheet from '../../common/packages/RBSheet/RBSheet';
 import MainHeader from '../../common/components/MainHeader';
-import CustomButtonNew from '../../common/components/CustomButton';
 import SearchBar from '../../common/components/SearchBar';
 import {convertDate} from '../../common/services/DateConverter';
-import ViewDetailsModal from '../../common/components/ViewDetailsModal';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {ProcgURL2} from '../../../App';
@@ -42,7 +35,6 @@ const ActionItemMainIndex = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const {userInfo, actionItems} = useRootStore();
-  const refRBSheet = useRef<RBSheet>(null);
   const [data, setData] = useState<ActionItemsStoreSnapshotType[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const height = useWindowDimensions().height;
@@ -107,10 +99,10 @@ const ActionItemMainIndex = () => {
     setCurrentPage(1);
   };
   const allStatus = [
-    {title: 'All', value: 'All'},
-    {title: 'New', value: 'NEW'},
-    {title: 'In Progress', value: 'IN PROGRESS'},
-    {title: 'Completed', value: 'COMPLETED'},
+    {id: 0, title: 'All', value: 'All'},
+    {id: 1, title: 'New', value: 'NEW'},
+    {id: 2, title: 'In Progress', value: 'IN PROGRESS'},
+    {id: 3, title: 'Completed', value: 'COMPLETED'},
   ];
   const handleSelectedStatus = (status: string) => {
     if (status.toLowerCase() === 'all') {
@@ -119,6 +111,7 @@ const ActionItemMainIndex = () => {
       setSelectedStatusQuery(status);
     }
   };
+
   const EmptyListItem = () => {
     return (
       <View
@@ -142,6 +135,7 @@ const ActionItemMainIndex = () => {
       header={
         <MainHeader routeName="Action Items" style={{fontWeight: '700'}} />
       }>
+      {/* searchbar and dropdown selection start */}
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <SearchBar
           placeholder="Search item"
@@ -158,6 +152,7 @@ const ActionItemMainIndex = () => {
           handleSelectedStatus={handleSelectedStatus}
         />
       </View>
+      {/* items rendering start */}
       <CustomFlatListThree
         data={actionItems.actionItems}
         keyExtractor={(item: ActionItemsStoreSnapshotType) =>
@@ -166,9 +161,11 @@ const ActionItemMainIndex = () => {
         RenderItems={({item}: any) => (
           <RenderItems
             item={item}
-            refSheet={refRBSheet}
+            selectedItem={selectedItem}
             setSelectedItem={setSelectedItem}
+            isLoading={isLoading}
             setIsLoading={setIsLoading}
+            allStatus={allStatus}
           />
         )}
         emptyItem={
@@ -183,42 +180,6 @@ const ActionItemMainIndex = () => {
         refreshing={actionItems.refreshing}
         onRefresh={handleRefresh}
       />
-
-      {/* Bottom Sheet */}
-      <CustomBottomSheetNew
-        refRBSheet={refRBSheet}
-        sheetHeight={600}
-        onClose={() => setSelectedItem(undefined)}>
-        {selectedItem && (
-          <ScrollView style={styles.itemContainer}>
-            <CustomTextNew
-              text={selectedItem.action_item_name}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <CustomTextNew
-              text={convertDate(selectedItem.last_update_date as any)}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <Column colStyle={styles.colStyle}>
-              <CustomTextNew
-                text={selectedItem.description}
-                txtColor={COLORS.blackish}
-                txtSize={14}
-              />
-            </Column>
-          </ScrollView>
-        )}
-      </CustomBottomSheetNew>
     </ContainerNew>
   );
 };
@@ -233,7 +194,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    // padding: 15,
     borderRadius: 15,
     paddingVertical: 10,
     marginBottom: 20,

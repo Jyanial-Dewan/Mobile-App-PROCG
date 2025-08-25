@@ -327,8 +327,9 @@ const ReplyScreen = () => {
         <View style={styles.lineContainer}>
           <Text style={{color: COLORS.darkGray}}>Subject</Text>
           <TextInput
-            style={{height: 40, width: '80%', color: COLORS.black}}
+            style={{height: 40, width: '80%', color: COLORS.textGray}}
             value={subject}
+            readOnly
             onChangeText={text => setSubject(text)}
           />
         </View>

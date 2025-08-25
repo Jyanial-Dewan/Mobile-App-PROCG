@@ -1,4 +1,10 @@
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import React, {useRef, useState} from 'react';
 import Row from '../../common/components/Row';
 import SVGController from '../../common/components/SVGController';
@@ -20,7 +26,7 @@ import RBSheet from '../../common/packages/RBSheet/RBSheet';
 
 interface Props {
   item: ActionItemsStoreSnapshotType;
-  refSheetViewDetails: any;
+  selectedItem: ActionItemsStoreSnapshotType | undefined;
   setSelectedItem: (item: ActionItemsStoreSnapshotType | undefined) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
@@ -28,7 +34,7 @@ interface Props {
 }
 const RenderItems = ({
   item,
-  refSheetViewDetails,
+  selectedItem,
   setSelectedItem,
   isLoading,
   setIsLoading,
@@ -37,7 +43,7 @@ const RenderItems = ({
   const url = ProcgURL2;
   const {userInfo, actionItems} = useRootStore();
   const toaster = useToast();
-
+  const refRBSheetViewDetails = useRef<RBSheet>(null);
   const refRBSheetUpdateStaus = useRef<RBSheet>(null);
   const [selectedStatusForUpdate, setSelectedStatusForUpdate] = useState('');
   const handleStatusUpdate = async (action_item_id: number, status: string) => {
@@ -66,7 +72,7 @@ const RenderItems = ({
   };
 
   const onOpenViewDetailsSheet = (item: ActionItemsStoreSnapshotType) => {
-    refSheetViewDetails.current?.open();
+    refRBSheetViewDetails.current?.open();
     setSelectedItem(item);
   };
   const onOpenUpdateStatusSheet = () => {
@@ -156,7 +162,6 @@ const RenderItems = ({
                   btnstyle={styles.btn}
                 />
                 <CustomButtonNew
-                  ref={handleUpdateStatusRef}
                   disabled={false}
                   btnText={'Update Status'}
                   // isLoading={false}
@@ -182,7 +187,50 @@ const RenderItems = ({
         refRBSheetStatusUpdate={refSheetStatusUpdate}
         handleStatusUpdate={handleStatusUpdate}
       /> */}
-      {/* bottom sheet */}
+      {/* Bottom Sheet View details*/}
+      <CustomBottomSheetNew
+        refRBSheet={refRBSheetViewDetails}
+        sheetHeight={600}
+        onClose={() => setSelectedItem(undefined)}>
+        {selectedItem && (
+          <TouchableWithoutFeedback>
+            <View>
+              <ScrollView
+                style={[styles.itemContainer]}
+                contentContainerStyle={{flexGrow: 1}}>
+                <TouchableOpacity activeOpacity={1}>
+                  <CustomTextNew
+                    text={selectedItem.action_item_name}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 'bold',
+                      color: COLORS.black,
+                      marginTop: 5,
+                    }}
+                  />
+                  <CustomTextNew
+                    text={convertDate(selectedItem.last_update_date as any)}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 'bold',
+                      color: COLORS.black,
+                      marginTop: 5,
+                    }}
+                  />
+                  <Column colStyle={styles.colStyle}>
+                    <CustomTextNew
+                      text={selectedItem.description}
+                      txtColor={COLORS.blackish}
+                      txtSize={14}
+                    />
+                  </Column>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </TouchableWithoutFeedback>
+        )}
+      </CustomBottomSheetNew>
+      {/* bottom sheet Update status*/}
       <CustomBottomSheetNew
         refRBSheet={refRBSheetUpdateStaus}
         sheetHeight={330}
