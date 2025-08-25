@@ -301,7 +301,7 @@ const SentScreen = observer(() => {
   const isFocused = useIsFocused();
   const navigation = useNavigation<NotificationDetailsNavigationProp>();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, deleteMessage, multipleDeleteMessage} = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
   const {control, setValue} = useForm();
   const [currentPage, setCurrentPage] = useState(1);
@@ -411,10 +411,11 @@ const SentScreen = observer(() => {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        socket?.emit('deleteMessage', {
-          notificationId: msgId,
-          sender: userInfo?.user_id,
-        });
+        deleteMessage(msgId);
+        // socket?.emit('deleteMessage', {
+        //   notificationId: msgId,
+        //   sender: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',
@@ -438,10 +439,11 @@ const SentScreen = observer(() => {
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        socket?.emit('multipleDelete', {
-          ids: selectedIds,
-          user: userInfo?.user_id,
-        });
+        multipleDeleteMessage(selectedIds);
+        // socket?.emit('multipleDelete', {
+        //   ids: selectedIds,
+        //   user: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',

@@ -318,7 +318,7 @@ const RecycleBin = observer(() => {
   const navigation = useNavigation<NotificationDetailsNavigationProp>();
   const isFocused = useIsFocused();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, deleteMessage, multipleDeleteMessage} = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(0);
@@ -424,10 +424,11 @@ const RecycleBin = observer(() => {
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        socket?.emit('multipleDelete', {
-          ids: selectedIds,
-          user: userInfo?.user_id,
-        });
+        multipleDeleteMessage(selectedIds);
+        // socket?.emit('multipleDelete', {
+        //   ids: selectedIds,
+        //   user: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',
@@ -461,10 +462,11 @@ const RecycleBin = observer(() => {
     try {
       const response = await httpRequest(putParams, setIsLoading);
       if (response.status === 200) {
-        socket?.emit('deleteMessage', {
-          id: msg.notification_id,
-          user: userInfo?.user_id,
-        });
+        deleteMessage(msg.notification_id);
+        // socket?.emit('deleteMessage', {
+        //   id: msg.notification_id,
+        //   user: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',

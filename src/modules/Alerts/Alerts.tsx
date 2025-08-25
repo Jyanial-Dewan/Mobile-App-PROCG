@@ -3,7 +3,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -111,6 +113,18 @@ const Alerts = () => {
     alertsStore.setRefreshing(true);
     setCurrentPage(1);
   };
+  const EmptyListItem = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <CustomTextNew text={'No alerts found'} txtColor={COLORS.black} />
+      </View>
+    );
+  };
   return (
     <ContainerNew
       edges={edges}
@@ -132,19 +146,9 @@ const Alerts = () => {
             setSelectedItem={setSelectedItem}
           />
         )}
-        emptyItem={() => {
-          if (!isLoading && alertsStore.alerts.length === 0) {
-            return (
-              <CustomTextNew
-                style={{
-                  textAlign: 'center',
-                  marginTop: height / 3,
-                }}
-                text="No data found"
-              />
-            );
-          }
-        }}
+        emptyItem={
+          !isLoading && alertsStore.alerts.length === 0 ? EmptyListItem : null
+        }
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -153,39 +157,47 @@ const Alerts = () => {
         onRefresh={handleRefresh}
       />
 
-      {/* Bottom Sheet */}
+      {/* Bottom Sheet View details*/}
       <CustomBottomSheetNew
         refRBSheet={refRBSheet}
         sheetHeight={600}
         onClose={() => setSelectedItem(undefined)}>
         {selectedItem && (
-          <ScrollView style={styles.itemContainer}>
-            <CustomTextNew
-              text={selectedItem.alert_name}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <CustomTextNew
-              text={convertDate(selectedItem.last_update_date as any)}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <Column colStyle={styles.colStyle}>
-              <CustomTextNew
-                text={selectedItem.description}
-                txtColor={COLORS.blackish}
-                txtSize={14}
-              />
-            </Column>
-          </ScrollView>
+          <TouchableWithoutFeedback>
+            <View>
+              <ScrollView
+                style={styles.itemContainer}
+                contentContainerStyle={{flexGrow: 1}}>
+                <TouchableOpacity activeOpacity={1}>
+                  <CustomTextNew
+                    text={selectedItem.alert_name}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 'bold',
+                      color: COLORS.black,
+                      marginTop: 5,
+                    }}
+                  />
+                  <CustomTextNew
+                    text={convertDate(selectedItem.last_update_date as any)}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 'bold',
+                      color: COLORS.black,
+                      marginTop: 5,
+                    }}
+                  />
+                  <Column colStyle={styles.colStyle}>
+                    <CustomTextNew
+                      text={selectedItem.description}
+                      txtColor={COLORS.blackish}
+                      txtSize={14}
+                    />
+                  </Column>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </TouchableWithoutFeedback>
         )}
       </CustomBottomSheetNew>
     </ContainerNew>
@@ -202,7 +214,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    // padding: 15,
     borderRadius: 15,
     paddingVertical: 10,
     marginBottom: 20,

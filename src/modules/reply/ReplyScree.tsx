@@ -40,7 +40,7 @@ const ReplyScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, sendMessage, sendDraft} = useSocketContext();
   const {_id} = route.params as {_id: string};
   const isFocused = useIsFocused();
   const [parrentMessage, setParrentMessage] =
@@ -135,10 +135,11 @@ const ReplyScreen = () => {
       const response = await httpRequest(sendParams, setIsSending);
       await httpRequest(sendNotificationParams, setIsSending);
       if (response) {
-        socket?.emit('sendMessage', {
-          notificationId: sendPayload.notification_id,
-          sender: sendPayload.sender,
-        });
+        sendMessage(sendPayload.notification_id);
+        // socket?.emit('sendMessage', {
+        //   notificationId: sendPayload.notification_id,
+        //   sender: sendPayload.sender,
+        // });
         toaster.show({message: response.message, type: 'success'});
       }
     } catch (error) {
@@ -182,10 +183,11 @@ const ReplyScreen = () => {
     try {
       const response = await httpRequest(draftParams, setIsDrafting);
       if (response) {
-        socket?.emit('sendDraft', {
-          notificationId: draftPayload.notification_id,
-          sender: draftPayload.sender,
-        });
+        sendDraft(draftPayload.notification_id);
+        // socket?.emit('sendDraft', {
+        //   notificationId: draftPayload.notification_id,
+        //   sender: draftPayload.sender,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',
@@ -325,8 +327,9 @@ const ReplyScreen = () => {
         <View style={styles.lineContainer}>
           <Text style={{color: COLORS.darkGray}}>Subject</Text>
           <TextInput
-            style={{height: 40, width: '80%', color: COLORS.black}}
+            style={{height: 40, width: '80%', color: COLORS.textGray}}
             value={subject}
+            readOnly
             onChangeText={text => setSubject(text)}
           />
         </View>

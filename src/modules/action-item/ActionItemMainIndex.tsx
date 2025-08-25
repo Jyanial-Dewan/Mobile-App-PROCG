@@ -1,11 +1,8 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
-  Modal,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableNativeFeedback,
   TouchableOpacity,
   TouchableWithoutFeedback,
   useWindowDimensions,
@@ -13,23 +10,16 @@ import {
 } from 'react-native';
 import {Edge} from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
-import CustomHeader from '../../common/components/CustomHeader';
 import CustomTextNew from '../../common/components/CustomText';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
 import {useRootStore} from '../../stores/rootStore';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {COLORS} from '../../common/constant/Themes';
-import Column from '../../common/components/Column';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import Row from '../../common/components/Row';
-import {_todayDate, dateFormater} from '../../common/services/todayDate';
+import {_todayDate} from '../../common/services/todayDate';
 import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
 import RBSheet from '../../common/packages/RBSheet/RBSheet';
 import MainHeader from '../../common/components/MainHeader';
-import CustomButtonNew from '../../common/components/CustomButton';
 import SearchBar from '../../common/components/SearchBar';
 import {convertDate} from '../../common/services/DateConverter';
-import ViewDetailsModal from '../../common/components/ViewDetailsModal';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {ProcgURL2} from '../../../App';
@@ -45,15 +35,10 @@ const ActionItemMainIndex = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const {userInfo, actionItems} = useRootStore();
-  const refRBSheet = useRef<RBSheet>(null);
   const [data, setData] = useState<ActionItemsStoreSnapshotType[]>([]);
-  const [search, setSearch] = useState('');
-  const [noResult, setNoResult] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const height = useWindowDimensions().height;
-  // const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState({
-  //   id: 0,
-  //   visible: false,
-  // });
+
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
@@ -63,29 +48,40 @@ const ActionItemMainIndex = () => {
     ActionItemsStoreSnapshotType | undefined
   >(undefined);
   const [selectedStatusQuery, setSelectedStatusQuery] = useState('');
-  const [updateStatus, setUpdateStatus] = useState('');
+
+  const searchActionItems = async () => {
+    setIsLoading(true);
+    const api_params = {
+      url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}&action_item_name=${searchQuery}`,
+      baseURL: url,
+      access_token: userInfo?.access_token,
+      // isConsole: true,
+      // isConsoleParams: true,
+    };
+    const res = await httpRequest(api_params, setIsLoading);
+
+    if (res) {
+      setHasMore(res.items.length);
+      setData(res.items);
+      actionItems.saveActionItems(res.items);
+      actionItems.setRefreshing(false);
+    }
+  };
 
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
         return null;
       }
-      //api call here
-      setIsLoading(true);
-      const api_params = {
-        url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}`,
-        baseURL: url,
-        access_token: userInfo?.access_token,
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-      const res = await httpRequest(api_params, setIsLoading);
+      if (!searchQuery) {
+        searchActionItems();
+      } else {
+        // Debounce only when query changes
+        const delayDebounce = setTimeout(async () => {
+          searchActionItems();
+        }, 1000);
 
-      if (res) {
-        setHasMore(res.items.length);
-        setData(res.items);
-        actionItems.saveActionItems(res.items);
-        actionItems.setRefreshing(false);
+        return () => clearTimeout(delayDebounce);
       }
     },
     [
@@ -94,37 +90,19 @@ const ActionItemMainIndex = () => {
       actionItems.refreshing,
       actionItems.actionItems,
       selectedStatusQuery,
+      searchQuery,
     ],
   );
-
-  // useEffect(() => {
-  //   const searchActionItems = () => {
-  //     const filteredItems = actionItems.actionItems.filter(item =>
-  //       item.action_item_name.toLowerCase().includes(search.toLowerCase()),
-  //     );
-  //     if (filteredItems.length) {
-  //       setData(filteredItems);
-  //     } else {
-  //       setData([]);
-  //       setNoResult(true);
-  //     }
-  //   };
-  //   if (search) {
-  //     searchActionItems();
-  //   } else {
-  //     setData(actionItems.actionItems);
-  //   }
-  // }, [search]);
 
   const handleRefresh = () => {
     actionItems.setRefreshing(true);
     setCurrentPage(1);
   };
   const allStatus = [
-    {title: 'All', value: 'All'},
-    {title: 'New', value: 'NEW'},
-    {title: 'In Progress', value: 'IN PROGRESS'},
-    {title: 'Completed', value: 'COMPLETED'},
+    {id: 0, title: 'All', value: 'All'},
+    {id: 1, title: 'New', value: 'NEW'},
+    {id: 2, title: 'In Progress', value: 'IN PROGRESS'},
+    {id: 3, title: 'Completed', value: 'COMPLETED'},
   ];
   const handleSelectedStatus = (status: string) => {
     if (status.toLowerCase() === 'all') {
@@ -134,6 +112,18 @@ const ActionItemMainIndex = () => {
     }
   };
 
+  const EmptyListItem = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <CustomTextNew text={'No action items found'} txtColor={COLORS.black} />
+      </View>
+    );
+  };
   return (
     <ContainerNew
       edges={edges}
@@ -145,19 +135,24 @@ const ActionItemMainIndex = () => {
       header={
         <MainHeader routeName="Action Items" style={{fontWeight: '700'}} />
       }>
+      {/* searchbar and dropdown selection start */}
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <SearchBar
           placeholder="Search item"
-          value={search}
-          onChangeText={setSearch}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
           customStyle={{width: 180}}
         />
         <SelectStatusDropDown
+          width={150}
+          height={50}
+          border={false}
           defaultValue={allStatus[0].title}
           data={allStatus}
           handleSelectedStatus={handleSelectedStatus}
         />
       </View>
+      {/* items rendering start */}
       <CustomFlatListThree
         data={actionItems.actionItems}
         keyExtractor={(item: ActionItemsStoreSnapshotType) =>
@@ -166,22 +161,18 @@ const ActionItemMainIndex = () => {
         RenderItems={({item}: any) => (
           <RenderItems
             item={item}
-            refSheet={refRBSheet}
+            selectedItem={selectedItem}
             setSelectedItem={setSelectedItem}
+            isLoading={isLoading}
             setIsLoading={setIsLoading}
+            allStatus={allStatus}
           />
         )}
-        emptyItem={() => {
-          return (
-            <CustomTextNew
-              style={{
-                textAlign: 'center',
-                marginTop: height / 3,
-              }}
-              text="No data found"
-            />
-          );
-        }}
+        emptyItem={
+          !isLoading && actionItems.actionItems.length === 0
+            ? EmptyListItem
+            : null
+        }
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -189,42 +180,6 @@ const ActionItemMainIndex = () => {
         refreshing={actionItems.refreshing}
         onRefresh={handleRefresh}
       />
-
-      {/* Bottom Sheet */}
-      <CustomBottomSheetNew
-        refRBSheet={refRBSheet}
-        sheetHeight={600}
-        onClose={() => setSelectedItem(undefined)}>
-        {selectedItem && (
-          <ScrollView style={styles.itemContainer}>
-            <CustomTextNew
-              text={selectedItem.action_item_name}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <CustomTextNew
-              text={convertDate(selectedItem.last_update_date as any)}
-              style={{
-                fontSize: 15,
-                fontWeight: 'bold',
-                color: COLORS.black,
-                marginTop: 5,
-              }}
-            />
-            <Column colStyle={styles.colStyle}>
-              <CustomTextNew
-                text={selectedItem.description}
-                txtColor={COLORS.blackish}
-                txtSize={14}
-              />
-            </Column>
-          </ScrollView>
-        )}
-      </CustomBottomSheetNew>
     </ContainerNew>
   );
 };
@@ -239,7 +194,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    // padding: 15,
     borderRadius: 15,
     paddingVertical: 10,
     marginBottom: 20,

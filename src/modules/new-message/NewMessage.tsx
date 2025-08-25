@@ -1,5 +1,7 @@
 import {
   ActivityIndicator,
+  Dimensions,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -7,9 +9,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
 import MainHeader from '../../common/components/MainHeader';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -33,6 +36,7 @@ import {
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
+import CustomTextNew from '../../common/components/CustomText';
 
 interface User {
   name: string;
@@ -42,7 +46,7 @@ interface User {
 const NewMessage = () => {
   const {name} = useRoute();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {SendAlert, sendMessage, sendDraft} = useSocketContext();
   const [showModal, setShowModal] = useState(false);
   const [recivers, setRecivers] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
@@ -51,8 +55,19 @@ const NewMessage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
+  const [selectedNotificationType, setSelectedNotificationType] =
+    useState('NOTIFICATION');
+  const [actionItemName, setActionItemName] = useState('');
+  const [actionItemDescription, setActionItemDescription] = useState('');
+  const [alertName, setAlertName] = useState('');
+  const [alertDescription, setAlertDescription] = useState('');
+  const [isUsersModalShow, setIsUsersModalShow] = useState(false);
+  const allNotificationType = [
+    {title: 'Notification', value: 'NOTIFICATION'},
+    {title: 'Action Item', value: 'ACTION ITEM'},
+    {title: 'Alert', value: 'ALERT'},
+  ];
   const navigation = useNavigation();
-  const notifcationType = 'REGULAR';
   const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
@@ -117,10 +132,9 @@ const NewMessage = () => {
       data: sendPayload,
       method: 'post',
       baseURL: urlNode,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-    // notificationID, parentId, date, sender, recipients, subject, body;
     const sendNotificationPayload = {
       notificationID: id,
       parentId: id,
@@ -135,93 +149,50 @@ const NewMessage = () => {
       data: sendNotificationPayload,
       method: 'post',
       baseURL: urlNode,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
-
     try {
-      const notificationResponse = await httpRequest(sendParams, setIsSending);
-      await httpRequest(sendNotificationParams, setIsSending);
+      if (selectedNotificationType.toLowerCase() === 'action item') {
+        const SendActionItemPayload = {
+          action_item_name: actionItemName,
+          description: actionItemDescription,
+          status: 'NEW',
+          user_ids: recivers,
+        };
+        const sendActionItemParams = {
+          url: api.ActionItem,
+          data: SendActionItemPayload,
+          method: 'post',
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const actionItemResponse = await httpRequest(
+          sendActionItemParams,
+          setIsSending,
+        );
 
-      if (notificationResponse.message) {
-        if (selectedNotificationType.toLowerCase() === 'alert') {
-          const SendAlertPayload = {
-            alert_name: alertName,
-            description: alertDescription,
-            recepients: recivers,
-            notification_id: id,
-            created_by: userInfo?.user_id,
-            last_updated_by: userInfo?.user_id,
-          };
-          const sendAlertParams = {
-            url: api.CreateAlert,
-            data: SendAlertPayload,
-            method: 'post',
-            baseURL: urlNode,
-            isConsole: true,
-            isConsoleParams: true,
-          };
-          const alertResponse = await httpRequest(
-            sendAlertParams,
+        if (actionItemResponse) {
+          sendPayload.action_item_id = actionItemResponse.action_item_id;
+          const notificationResponse = await httpRequest(
+            sendParams,
             setIsSending,
           );
-
-          if (alertResponse.message) {
-            setAlertName('');
-            setAlertDescription('');
-            const params = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                alert_id: alertResponse.result.alert_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              isConsole: true,
-              isConsoleParams: true,
-            };
-            await httpRequest(params, setIsSending);
-            socket.emit('SendAlert', {
-              alertId: alertResponse.result.alert_id,
-              recipients: recivers,
-              isAcknowledge: false,
-            });
-          }
-        }
-        if (selectedNotificationType.toLowerCase() === 'action item') {
-          const SendActionItemPayload = {
-            action_item_name: actionItemName,
-            description: actionItemDescription,
-            status: 'NEW',
-            user_ids: recivers,
-          };
-          const sendActionItemParams = {
-            url: api.ActionItem,
-            data: SendActionItemPayload,
-            method: 'post',
-            baseURL: urlPython,
-            access_token: userInfo?.access_token,
-            // isConsole: true,
-            // isConsoleParams: true,
-          };
-          const actionItemResponse = await httpRequest(
-            sendActionItemParams,
-            setIsSending,
-          );
-
-          if (actionItemResponse.message) {
-            setActionItemName('');
-            setActionItemDescription('');
-            const params1 = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                action_item_id: actionItemResponse.action_item_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            await httpRequest(params1, setIsSending);
+          if (notificationResponse) {
+            await httpRequest(sendNotificationParams, setIsSending);
+            // const params1 = {
+            //   url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+            //   data: {
+            //     action_item_id: actionItemResponse.action_item_id,
+            //   },
+            //   method: 'put',
+            //   baseURL: urlNode,
+            //   // isConsole: true,
+            //   // isConsoleParams: true,
+            // };
+            // await httpRequest(params1, setIsSending);
             const params2 = {
               url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
               data: {
@@ -234,33 +205,125 @@ const NewMessage = () => {
               // isConsoleParams: true,
             };
             await httpRequest(params2, setIsSending);
+            sendMessage(sendPayload.notification_id);
+            // socket?.emit('sendMessage', {
+            //   notificationId: sendPayload.notification_id,
+            //   sender: sendPayload.sender,
+            // });
+            toaster.show({
+              message: notificationResponse.message,
+              type: 'success',
+            });
           }
         }
+      } else if (selectedNotificationType.toLowerCase() === 'alert') {
+        const SendAlertPayload = {
+          alert_name: alertName,
+          description: alertDescription,
+          recepients: recivers,
+          // notification_id: id,
+          created_by: userInfo?.user_id,
+          last_updated_by: userInfo?.user_id,
+        };
+        const sendAlertParams = {
+          url: api.CreateAlert,
+          data: SendAlertPayload,
+          method: 'post',
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse = await httpRequest(sendAlertParams, setIsSending);
 
-        socket?.emit('sendMessage', {
-          notificationId: sendPayload.notification_id,
-          sender: sendPayload.sender,
-        });
-        toaster.show({message: notificationResponse.message, type: 'success'});
+        if (alertResponse) {
+          sendPayload.alert_id = alertResponse.result.alert_id;
+          const notificationResponse = await httpRequest(
+            sendParams,
+            setIsSending,
+          );
+          if (notificationResponse) {
+            //update alert
+            const updateAlertParams = {
+              url: `${api.CreateAlert}/${alertResponse.result.alert_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(updateAlertParams, setIsSending);
+            // send notification
+            await httpRequest(sendNotificationParams, setIsSending);
+            // const params = {
+            //   url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+            //   data: {
+            //     alert_id: alertResponse.result.alert_id,
+            //   },
+            //   method: 'put',
+            //   baseURL: urlNode,
+            //   // isConsole: true,
+            //   // isConsoleParams: true,
+            // };
+            // await httpRequest(params, setIsSending);
+            SendAlert(alertResponse.result.alert_id, recivers, false);
+            // socket.emit('SendAlert', {
+            //   alertId: alertResponse.result.alert_id,
+            //   recipients: recivers,
+            //   isAcknowledge: false,
+            // });
+            sendMessage(sendPayload.notification_id);
+            // socket?.emit('sendMessage', {
+            //   notificationId: sendPayload.notification_id,
+            //   sender: sendPayload.sender,
+            // });
+            toaster.show({
+              message: notificationResponse.message,
+              type: 'success',
+            });
+          }
+        }
+      } else {
+        const notificationResponse = await httpRequest(
+          sendParams,
+          setIsSending,
+        );
+        if (notificationResponse) {
+          await httpRequest(sendNotificationParams, setIsSending);
+          sendMessage(sendPayload.notification_id);
+          // socket?.emit('sendMessage', {
+          //   notificationId: sendPayload.notification_id,
+          //   sender: sendPayload.sender,
+          // });
+          toaster.show({
+            message: notificationResponse.message,
+            type: 'success',
+          });
+        }
       }
       setTimeout(async () => {
+        setSubject('');
+        setRecivers([]);
+        setBody('');
+        setActionItemName('');
+        setActionItemDescription('');
+        setAlertName('');
+        setAlertDescription('');
+        // setSelectedNotificationType('NOTIFICATION');
         navigation.goBack();
       }, 500);
     } catch (error) {
       if (error instanceof Error) {
         toaster.show({message: error.message, type: 'error'});
       }
-    } finally {
-      setRecivers([]);
-      setSubject('');
-      setBody('');
     }
   };
   // draft
   const handleDraft = async () => {
     const draftPayload = {
       notification_id: id,
-      notification_type: notifcationType,
+      notification_type: selectedNotificationType,
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
@@ -280,32 +343,161 @@ const NewMessage = () => {
       data: draftPayload,
       method: 'post',
       baseURL: urlNode,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
     try {
-      const response = await httpRequest(draftParams, setIsDrafting);
-      if (response) {
-        socket?.emit('sendDraft', {
-          notificationId: draftPayload.notification_id,
-          sender: draftPayload.sender,
-        });
-        toaster.show({
-          message: response.message,
-          type: 'success',
-        });
-        setTimeout(async () => {
-          navigation.goBack();
-        }, 500);
+      if (selectedNotificationType.toLowerCase() === 'action item') {
+        const SendActionItemPayload = {
+          action_item_name: actionItemName ?? ' ',
+          description: actionItemDescription ?? ' ',
+          status: 'NEW',
+          user_ids: recivers ?? [],
+        };
+        const sendActionItemParams = {
+          url: api.ActionItem,
+          data: SendActionItemPayload,
+          method: 'post',
+          baseURL: urlPython,
+          access_token: userInfo?.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const actionItemResponse = await httpRequest(
+          sendActionItemParams,
+          setIsDrafting,
+        );
+        if (actionItemResponse) {
+          draftPayload.action_item_id = actionItemResponse.action_item_id;
+          const notificationResponse = await httpRequest(
+            draftParams,
+            setIsDrafting,
+          );
+          if (notificationResponse) {
+            // const params1 = {
+            //   url: `${api.Messages}/${notificationResponse.result.notification_id}`,
+            //   data: {
+            //     action_item_id: actionItemResponse.action_item_id,
+            //   },
+            //   method: 'put',
+            //   baseURL: urlNode,
+            //   isConsole: true,
+            //   isConsoleParams: true,
+            // };
+            // await httpRequest(params1, setIsDrafting);
+            const params2 = {
+              url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlPython,
+              access_token: userInfo?.access_token,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(params2, setIsDrafting);
+            sendDraft(draftPayload.notification_id);
+            // socket?.emit('sendDraft', {
+            //   notificationId: draftPayload.notification_id,
+            //   sender: draftPayload.sender,
+            // });
+            toaster.show({
+              message: 'Message Save to Drafts Successfully',
+              type: 'success',
+            });
+          }
+        }
       }
+      if (selectedNotificationType.toLowerCase() === 'alert') {
+        const SendAlertPayload = {
+          alert_name: alertName ?? ' ',
+          description: alertDescription ?? ' ',
+          recepients: recivers ?? [],
+          // notification_id: id,
+          created_by: userInfo?.user_id,
+          last_updated_by: userInfo?.user_id,
+        };
+        const sendAlertParams = {
+          url: api.CreateAlert,
+          data: SendAlertPayload,
+          method: 'post',
+          baseURL: urlNode,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const alertResponse = await httpRequest(sendAlertParams, setIsDrafting);
+        if (alertResponse) {
+          draftPayload.alert_id = alertResponse.result.alert_id;
+          const notificationResponse = await httpRequest(
+            draftParams,
+            setIsDrafting,
+          );
+          if (notificationResponse) {
+            const updateAlertParams = {
+              url: `${api.CreateAlert}/${alertResponse.result.alert_id}`,
+              data: {
+                notification_id: notificationResponse.result.notification_id,
+              },
+              method: 'put',
+              baseURL: urlNode,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+            await httpRequest(updateAlertParams, setIsDrafting);
+            SendAlert(alertResponse.result.alert_id, recivers, false);
+            // socket.emit('SendAlert', {
+            //   alertId: alertResponse.result.alert_id,
+            //   recipients: recivers,
+            //   isAcknowledge: false,
+            // });
+            sendDraft(draftPayload.notification_id);
+            // socket?.emit('sendDraft', {
+            //   notificationId: draftPayload.notification_id,
+            //   sender: draftPayload.sender,
+            // });
+            toaster.show({
+              message: 'Message Save to Drafts Successfully',
+              type: 'success',
+            });
+          }
+        }
+      } else {
+        const notificationResponse = await httpRequest(
+          draftParams,
+          setIsDrafting,
+        );
+        if (notificationResponse) {
+          sendDraft(draftPayload.notification_id);
+          // socket?.emit('sendDraft', {
+          //   notificationId: draftPayload.notification_id,
+          //   sender: draftPayload.sender,
+          // });
+          toaster.show({
+            message: notificationResponse.message,
+            type: 'success',
+          });
+        }
+      }
+
+      setTimeout(async () => {
+        setSubject('');
+        setRecivers([]);
+        setBody('');
+        setActionItemName('');
+        setActionItemDescription('');
+        setAlertName('');
+        setAlertDescription('');
+        // setSelectedNotificationType('NOTIFICATION');
+        navigation.goBack();
+      }, 500);
     } catch (error) {
       if (error instanceof Error) {
-        toaster.show({message: error.message, type: 'error'});
+        toaster.show({
+          message: `${(error && error.message) ?? 'Action item name already exists'}`,
+          type: 'error',
+        });
       }
-    } finally {
-      setRecivers([]);
-      setSubject('');
-      setBody('');
     }
   };
 
@@ -313,28 +505,65 @@ const NewMessage = () => {
     const newRecievers = recivers.filter(r => r !== rcvr);
     setRecivers(newRecievers);
   };
-  const [selectedNotificationType, setSelectedNotificationType] =
-    useState('NOTIFICATION');
-  const [actionItemName, setActionItemName] = useState('');
-  const [actionItemDescription, setActionItemDescription] = useState('');
-  const [alertName, setAlertName] = useState('');
-  const [alertDescription, setAlertDescription] = useState('');
+
   const handleNotificationType = (type: string) => {
     setSelectedNotificationType(type);
   };
-  const allNotificationType = [
-    {title: 'Notification', value: 'NOTIFICATION'},
-    {title: 'Action Item', value: 'ACTION ITEM'},
-    {title: 'Alert', value: 'ALERT'},
-  ];
+
+  useEffect(() => {
+    if (recivers.length === 0) {
+      setShowModal(false);
+    }
+  }, [recivers.length]);
   return (
     <ContainerNew
       isRefresh={false}
       isKeyboardAware={true}
       isScrollView={false}
-      header={<MainHeader routeName={name} />}
+      header={
+        <MainHeader
+          routeName={`New ${toTitleCase(selectedNotificationType)}`}
+        />
+      }
       footer={
         <View>
+          {/* draft */}
+          <TouchableOpacity
+            onPress={handleDraft}
+            disabled={
+              selectedNotificationType.toLowerCase() === 'notification'
+                ? (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting
+                : (actionItemName === '' &&
+                    actionItemDescription === '' &&
+                    alertName === '' &&
+                    alertDescription === '') ||
+                  (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting
+            }
+            style={[
+              styles.draftBtn,
+              (selectedNotificationType.toLowerCase() === 'notification'
+                ? (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting
+                : (actionItemName === '' &&
+                    actionItemDescription === '' &&
+                    alertName === '' &&
+                    alertDescription === '') ||
+                  (recivers.length === 0 && body === '' && subject === '') ||
+                  isDrafting) && styles.disabled,
+            ]}>
+            {isDrafting ? (
+              <ActivityIndicator
+                size={24}
+                color={COLORS.white}
+                style={styles.loadingStyle}
+              />
+            ) : (
+              <SVGController name="Notebook-Pen" color={COLORS.white} />
+            )}
+          </TouchableOpacity>
+          {/* send */}
           <TouchableOpacity
             onPress={handleSend}
             style={[
@@ -342,6 +571,14 @@ const NewMessage = () => {
               (recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
+                (selectedNotificationType.toLowerCase() === 'action item' &&
+                  actionItemName === '') ||
+                (selectedNotificationType.toLowerCase() === 'action item' &&
+                  actionItemDescription === '') ||
+                (selectedNotificationType.toLowerCase() === 'alert' &&
+                  alertName === '') ||
+                (selectedNotificationType.toLowerCase() === 'alert' &&
+                  alertDescription === '') ||
                 isSending) &&
                 styles.disabled,
             ]}
@@ -349,6 +586,14 @@ const NewMessage = () => {
               recivers.length === 0 ||
               body === '' ||
               subject === '' ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
               isSending
             }>
             {isSending ? (
@@ -361,35 +606,26 @@ const NewMessage = () => {
               <SVGController name="Send" color={COLORS.white} />
             )}
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleDraft}
-            disabled={
-              (recivers.length === 0 && body === '' && subject === '') ||
-              isDrafting
-            }
-            style={[
-              styles.draftBtn,
-              ((recivers.length === 0 && body === '' && subject === '') ||
-                isDrafting) &&
-                styles.disabled,
-            ]}>
-            {isDrafting ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Notebook-Pen" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
         </View>
       }>
-      <View style={{marginHorizontal: 20}}>
+      <View
+        style={{
+          marginHorizontal: 20,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 10,
+        }}>
+        {/*Notification Type*/}
+        <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
         <SelectStatusDropDown
+          width={210}
+          // width={Dimensions.get('screen').width - 40}
+          height={30}
           defaultValue={allNotificationType[0]?.title}
           data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
+          border={true}
         />
       </View>
       <View style={{flex: 1, marginHorizontal: 20}}>
@@ -404,11 +640,14 @@ const NewMessage = () => {
             isHandleX={true}
           />
           <View style={styles.withinLineContainer}>
-            <Text style={{color: COLORS.darkGray}}>To</Text>
-            <TextInput
-              style={{height: 40, width: '90%', color: COLORS.black}}
-              value={query}
-              onChangeText={text => setQuery(text)}
+            <Text
+              style={{color: COLORS.darkGray}}
+              onPress={() => setIsUsersModalShow(true)}>
+              To
+            </Text>
+            <Pressable
+              onPress={() => setIsUsersModalShow(true)}
+              style={{width: '90%', height: 40}}
             />
           </View>
           {recivers.length > 1 && (
@@ -423,57 +662,110 @@ const NewMessage = () => {
             </Pressable>
           )}
         </View>
-        {query !== '' && (
-          <ScrollView style={styles.modal}>
-            <Pressable style={styles.selectPress} onPress={handleSelectAll}>
-              <Text style={[styles.item]}>All</Text>
-              {isAllClicked && (
-                <AntDesign name="check" size={20} color="#3632A6" />
-              )}
-            </Pressable>
-            {filterdUser.map(usr => (
-              <TouchableOpacity
-                onPress={() => handleReciever(usr.user_id)}
-                key={usr.user_id}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: 6,
-                      alignItems: 'center',
-                    }}>
-                    <Image
-                      style={styles.profileImage}
-                      source={{
-                        uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
-                        // headers: {
-                        //   Authorization: `Bearer ${userInfo?.access_token}`,
-                        // },
-                      }}
-                      fallback={fallbacks}
-                    />
-                    <Text style={[styles.item]}>{usr?.user_name}</Text>
-                  </View>
-                  <View style={styles.itemListWrapper} />
-                  {recivers.includes(usr.user_id) && (
-                    <AntDesign name="check" size={20} color="#3632A6" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
 
-            {filterdUser?.length === 0 && (
-              <View style={styles.noData}>
-                <Text style={[styles.noItem]}>No Data Found</Text>
-              </View>
-            )}
-          </ScrollView>
-        )}
+        <Modal
+          visible={isUsersModalShow}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsUsersModalShow(false)}>
+          <TouchableWithoutFeedback onPress={() => setIsUsersModalShow(false)}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback onPress={() => {}}>
+                <View
+                  style={[
+                    styles.modalContent,
+                    {
+                      position: 'absolute',
+                      top: 140,
+                      left: 20,
+                    },
+                  ]}>
+                  <TextInput
+                    autoFocus
+                    style={{
+                      fontSize: 16,
+                      height: 40,
+                      width: '90%',
+                      color: COLORS.black,
+                    }}
+                    placeholder="Search recipient"
+                    placeholderTextColor={COLORS.black}
+                    value={query}
+                    onChangeText={text => {
+                      setQuery(text);
+                    }}
+                  />
+                  <ScrollView scrollEnabled={true} style={{height: 300}}>
+                    <Pressable
+                      style={styles.selectPress}
+                      onPress={handleSelectAll}>
+                      <Text style={[styles.item]}>Select All</Text>
+                      {isAllClicked && (
+                        <AntDesign
+                          name="check"
+                          size={20}
+                          color={COLORS.black}
+                        />
+                      )}
+                    </Pressable>
+
+                    {filterdUser.map(usr => (
+                      <TouchableOpacity
+                        onPress={() => handleReciever(usr.user_id)}
+                        key={usr.user_id}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              gap: 6,
+                              alignItems: 'center',
+                            }}>
+                            <Image
+                              style={styles.profileImage}
+                              source={{
+                                uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
+                                // headers: {
+                                //   Authorization: `Bearer ${userInfo?.access_token}`,
+                                // },
+                              }}
+                              fallback={fallbacks}
+                            />
+                            <Text style={[styles.item]}>{usr?.user_name}</Text>
+                          </View>
+                          <View style={styles.itemListWrapper} />
+                          {recivers.includes(usr.user_id) && (
+                            <AntDesign
+                              name="check"
+                              size={20}
+                              color={COLORS.black}
+                            />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+
+                    {filterdUser?.length === 0 && (
+                      <View style={styles.noData}>
+                        <Text style={[styles.noItem]}>No Data Found</Text>
+                      </View>
+                    )}
+                  </ScrollView>
+                  <ScrollView scrollEnabled={true}>
+                    {/* {query !== '' && ( */}
+
+                    {/* )} */}
+                  </ScrollView>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
         {recivers.length !== 0 ? (
           <View style={{flexDirection: 'row'}}>
             <View style={styles.singleRcvr}>
@@ -515,6 +807,7 @@ const NewMessage = () => {
           <TextInput
             style={{height: 40, width: '80%', color: COLORS.black}}
             value={subject}
+            maxLength={100}
             onChangeText={text => setSubject(text)}
           />
         </View>
@@ -531,7 +824,7 @@ const NewMessage = () => {
           />
         </View>
 
-        {selectedNotificationType.toLowerCase() !== 'notification' && (
+        {/* {selectedNotificationType.toLowerCase() !== 'notification' && (
           <View style={styles.dividerContainer}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>
@@ -539,7 +832,7 @@ const NewMessage = () => {
             </Text>
             <View style={styles.dividerLine} />
           </View>
-        )}
+        )} */}
         {/* Action Item   */}
         {selectedNotificationType.toLowerCase() === 'action item' && (
           <>
@@ -551,17 +844,18 @@ const NewMessage = () => {
                   borderBottomColor: COLORS.lightGray5,
                 },
               ]}>
-              <Text style={{color: COLORS.darkGray}}>Action Item Name</Text>
+              <Text style={{color: COLORS.darkGray}}>Name</Text>
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={actionItemName}
+                maxLength={100}
                 onChangeText={text => setActionItemName(text)}
               />
             </View>
             <View style={styles.lineContainerBody}>
               <TextInput
                 style={styles.textInputBody}
-                placeholder="Action Item Description"
+                placeholder="Description"
                 value={actionItemDescription}
                 onChangeText={text => setActionItemDescription(text)}
                 multiline={true}
@@ -583,10 +877,11 @@ const NewMessage = () => {
                   borderBottomColor: COLORS.lightGray5,
                 },
               ]}>
-              <Text style={{color: COLORS.darkGray}}>Alert Name</Text>
+              <Text style={{color: COLORS.darkGray}}>Name</Text>
               <TextInput
                 style={{height: 40, width: '90%', color: COLORS.black}}
                 value={alertName}
+                maxLength={100}
                 onChangeText={text => setAlertName(text)}
               />
             </View>
@@ -595,7 +890,7 @@ const NewMessage = () => {
                 multiline={true}
                 // numberOfLines={10}
                 style={styles.textInputBody}
-                placeholder="Alert Description"
+                placeholder="Description"
                 value={alertDescription}
                 onChangeText={text => setAlertDescription(text)}
                 placeholderTextColor={COLORS.darkGray}
@@ -649,6 +944,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     width: '100%',
     color: COLORS.black,
+    // borderBottomColor: COLORS.lightGray5,
+    // borderBottomWidth: 0.5,
   },
   sentBtn: {
     position: 'absolute',
@@ -800,6 +1097,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
-    backgroundColor: '#f0f0f0', // light background
+    backgroundColor: '#ffffffff',
+    color: COLORS.black,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    // width: 333,
+    width: '70%',
+    padding: 6,
+    borderRadius: 10,
+    // maxHeight: 60,
+    position: 'absolute',
+    top: 66,
+    left: 20,
+    zIndex: 99999,
+    borderBlockColor: '#b1b1b1ff',
+    borderWidth: 0.5,
   },
 });

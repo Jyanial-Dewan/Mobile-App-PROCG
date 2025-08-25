@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   unsuccessText: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.red,
     borderRadius: 3,
     padding: 10,
     color: COLORS.white,

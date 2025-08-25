@@ -301,7 +301,8 @@ const RenderMessageItem = ({
 const InboxScreen = observer(() => {
   const isFocused = useIsFocused();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
-  const {socket} = useSocketContext();
+  const {socket, readMessage, deleteMessage, multipleDeleteMessage} =
+    useSocketContext();
   const navigation = useNavigation<NotificationDetailsNavigationProp>();
   const [isLoading, setIsLoading] = useState(false);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
@@ -387,10 +388,11 @@ const InboxScreen = observer(() => {
         const response = await httpRequest(readerParams, setIsLoading);
         if (response) {
           if (notificationIds.includes(parentId)) {
-            socket?.emit('read', {
-              parentID: parentId,
-              sender: userInfo?.user_id,
-            });
+            readMessage(parentId);
+            // socket?.emit('read', {
+            //   parentID: parentId,
+            //   sender: userInfo?.user_id,
+            // });
           }
           navigation.navigate('NotificationDetails', {
             _id: parentId,
@@ -441,10 +443,11 @@ const InboxScreen = observer(() => {
       setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        socket?.emit('deleteMessage', {
-          notificationId: msgId,
-          sender: userInfo?.user_id,
-        });
+        deleteMessage(msgId);
+        // socket?.emit('deleteMessage', {
+        //   notificationId: msgId,
+        //   sender: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',
@@ -469,10 +472,11 @@ const InboxScreen = observer(() => {
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        socket?.emit('multipleDelete', {
-          ids: selectedIds,
-          user: userInfo?.user_id,
-        });
+        multipleDeleteMessage(selectedIds);
+        // socket?.emit('multipleDelete', {
+        //   ids: selectedIds,
+        //   user: userInfo?.user_id,
+        // });
         toaster.show({
           message: response.message,
           type: 'success',

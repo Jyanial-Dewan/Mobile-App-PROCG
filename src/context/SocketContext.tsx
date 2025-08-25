@@ -24,6 +24,17 @@ interface InActiveDevicesProps {
 interface SocketContext {
   socket: Socket;
   setUserId: (userId: number | null) => void;
+  sendMessage: (notificationId: string) => void;
+  draftMessageId: (notificationId: string) => void;
+  sendDraft: (notificationId: string) => void;
+  deleteMessage: (notificationId: string) => void;
+  multipleDeleteMessage: (notificationIds: string[]) => void;
+  readMessage: (parentId: string) => void;
+  SendAlert: (
+    alertId: number,
+    recipients: number[],
+    isAcknowledge: boolean,
+  ) => void;
   addDevice: (device: DeviceModel) => void;
   inactiveDevice: (deviceInfoData: InActiveDevicesProps) => void;
 }
@@ -181,6 +192,54 @@ export function SocketContextProvider({children}: SocketContextProps) {
     };
   }, [socket, userId]);
 
+  const sendMessage = (notificationId: string) => {
+    socket?.emit('sendMessage', {
+      notificationId,
+      sender: userId,
+    });
+  };
+  const draftMessageId = (notificationId: string) => {
+    socket?.emit('draftMsgId', {
+      notificationId,
+      sender: userId,
+    });
+  };
+  const sendDraft = (notificationId: string) => {
+    socket?.emit('sendDraft', {
+      notificationId,
+      sender: userId,
+    });
+  };
+  const deleteMessage = (notificationId: string) => {
+    socket?.emit('deleteMessage', {
+      notificationId,
+      sender: userId,
+    });
+  };
+  const multipleDeleteMessage = (selectedIds: string[]) => {
+    socket?.emit('multipleDelete', {
+      ids: selectedIds,
+      user: userId,
+    });
+  };
+  const readMessage = (parentId: string) => {
+    socket?.emit('read', {
+      parentID: parentId,
+      sender: userId,
+    });
+  };
+  const SendAlert = (
+    alertId: number,
+    recipients: number[],
+    isAcknowledge: boolean,
+  ) => {
+    socket.emit('SendAlert', {
+      alertId,
+      recipients,
+      isAcknowledge,
+    });
+  };
+
   const addDevice = (device: DeviceModel) => {
     socket?.emit('addDevice', {deviceId: device.id, userId});
   };
@@ -192,6 +251,13 @@ export function SocketContextProvider({children}: SocketContextProps) {
       value={{
         socket,
         setUserId,
+        sendMessage,
+        draftMessageId,
+        sendDraft,
+        deleteMessage,
+        multipleDeleteMessage,
+        readMessage,
+        SendAlert,
         addDevice,
         inactiveDevice,
       }}>
