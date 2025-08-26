@@ -171,14 +171,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   btn: {
-    width: '45%',
+    width: 'auto',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.darkGray,
   },
   btnDisable: {
-    width: '45%',
+    width: 'auto',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
