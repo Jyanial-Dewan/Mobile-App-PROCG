@@ -32,7 +32,7 @@ import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
@@ -697,7 +697,13 @@ const NewMessage = () => {
                   />
                   <ScrollView scrollEnabled={true} style={{height: 300}}>
                     <Pressable
-                      style={styles.selectPress}
+                      style={[
+                        styles.selectPress,
+                        {
+                          borderBottomColor: COLORS.lightGray,
+                          borderBottomWidth: 0.5,
+                        },
+                      ]}
                       onPress={handleSelectAll}>
                       <Text style={[styles.item]}>Select All</Text>
                       {isAllClicked && (
@@ -709,7 +715,7 @@ const NewMessage = () => {
                       )}
                     </Pressable>
 
-                    {filterdUser.map(usr => (
+                    {filterdUser.map((usr, index) => (
                       <TouchableOpacity
                         onPress={() => handleReciever(usr.user_id)}
                         key={usr.user_id}>
@@ -718,6 +724,11 @@ const NewMessage = () => {
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             alignItems: 'center',
+                            borderBottomColor:
+                              index !== filterdUser.length - 1
+                                ? COLORS.lightGray
+                                : 'transparent',
+                            borderBottomWidth: 0.5,
                           }}>
                           <View
                             style={{
@@ -755,11 +766,6 @@ const NewMessage = () => {
                       </View>
                     )}
                   </ScrollView>
-                  <ScrollView scrollEnabled={true}>
-                    {/* {query !== '' && ( */}
-
-                    {/* )} */}
-                  </ScrollView>
                 </View>
               </TouchableWithoutFeedback>
             </View>
@@ -781,9 +787,10 @@ const NewMessage = () => {
                   fallback={fallbacks}
                 />
                 <Text style={styles.textGreen}>
-                  {renderUserName(
+                  {renderSlicedUsername(
                     recivers[recivers.length - 1],
                     usersStore.users,
+                    30,
                   )}
                 </Text>
               </View>
@@ -1117,7 +1124,5 @@ const styles = StyleSheet.create({
     top: 66,
     left: 20,
     zIndex: 99999,
-    borderBlockColor: '#b1b1b1ff',
-    borderWidth: 0.5,
   },
 });

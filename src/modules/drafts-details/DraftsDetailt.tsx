@@ -33,7 +33,7 @@ import SVGController from '../../common/components/SVGController';
 import {useSocketContext} from '../../context/SocketContext';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import {AlertStoreSnapshotType} from '../../stores/alertsStore';
@@ -901,9 +901,10 @@ const DraftsDetails = observer(() => {
                     fallback={fallbacks}
                   />
                   <Text style={styles.textGreen}>
-                    {renderUserName(
+                    {renderSlicedUsername(
                       recivers[recivers.length - 1],
                       usersStore.users,
+                      30,
                     )}
                   </Text>
                 </View>

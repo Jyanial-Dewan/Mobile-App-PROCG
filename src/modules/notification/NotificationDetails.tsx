@@ -22,7 +22,7 @@ import Autolink from 'react-native-autolink';
 import {ActivityIndicator} from 'react-native-paper';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
@@ -171,7 +171,7 @@ const NotificationDetails = observer(() => {
             <View>
               <CustomTextNew
                 txtStyle={styles.headText}
-                text={renderUserName(item.sender, usersStore.users)}
+                text={renderSlicedUsername(item.sender, usersStore.users, 15)}
               />
               <View style={{flexDirection: 'row', gap: 4}}>
                 <CustomTextNew
@@ -179,7 +179,12 @@ const NotificationDetails = observer(() => {
                   txtColor={COLORS.inputTextColor}
                   txtWeight={'500'}
                   text={
-                    'to ' + renderUserName(item.recipients[0], usersStore.users)
+                    'to ' +
+                    renderSlicedUsername(
+                      item.recipients[0],
+                      usersStore.users,
+                      30,
+                    )
                   }
                 />
                 {item.recipients.length > 1 && (

@@ -15,7 +15,7 @@ import CustomTextNew from './CustomText';
 import Image from 'react-native-image-fallback';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../utility/notifications.utility';
 
 interface ReceiversModalProps {
@@ -46,7 +46,18 @@ const ReceiversModal = ({
             <View style={styles.modalContent}>
               <ScrollView>
                 {recivers.map((recver, index) => (
-                  <TouchableOpacity key={index} style={styles.listConatainer}>
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.listConatainer,
+                      {
+                        borderBottomColor:
+                          index !== recivers.length - 1
+                            ? COLORS.lightGray
+                            : 'transparent',
+                        borderBottomWidth: 0.5,
+                      },
+                    ]}>
                     <View
                       style={{
                         flexDirection: 'row',
@@ -65,7 +76,11 @@ const ReceiversModal = ({
                       />
                       <CustomTextNew
                         txtColor={COLORS.headerText}
-                        text={renderUserName(recver, usersStore.users)}
+                        text={renderSlicedUsername(
+                          recver,
+                          usersStore.users,
+                          24,
+                        )}
                       />
                     </View>
                     {isHandleX && (
@@ -135,7 +150,5 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderBottomColor: COLORS.lightGray,
-    borderBottomWidth: 0.5,
   },
 });

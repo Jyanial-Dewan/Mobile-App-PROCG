@@ -28,7 +28,7 @@ import Image from 'react-native-image-fallback';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 
 interface User {
@@ -52,6 +52,7 @@ const ReplyScreen = () => {
   const [isDrafting, setIsDrafting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [oldBody, setOldBody] = useState('');
   const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
@@ -82,6 +83,7 @@ const ReplyScreen = () => {
           usr => usr !== userInfo?.user_id,
         );
         setRecivers(newRecivers);
+        setOldBody(res.notification_body);
       }
     },
     [isFocused, _id],
@@ -214,26 +216,17 @@ const ReplyScreen = () => {
       header={<MainHeader routeName={route.name} />}
       footer={
         <View>
+          {/* send  */}
           <TouchableOpacity
             onPress={handleSend}
             style={[
               styles.sentBtn,
               {
                 opacity:
-                  recivers.length === 0 ||
-                  body === '' ||
-                  subject === '' ||
-                  isSending
-                    ? 0.5
-                    : 1,
+                  recivers.length === 0 || body === '' || isSending ? 0.5 : 1,
               },
             ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              isSending
-            }>
+            disabled={recivers.length === 0 || body === '' || isSending}>
             {isSending ? (
               <ActivityIndicator
                 size={24}
@@ -244,20 +237,15 @@ const ReplyScreen = () => {
               <SVGController name="Send" color={COLORS.white} />
             )}
           </TouchableOpacity>
+          {/* draft  */}
           <TouchableOpacity
             onPress={handleDraft}
-            disabled={
-              (recivers.length === 0 && body === '' && subject === '') ||
-              isDrafting
-            }
+            disabled={body === '' || oldBody === body || isDrafting}
             style={[
               styles.draftBtn,
               {
                 opacity:
-                  (recivers.length === 0 && body === '' && subject === '') ||
-                  isDrafting
-                    ? 0.5
-                    : 1,
+                  body === '' || oldBody === body || isDrafting ? 0.5 : 1,
               },
             ]}>
             {isDrafting ? (
@@ -300,9 +288,10 @@ const ReplyScreen = () => {
                       fallback={fallbacks}
                     />
                     <Text style={styles.textGreen}>
-                      {renderUserName(
+                      {renderSlicedUsername(
                         recivers[recivers.length - 1],
                         usersStore.users,
+                        15,
                       )}
                     </Text>
                   </View>

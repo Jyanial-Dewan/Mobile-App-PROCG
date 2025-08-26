@@ -141,10 +141,10 @@ const ActionItemMainIndex = () => {
           placeholder="Search item"
           value={searchQuery}
           onChangeText={setSearchQuery}
-          customStyle={{width: 170}}
+          customStyle={{width: 180}}
         />
         <SelectStatusDropDown
-          width={140}
+          width={150}
           height={50}
           border={false}
           defaultValue={allStatus[0].title}
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 0,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
   },
   itemContainer: {
     backgroundColor: COLORS.white,

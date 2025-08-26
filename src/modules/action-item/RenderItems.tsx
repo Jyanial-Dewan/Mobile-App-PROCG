@@ -215,7 +215,11 @@ const RenderItems = ({
                 key={index}
                 onPress={() =>
                   setSelectedStatusForUpdate(prev => {
-                    if (prev === statusItem.value) {
+                    if (
+                      prev === statusItem.value ||
+                      item.status.toLowerCase() ===
+                        statusItem.value.toLowerCase()
+                    ) {
                       return '';
                     } else {
                       return statusItem.value;

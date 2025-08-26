@@ -80,7 +80,7 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
           <SVGController name="Alert-Low" color={COLORS.white} />
         </View>
         <Column colWidth="100%">
-          <Column colWidth="90%">
+          <Column colWidth="85%">
             <CustomTextNew
               text={item.alert_name}
               style={{
@@ -147,7 +147,7 @@ export default RenderItems;
 const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    padding: 10,
     borderRadius: 15,
     marginBottom: 10,
     // shadowColor: '#000',
