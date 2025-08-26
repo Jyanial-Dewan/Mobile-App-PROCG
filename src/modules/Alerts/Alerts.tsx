@@ -35,6 +35,7 @@ import {AlertStoreSnapshotType} from '../../stores/alertsStore';
 import RenderItems from './RenderItems';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import {getSnapshot} from 'mobx-state-tree';
+import ViewDetailsBottomSheet from '../../common/components/ViewDetailsBottomSheet';
 
 const edges: Edge[] = ['right', 'bottom', 'left'];
 
@@ -158,48 +159,13 @@ const Alerts = () => {
       />
 
       {/* Bottom Sheet View details*/}
-      <CustomBottomSheetNew
-        refRBSheet={refRBSheet}
-        sheetHeight={600}
-        onClose={() => setSelectedItem(undefined)}>
-        {selectedItem && (
-          <TouchableWithoutFeedback>
-            <View>
-              <ScrollView
-                style={styles.itemContainer}
-                contentContainerStyle={{flexGrow: 1}}>
-                <TouchableOpacity activeOpacity={1}>
-                  <CustomTextNew
-                    text={selectedItem.alert_name}
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 'bold',
-                      color: COLORS.black,
-                      marginTop: 5,
-                    }}
-                  />
-                  <CustomTextNew
-                    text={convertDate(selectedItem.last_update_date as any)}
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 'bold',
-                      color: COLORS.black,
-                      marginTop: 5,
-                    }}
-                  />
-                  <Column colStyle={styles.colStyle}>
-                    <CustomTextNew
-                      text={selectedItem.description}
-                      txtColor={COLORS.blackish}
-                      txtSize={14}
-                    />
-                  </Column>
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
-          </TouchableWithoutFeedback>
-        )}
-      </CustomBottomSheetNew>
+      <ViewDetailsBottomSheet
+        refRBSheetViewDetails={refRBSheet}
+        title={selectedItem?.alert_name!}
+        dateAndTime={selectedItem?.last_update_date}
+        description={selectedItem?.description!}
+        setSelectedItem={setSelectedItem}
+      />
     </ContainerNew>
   );
 };
@@ -210,27 +176,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 0,
-    marginHorizontal: 20,
-  },
-  itemContainer: {
-    backgroundColor: COLORS.white,
-    // padding: 15,
-    borderRadius: 15,
-    paddingVertical: 10,
-    marginBottom: 20,
-    // shadowColor: '#000',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.4,
-    // shadowRadius: 3.84,
-    // elevation: 1,
-  },
-  colStyle: {
-    // borderBottomColor: COLORS.borderBottom,
-    // borderBottomWidth: 2,
-    marginBottom: 5,
-    paddingVertical: 5,
+    marginHorizontal: 10,
   },
 });

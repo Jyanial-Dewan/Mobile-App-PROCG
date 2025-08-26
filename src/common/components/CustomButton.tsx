@@ -71,14 +71,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   btnStyle: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 6,
     justifyContent: 'center',
   },
   btnContentWrapperView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     alignItems: 'center',
   },
   loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}], paddingLeft: 10},

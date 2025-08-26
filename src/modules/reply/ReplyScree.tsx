@@ -28,8 +28,10 @@ import Image from 'react-native-image-fallback';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
+import FooterSendButton from '../../common/components/FooterSendButton';
+import FooterDraftButton from '../../common/components/FooterDraftButton';
 
 interface User {
   name: string;
@@ -52,6 +54,7 @@ const ReplyScreen = () => {
   const [isDrafting, setIsDrafting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [oldBody, setOldBody] = useState('');
   const id = uuidv4();
   const date = new Date();
   const toaster = useToast();
@@ -82,6 +85,7 @@ const ReplyScreen = () => {
           usr => usr !== userInfo?.user_id,
         );
         setRecivers(newRecivers);
+        setOldBody(res.notification_body);
       }
     },
     [isFocused, _id],
@@ -214,62 +218,32 @@ const ReplyScreen = () => {
       header={<MainHeader routeName={route.name} />}
       footer={
         <View>
-          <TouchableOpacity
-            onPress={handleSend}
-            style={[
-              styles.sentBtn,
-              {
-                opacity:
-                  recivers.length === 0 ||
-                  body === '' ||
-                  subject === '' ||
-                  isSending
-                    ? 0.5
-                    : 1,
-              },
-            ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              isSending
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleDraft}
-            disabled={
-              (recivers.length === 0 && body === '' && subject === '') ||
-              isDrafting
-            }
+          {/* draft */}
+          <FooterDraftButton
+            handleDraft={handleDraft}
+            isDrafting={isDrafting}
+            disabled={body === '' || oldBody === body || isDrafting}
             style={[
               styles.draftBtn,
               {
                 opacity:
-                  (recivers.length === 0 && body === '' && subject === '') ||
-                  isDrafting
-                    ? 0.5
-                    : 1,
+                  body === '' || oldBody === body || isDrafting ? 0.5 : 1,
               },
-            ]}>
-            {isDrafting ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Notebook-Pen" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+            ]}
+          />
+          {/* send */}
+          <FooterSendButton
+            handleSend={handleSend}
+            isSending={isSending}
+            disabled={recivers.length === 0 || body === '' || isSending}
+            style={[
+              styles.sentBtn,
+              {
+                opacity:
+                  recivers.length === 0 || body === '' || isSending ? 0.5 : 1,
+              },
+            ]}
+          />
         </View>
       }>
       <View style={{flex: 1, marginHorizontal: 20}}>
@@ -300,9 +274,10 @@ const ReplyScreen = () => {
                       fallback={fallbacks}
                     />
                     <Text style={styles.textGreen}>
-                      {renderUserName(
+                      {renderSlicedUsername(
                         recivers[recivers.length - 1],
                         usersStore.users,
+                        15,
                       )}
                     </Text>
                   </View>

@@ -21,7 +21,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import Receivers from '../../common/components/Receivers';
 
@@ -261,9 +261,10 @@ const RecycleBinDetail = observer(() => {
                 <View>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={renderUserName(
+                    text={renderSlicedUsername(
                       parrentMessage?.recipients[0],
                       usersStore.users,
+                      15,
                     )}
                   />
                   <View style={{flexDirection: 'row', gap: 4}}>
@@ -276,13 +277,15 @@ const RecycleBinDetail = observer(() => {
                           ? '(no user)'
                           : 'to ' +
                             (parrentMessage?.recipients.length! > 1
-                              ? `${renderUserName(
+                              ? `${renderSlicedUsername(
                                   parrentMessage?.sender,
                                   usersStore.users,
+                                  30,
                                 )}`
-                              : renderUserName(
+                              : renderSlicedUsername(
                                   parrentMessage?.recipients[0],
                                   usersStore.users,
+                                  30,
                                 ))
                       }
                       // text={

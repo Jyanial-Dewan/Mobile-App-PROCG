@@ -297,7 +297,7 @@ const CustomDropDownNew = observer(
                   )}
                   <FlatList
                     data={messageGroup}
-                    renderItem={({item}) => (
+                    renderItem={({item, index}) => (
                       <Pressable onPress={() => handleSelect(item)}>
                         <View style={{paddingVertical: 5}}>
                           <View
@@ -334,7 +334,16 @@ const CustomDropDownNew = observer(
                             )}
                           </View>
 
-                          <View style={styles.itemListWrapper} />
+                          <View
+                            style={{
+                              borderTopWidth: 1,
+                              borderColor:
+                                messageGroup.length - 1 === index
+                                  ? 'transparent'
+                                  : '#E4E9F2',
+                              marginTop: 8,
+                            }}
+                          />
                         </View>
                       </Pressable>
                     )}
@@ -444,7 +453,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
     width: Platform.OS === 'ios' ? '100%' : '50%',
-    height: Platform.OS === 'ios' ? '90%' : '30%',
+    height: 'auto',
     backgroundColor: 'white',
     borderRadius: 10,
     overflow: 'hidden',

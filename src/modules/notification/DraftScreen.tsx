@@ -47,7 +47,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import {MessageSnapshotType} from '../../stores/messageStore';
@@ -255,9 +255,10 @@ const RenderMessageItem = ({
                     txtStyle={styles.headText}
                     text={
                       item?.recipients.length > 0
-                        ? `${renderUserName(
+                        ? `${renderSlicedUsername(
                             item.recipients[0],
                             usersStore.users,
+                            15,
                           )}${item.recipients.length > 1 ? ', ...' : ''}`
                         : '(no user)'
                     }

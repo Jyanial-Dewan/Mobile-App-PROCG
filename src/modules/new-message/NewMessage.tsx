@@ -32,11 +32,13 @@ import Image from 'react-native-image-fallback';
 import {useSocketContext} from '../../context/SocketContext';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
+import FooterDraftButton from '../../common/components/FooterDraftButton';
+import FooterSendButton from '../../common/components/FooterSendButton';
 
 interface User {
   name: string;
@@ -528,8 +530,9 @@ const NewMessage = () => {
       footer={
         <View>
           {/* draft */}
-          <TouchableOpacity
-            onPress={handleDraft}
+          <FooterDraftButton
+            handleDraft={handleDraft}
+            isDrafting={isDrafting}
             disabled={
               selectedNotificationType.toLowerCase() === 'notification'
                 ? (recivers.length === 0 && body === '' && subject === '') ||
@@ -552,20 +555,26 @@ const NewMessage = () => {
                     alertDescription === '') ||
                   (recivers.length === 0 && body === '' && subject === '') ||
                   isDrafting) && styles.disabled,
-            ]}>
-            {isDrafting ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Notebook-Pen" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+            ]}
+          />
           {/* send */}
-          <TouchableOpacity
-            onPress={handleSend}
+          <FooterSendButton
+            handleSend={handleSend}
+            isSending={isSending}
+            disabled={
+              recivers.length === 0 ||
+              body === '' ||
+              subject === '' ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
+              isSending
+            }
             style={[
               styles.sentBtn,
               (recivers.length === 0 ||
@@ -582,30 +591,7 @@ const NewMessage = () => {
                 isSending) &&
                 styles.disabled,
             ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemName === '') ||
-              (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemDescription === '') ||
-              (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertName === '') ||
-              (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertDescription === '') ||
-              isSending
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+          />
         </View>
       }>
       <View
@@ -697,7 +683,13 @@ const NewMessage = () => {
                   />
                   <ScrollView scrollEnabled={true} style={{height: 300}}>
                     <Pressable
-                      style={styles.selectPress}
+                      style={[
+                        styles.selectPress,
+                        {
+                          borderBottomColor: COLORS.lightGray,
+                          borderBottomWidth: 0.5,
+                        },
+                      ]}
                       onPress={handleSelectAll}>
                       <Text style={[styles.item]}>Select All</Text>
                       {isAllClicked && (
@@ -709,7 +701,7 @@ const NewMessage = () => {
                       )}
                     </Pressable>
 
-                    {filterdUser.map(usr => (
+                    {filterdUser.map((usr, index) => (
                       <TouchableOpacity
                         onPress={() => handleReciever(usr.user_id)}
                         key={usr.user_id}>
@@ -718,6 +710,11 @@ const NewMessage = () => {
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             alignItems: 'center',
+                            borderBottomColor:
+                              index !== filterdUser.length - 1
+                                ? COLORS.lightGray
+                                : 'transparent',
+                            borderBottomWidth: 0.5,
                           }}>
                           <View
                             style={{
@@ -755,11 +752,6 @@ const NewMessage = () => {
                       </View>
                     )}
                   </ScrollView>
-                  <ScrollView scrollEnabled={true}>
-                    {/* {query !== '' && ( */}
-
-                    {/* )} */}
-                  </ScrollView>
                 </View>
               </TouchableWithoutFeedback>
             </View>
@@ -781,9 +773,10 @@ const NewMessage = () => {
                   fallback={fallbacks}
                 />
                 <Text style={styles.textGreen}>
-                  {renderUserName(
+                  {renderSlicedUsername(
                     recivers[recivers.length - 1],
                     usersStore.users,
+                    30,
                   )}
                 </Text>
               </View>
@@ -1117,7 +1110,5 @@ const styles = StyleSheet.create({
     top: 66,
     left: 20,
     zIndex: 99999,
-    borderBlockColor: '#b1b1b1ff',
-    borderWidth: 0.5,
   },
 });

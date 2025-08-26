@@ -14,7 +14,7 @@ import CustomTextNew from './CustomText';
 import Image from 'react-native-image-fallback';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../utility/notifications.utility';
 
 interface User {
@@ -70,7 +70,11 @@ const Receivers = ({
                       />
                       <CustomTextNew
                         txtColor={COLORS.headerText}
-                        text={renderUserName(recver, usersStore.users)}
+                        text={renderSlicedUsername(
+                          recver,
+                          usersStore.users,
+                          15,
+                        )}
                       />
                     </View>
                   </TouchableOpacity>

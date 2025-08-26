@@ -47,7 +47,7 @@ import {useSocketContext} from '../../context/SocketContext';
 import {MessageSnapshotType} from '~/stores/messageStore';
 import {
   renderProfilePicture,
-  renderUserName,
+  renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 
@@ -269,11 +269,16 @@ const RenderMessageItem = observer(
                         item?.recipients?.length === 0
                           ? '(No User)'
                           : findOrigin(item) === 'Inbox'
-                            ? renderUserName(
+                            ? renderSlicedUsername(
                                 item.recipients[0],
                                 usersStore.users,
+                                15,
                               )
-                            : renderUserName(item.sender, usersStore.users)
+                            : renderSlicedUsername(
+                                item.sender,
+                                usersStore.users,
+                                15,
+                              )
                         // item?.recivers?.length === 0
                         //   ? '(No User)'
                         //   : findOrigin(item) === 'Inbox'
