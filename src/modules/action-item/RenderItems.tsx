@@ -23,6 +23,7 @@ import {toTitleCase} from '../../common/utility/general';
 import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from '../../common/packages/RBSheet/RBSheet';
+import ViewDetailsBottomSheet from '../../common/components/ViewDetailsBottomSheet';
 
 interface Props {
   item: ActionItemsStoreSnapshotType;
@@ -111,7 +112,7 @@ const RenderItems = ({
           </View>
           {/* item */}
           <Column colWidth="100%">
-            <Column colWidth="90%">
+            <Column colWidth="85%">
               <CustomTextNew
                 text={item.action_item_name}
                 // txtColor={COLORS.black}
@@ -188,48 +189,13 @@ const RenderItems = ({
         handleStatusUpdate={handleStatusUpdate}
       /> */}
       {/* Bottom Sheet View details*/}
-      <CustomBottomSheetNew
-        refRBSheet={refRBSheetViewDetails}
-        sheetHeight={600}
-        onClose={() => setSelectedItem(undefined)}>
-        {selectedItem && (
-          <TouchableWithoutFeedback>
-            <View>
-              <ScrollView
-                style={[styles.itemContainer]}
-                contentContainerStyle={{flexGrow: 1}}>
-                <TouchableOpacity activeOpacity={1}>
-                  <CustomTextNew
-                    text={selectedItem.action_item_name}
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 'bold',
-                      color: COLORS.black,
-                      marginTop: 5,
-                    }}
-                  />
-                  <CustomTextNew
-                    text={convertDate(selectedItem.last_update_date as any)}
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 'bold',
-                      color: COLORS.black,
-                      marginTop: 5,
-                    }}
-                  />
-                  <Column colStyle={styles.colStyle}>
-                    <CustomTextNew
-                      text={selectedItem.description}
-                      txtColor={COLORS.blackish}
-                      txtSize={14}
-                    />
-                  </Column>
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
-          </TouchableWithoutFeedback>
-        )}
-      </CustomBottomSheetNew>
+      <ViewDetailsBottomSheet
+        refRBSheetViewDetails={refRBSheetViewDetails}
+        title={item.action_item_name}
+        dateAndTime={item.last_update_date}
+        description={item.description}
+        setSelectedItem={setSelectedItem}
+      />
       {/* bottom sheet Update status*/}
       <CustomBottomSheetNew
         refRBSheet={refRBSheetUpdateStaus}
@@ -357,7 +323,7 @@ export default RenderItems;
 const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    padding: 10,
     borderRadius: 15,
     marginBottom: 10,
     // elevation: 1,

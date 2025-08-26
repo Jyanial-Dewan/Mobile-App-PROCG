@@ -141,10 +141,10 @@ const ActionItemMainIndex = () => {
           placeholder="Search item"
           value={searchQuery}
           onChangeText={setSearchQuery}
-          customStyle={{width: 180}}
+          customStyle={{width: 170}}
         />
         <SelectStatusDropDown
-          width={150}
+          width={140}
           height={50}
           border={false}
           defaultValue={allStatus[0].title}

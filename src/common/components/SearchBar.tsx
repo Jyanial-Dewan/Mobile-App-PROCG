@@ -52,6 +52,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 10,
     paddingHorizontal: 10,
-    gap: 10,
+    gap: 5,
   },
 });
