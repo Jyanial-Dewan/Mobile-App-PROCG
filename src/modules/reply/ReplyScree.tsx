@@ -30,6 +30,8 @@ import {
   renderProfilePicture,
   renderSlicedUsername,
 } from '../../common/utility/notifications.utility';
+import FooterSendButton from '../../common/components/FooterSendButton';
+import FooterDraftButton from '../../common/components/FooterDraftButton';
 
 interface User {
   name: string;
@@ -216,30 +218,10 @@ const ReplyScreen = () => {
       header={<MainHeader routeName={route.name} />}
       footer={
         <View>
-          {/* send  */}
-          <TouchableOpacity
-            onPress={handleSend}
-            style={[
-              styles.sentBtn,
-              {
-                opacity:
-                  recivers.length === 0 || body === '' || isSending ? 0.5 : 1,
-              },
-            ]}
-            disabled={recivers.length === 0 || body === '' || isSending}>
-            {isSending ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
-          {/* draft  */}
-          <TouchableOpacity
-            onPress={handleDraft}
+          {/* draft */}
+          <FooterDraftButton
+            handleDraft={handleDraft}
+            isDrafting={isDrafting}
             disabled={body === '' || oldBody === body || isDrafting}
             style={[
               styles.draftBtn,
@@ -247,17 +229,21 @@ const ReplyScreen = () => {
                 opacity:
                   body === '' || oldBody === body || isDrafting ? 0.5 : 1,
               },
-            ]}>
-            {isDrafting ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Notebook-Pen" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+            ]}
+          />
+          {/* send */}
+          <FooterSendButton
+            handleSend={handleSend}
+            isSending={isSending}
+            disabled={recivers.length === 0 || body === '' || isSending}
+            style={[
+              styles.sentBtn,
+              {
+                opacity:
+                  recivers.length === 0 || body === '' || isSending ? 0.5 : 1,
+              },
+            ]}
+          />
         </View>
       }>
       <View style={{flex: 1, marginHorizontal: 20}}>

@@ -41,6 +41,8 @@ import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
+import FooterSendButton from '../../common/components/FooterSendButton';
+import FooterDraftButton from '../../common/components/FooterDraftButton';
 interface IOldMsgTypes {
   receivers?: number[];
   subject?: string;
@@ -584,55 +586,11 @@ const DraftsDetails = observer(() => {
       }
       footer={
         <View>
-          {/* send */}
-          <TouchableOpacity
-            onPress={handleSend}
-            style={[
-              styles.sentBtn,
-              (recivers.length === 0 ||
-                body === '' ||
-                subject === '' ||
-                isSending ||
-                isLoading ||
-                (notificationType.toLowerCase() === 'alert' &&
-                  alertName === '') ||
-                (notificationType.toLowerCase() === 'alert' &&
-                  alertDescription === '') ||
-                (notificationType.toLowerCase() === 'action item' &&
-                  actionItemName === '') ||
-                (notificationType.toLowerCase() === 'action item' &&
-                  actionItemDescription === '')) &&
-                styles.disabled,
-            ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              isSending ||
-              isLoading ||
-              (notificationType.toLowerCase() === 'alert' &&
-                alertName === '') ||
-              (notificationType.toLowerCase() === 'alert' &&
-                alertDescription === '') ||
-              (notificationType.toLowerCase() === 'action item' &&
-                actionItemName === '') ||
-              (notificationType.toLowerCase() === 'action item' &&
-                actionItemDescription === '')
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size="small"
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
           {/* draft */}
           {notificationType.toLowerCase() === 'alert' && (
-            <TouchableOpacity
-              onPress={handleDraft}
+            <FooterDraftButton
+              handleDraft={handleDraft}
+              isDrafting={isDrafting}
               disabled={
                 (!userChanged &&
                   oldMsgState?.subject === subject &&
@@ -652,21 +610,13 @@ const DraftsDetails = observer(() => {
                   isLoading ||
                   isDrafting) &&
                   styles.disabled,
-              ]}>
-              {isDrafting ? (
-                <ActivityIndicator
-                  size="small"
-                  color={COLORS.white}
-                  style={styles.loadingStyle}
-                />
-              ) : (
-                <SVGController name="Notebook-Pen" color={COLORS.white} />
-              )}
-            </TouchableOpacity>
+              ]}
+            />
           )}
           {notificationType.toLowerCase() === 'action item' && (
-            <TouchableOpacity
-              onPress={handleDraft}
+            <FooterDraftButton
+              handleDraft={handleDraft}
+              isDrafting={isDrafting}
               disabled={
                 (!userChanged &&
                   oldMsgState?.subject === subject &&
@@ -686,21 +636,13 @@ const DraftsDetails = observer(() => {
                     actionItemDescription) ||
                   isDrafting) &&
                   styles.disabled,
-              ]}>
-              {isDrafting ? (
-                <ActivityIndicator
-                  size="small"
-                  color={COLORS.white}
-                  style={styles.loadingStyle}
-                />
-              ) : (
-                <SVGController name="Notebook-Pen" color={COLORS.white} />
-              )}
-            </TouchableOpacity>
+              ]}
+            />
           )}
           {notificationType.toLowerCase() === 'notification' && (
-            <TouchableOpacity
-              onPress={handleDraft}
+            <FooterDraftButton
+              handleDraft={handleDraft}
+              isDrafting={isDrafting}
               disabled={
                 (!userChanged &&
                   oldMsgState?.subject === subject &&
@@ -714,18 +656,46 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.body === body) ||
                   isDrafting) &&
                   styles.disabled,
-              ]}>
-              {isDrafting ? (
-                <ActivityIndicator
-                  size="small"
-                  color={COLORS.white}
-                  style={styles.loadingStyle}
-                />
-              ) : (
-                <SVGController name="Notebook-Pen" color={COLORS.white} />
-              )}
-            </TouchableOpacity>
+              ]}
+            />
           )}
+          {/* send */}
+          <FooterSendButton
+            handleSend={handleSend}
+            isSending={isSending}
+            disabled={
+              recivers.length === 0 ||
+              body === '' ||
+              subject === '' ||
+              isSending ||
+              isLoading ||
+              (notificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (notificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
+              (notificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (notificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '')
+            }
+            style={[
+              styles.sentBtn,
+              (recivers.length === 0 ||
+                body === '' ||
+                subject === '' ||
+                isSending ||
+                isLoading ||
+                (notificationType.toLowerCase() === 'alert' &&
+                  alertName === '') ||
+                (notificationType.toLowerCase() === 'alert' &&
+                  alertDescription === '') ||
+                (notificationType.toLowerCase() === 'action item' &&
+                  actionItemName === '') ||
+                (notificationType.toLowerCase() === 'action item' &&
+                  actionItemDescription === '')) &&
+                styles.disabled,
+            ]}
+          />
         </View>
       }>
       {isLoading ? (
@@ -1091,19 +1061,6 @@ const styles = StyleSheet.create({
     // Android Shadow
     // elevation: 5,
   },
-  // modal: {
-  //   paddingHorizontal: 15,
-  //   paddingVertical: 20,
-  //   borderWidth: 1,
-  //   borderColor: COLORS.lightGray6,
-  //   width: Platform.OS === 'ios' ? '100%' : '100%',
-  //   maxHeight: Platform.OS === 'ios' ? '90%' : 350,
-  //   backgroundColor: COLORS.lightBackground,
-  //   borderRadius: 6,
-  //   position: 'absolute',
-  //   top: 40,
-  //   zIndex: 10,
-  // },
   noData: {alignItems: 'center', justifyContent: 'center'},
   noItem: {
     paddingVertical: 15,
@@ -1134,34 +1091,6 @@ const styles = StyleSheet.create({
     gap: 20,
     borderRadius: 6,
   },
-  // singleRcvrScroll: {
-  //   width: '100%',
-
-  //   backgroundColor: COLORS.lightBackground,
-  //   paddingVertical: 4,
-  //   paddingHorizontal: 10,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'space-between',
-  //   gap: 20,
-  //   borderRadius: 6,
-  //   marginBottom: 10,
-  // },
-  // receiversContainer: {
-  //   flex: 1,
-  //   flexDirection: 'row',
-  //   gap: 10,
-  //   flexWrap: 'wrap',
-  //   borderBottomWidth: 0.5,
-  //   borderBottomColor: COLORS.lightGray5,
-  //   paddingBottom: 10,
-  // },
-  // imageStyle: {
-  //   height: 20,
-  //   width: 20,
-  //   borderRadius: 99,
-  //   objectFit: 'cover',
-  // },
   withinSinglRcve: {flexDirection: 'row', gap: 5, alignItems: 'center'},
   textGreen: {
     color: COLORS.textGreen,
@@ -1177,7 +1106,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     borderRadius: 4,
   },
-
   profileImage: {
     width: 24,
     height: 24,
@@ -1188,7 +1116,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingStyle: {transform: [{scaleX: 0.8}, {scaleY: 0.8}]},
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',

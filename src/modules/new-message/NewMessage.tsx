@@ -37,6 +37,8 @@ import {
 import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
 import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
+import FooterDraftButton from '../../common/components/FooterDraftButton';
+import FooterSendButton from '../../common/components/FooterSendButton';
 
 interface User {
   name: string;
@@ -528,8 +530,9 @@ const NewMessage = () => {
       footer={
         <View>
           {/* draft */}
-          <TouchableOpacity
-            onPress={handleDraft}
+          <FooterDraftButton
+            handleDraft={handleDraft}
+            isDrafting={isDrafting}
             disabled={
               selectedNotificationType.toLowerCase() === 'notification'
                 ? (recivers.length === 0 && body === '' && subject === '') ||
@@ -552,20 +555,26 @@ const NewMessage = () => {
                     alertDescription === '') ||
                   (recivers.length === 0 && body === '' && subject === '') ||
                   isDrafting) && styles.disabled,
-            ]}>
-            {isDrafting ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Notebook-Pen" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+            ]}
+          />
           {/* send */}
-          <TouchableOpacity
-            onPress={handleSend}
+          <FooterSendButton
+            handleSend={handleSend}
+            isSending={isSending}
+            disabled={
+              recivers.length === 0 ||
+              body === '' ||
+              subject === '' ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemName === '') ||
+              (selectedNotificationType.toLowerCase() === 'action item' &&
+                actionItemDescription === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertName === '') ||
+              (selectedNotificationType.toLowerCase() === 'alert' &&
+                alertDescription === '') ||
+              isSending
+            }
             style={[
               styles.sentBtn,
               (recivers.length === 0 ||
@@ -582,30 +591,7 @@ const NewMessage = () => {
                 isSending) &&
                 styles.disabled,
             ]}
-            disabled={
-              recivers.length === 0 ||
-              body === '' ||
-              subject === '' ||
-              (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemName === '') ||
-              (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemDescription === '') ||
-              (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertName === '') ||
-              (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertDescription === '') ||
-              isSending
-            }>
-            {isSending ? (
-              <ActivityIndicator
-                size={24}
-                color={COLORS.white}
-                style={styles.loadingStyle}
-              />
-            ) : (
-              <SVGController name="Send" color={COLORS.white} />
-            )}
-          </TouchableOpacity>
+          />
         </View>
       }>
       <View
