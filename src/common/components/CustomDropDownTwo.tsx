@@ -202,7 +202,9 @@ const CustomDropDownNew = observer(
                           : 'red'
                         : COLORS.offDay,
 
-                    backgroundColor: isDisable ? COLORS.lightGray3 : '#f9f9f9',
+                    backgroundColor: isDisable
+                      ? COLORS.lightGray3
+                      : '#f4f4f4ff',
                   },
                 ]}
                 onPress={() => {

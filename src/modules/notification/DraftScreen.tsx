@@ -51,6 +51,8 @@ import {
 } from '../../common/utility/notifications.utility';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import {MessageSnapshotType} from '../../stores/messageStore';
+import {toTitleCase} from '../../common/utility/general';
+import Row from '../../common/components/Row';
 
 const ITEMHEIGHT = 105;
 const RenderMessageItem = ({
@@ -277,7 +279,20 @@ const RenderMessageItem = ({
                     />
                   </View>
                 </View>
-
+                <Row>
+                  <View
+                    style={{
+                      backgroundColor: COLORS.badgeBlueLight,
+                      paddingHorizontal: 3,
+                      borderRadius: 5,
+                      alignItems: 'center',
+                    }}>
+                    <CustomTextNew
+                      text={toTitleCase(item?.notification_type)}
+                      txtColor={COLORS.black}
+                    />
+                  </View>
+                </Row>
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"

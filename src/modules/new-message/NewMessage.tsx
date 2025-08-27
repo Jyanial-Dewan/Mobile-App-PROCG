@@ -603,7 +603,7 @@ const NewMessage = () => {
           gap: 10,
         }}>
         {/*Notification Type*/}
-        <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
+        <CustomTextNew text="Type:" txtColor={COLORS.black} />
         <SelectStatusDropDown
           width={210}
           // width={Dimensions.get('screen').width - 40}
@@ -807,7 +807,15 @@ const NewMessage = () => {
         {/*Body*/}
         <View style={styles.lineContainerBody}>
           <TextInput
-            style={styles.textInputBody}
+            style={[
+              styles.textInputBody,
+              {
+                height:
+                  selectedNotificationType.toLowerCase() === 'notification'
+                    ? 400
+                    : 200,
+              },
+            ]}
             placeholder="Body"
             value={body}
             onChangeText={text => setBody(text)}
@@ -817,15 +825,6 @@ const NewMessage = () => {
           />
         </View>
 
-        {/* {selectedNotificationType.toLowerCase() !== 'notification' && (
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>
-              {toTitleCase(selectedNotificationType)}
-            </Text>
-            <View style={styles.dividerLine} />
-          </View>
-        )} */}
         {/* Action Item   */}
         {selectedNotificationType.toLowerCase() === 'action item' && (
           <>
@@ -833,6 +832,7 @@ const NewMessage = () => {
               style={[
                 styles.withinLineContainer,
                 {
+                  width: '100%',
                   borderBottomWidth: 0.5,
                   borderBottomColor: COLORS.lightGray5,
                 },
@@ -866,6 +866,7 @@ const NewMessage = () => {
               style={[
                 styles.withinLineContainer,
                 {
+                  width: '100%',
                   borderBottomWidth: 0.5,
                   borderBottomColor: COLORS.lightGray5,
                 },
@@ -924,6 +925,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderBottomColor: COLORS.lightGray5,
+    borderBottomWidth: 0.5,
     paddingBottom: 2,
   },
   withinLineContainer: {

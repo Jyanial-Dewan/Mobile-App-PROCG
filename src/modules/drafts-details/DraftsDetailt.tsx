@@ -710,7 +710,7 @@ const DraftsDetails = observer(() => {
               gap: 10,
             }}>
             {/*Notification Type*/}
-            <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
+            <CustomTextNew text="Type:" txtColor={COLORS.black} />
             <SelectStatusDropDown
               isDisabled={true}
               width={210}
@@ -790,7 +790,13 @@ const DraftsDetails = observer(() => {
                     />
                     <ScrollView scrollEnabled={true} style={{height: 300}}>
                       <Pressable
-                        style={styles.selectPress}
+                        style={[
+                          styles.selectPress,
+                          {
+                            borderBottomColor: COLORS.lightGray,
+                            borderBottomWidth: 0.5,
+                          },
+                        ]}
                         onPress={handleSelectAll}>
                         <Text style={[styles.item]}>Select All</Text>
                         {isAllClicked && (
@@ -802,7 +808,7 @@ const DraftsDetails = observer(() => {
                         )}
                       </Pressable>
 
-                      {filterdUser.map(usr => (
+                      {filterdUser.map((usr, index) => (
                         <TouchableOpacity
                           onPress={() => handleReciever(usr.user_id)}
                           key={usr.user_id}>
@@ -811,6 +817,11 @@ const DraftsDetails = observer(() => {
                               flexDirection: 'row',
                               justifyContent: 'space-between',
                               alignItems: 'center',
+                              borderBottomColor:
+                                index !== filterdUser.length - 1
+                                  ? COLORS.lightGray
+                                  : 'transparent',
+                              borderBottomWidth: 0.5,
                             }}>
                             <View
                               style={{
@@ -905,7 +916,15 @@ const DraftsDetails = observer(() => {
           {/*Body*/}
           <View style={styles.lineContainerBody}>
             <TextInput
-              style={styles.textInputBody}
+              style={[
+                styles.textInputBody,
+                {
+                  height:
+                    notificationType.toLowerCase() === 'notification'
+                      ? 400
+                      : 200,
+                },
+              ]}
               placeholderTextColor={COLORS.darkGray}
               placeholder="Body"
               value={body}
@@ -920,6 +939,7 @@ const DraftsDetails = observer(() => {
                 style={[
                   styles.withinLineContainer,
                   {
+                    width: '100%',
                     borderBottomWidth: 0.5,
                     borderBottomColor: COLORS.lightGray5,
                   },
@@ -953,6 +973,7 @@ const DraftsDetails = observer(() => {
                 style={[
                   styles.withinLineContainer,
                   {
+                    width: '100%',
                     borderBottomWidth: 0.5,
                     borderBottomColor: COLORS.lightGray5,
                   },
@@ -1012,6 +1033,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderBottomColor: COLORS.lightGray5,
+    borderBottomWidth: 0.5,
     paddingBottom: 2,
   },
   withinLineContainer: {
@@ -1133,7 +1155,7 @@ const styles = StyleSheet.create({
     top: 66,
     left: 20,
     zIndex: 99999,
-    borderBlockColor: '#b1b1b1ff',
-    borderWidth: 0.5,
+    // borderBlockColor: '#b1b1b1ff',
+    // borderWidth: 0.5,
   },
 });

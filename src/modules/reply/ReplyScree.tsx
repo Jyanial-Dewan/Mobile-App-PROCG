@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderBottomColor: COLORS.lightGray5,
+    borderBottomWidth: 0.5,
     paddingBottom: 2,
   },
   withinLineContainer: {
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textInputBody: {
-    minHeight: 200,
+    minHeight: 400,
     textAlignVertical: 'top',
     width: '100%',
     color: COLORS.black,
