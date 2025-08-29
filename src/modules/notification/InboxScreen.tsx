@@ -50,6 +50,8 @@ import {
 } from '../../common/utility/notifications.utility';
 import {MessageSnapshotType} from '../../stores/messageStore';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
+import {toTitleCase} from '../../common/utility/general';
+import Row from '../../common/components/Row';
 
 export interface RenderMessageItemProps {
   item: MessageSnapshotType;
@@ -277,6 +279,20 @@ const RenderMessageItem = ({
                     />
                   </View>
                 </View>
+                <Row>
+                  <View
+                    style={{
+                      backgroundColor: COLORS.badgeBlueLight,
+                      paddingHorizontal: 3,
+                      borderRadius: 5,
+                      alignItems: 'center',
+                    }}>
+                    <CustomTextNew
+                      text={toTitleCase(item?.notification_type)}
+                      txtColor={COLORS.black}
+                    />
+                  </View>
+                </Row>
 
                 <CustomTextNew
                   txtStyle={styles.subText}
@@ -690,5 +706,16 @@ const styles = StyleSheet.create({
   },
   flexGrow: {
     flexGrow: 1,
+  },
+  badgeText: {
+    width: 'auto',
+    fontSize: 12,
+    // fontWeight: '700',
+    color: COLORS.primary,
+    backgroundColor: '#f4f4f4be',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    flexDirection: 'column',
   },
 });

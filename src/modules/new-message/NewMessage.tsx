@@ -39,6 +39,7 @@ import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
 import FooterDraftButton from '../../common/components/FooterDraftButton';
 import FooterSendButton from '../../common/components/FooterSendButton';
+import {observer} from 'mobx-react-lite';
 
 interface User {
   name: string;
@@ -57,8 +58,7 @@ const NewMessage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
-  const [selectedNotificationType, setSelectedNotificationType] =
-    useState('NOTIFICATION');
+  const [selectedNotificationType, setSelectedNotificationType] = useState('');
   const [actionItemName, setActionItemName] = useState('');
   const [actionItemDescription, setActionItemDescription] = useState('');
   const [alertName, setAlertName] = useState('');
@@ -517,6 +517,9 @@ const NewMessage = () => {
       setShowModal(false);
     }
   }, [recivers.length]);
+
+  const actionItemEmpty = !subject || !actionItemName || !actionItemDescription;
+  const alertEmpty = !subject || !alertName || !alertDescription;
   return (
     <ContainerNew
       isRefresh={false}
@@ -537,23 +540,22 @@ const NewMessage = () => {
               selectedNotificationType.toLowerCase() === 'notification'
                 ? (recivers.length === 0 && body === '' && subject === '') ||
                   isDrafting
-                : (actionItemName === '' &&
-                    actionItemDescription === '' &&
-                    alertName === '' &&
-                    alertDescription === '') ||
-                  (recivers.length === 0 && body === '' && subject === '') ||
+                : !selectedNotificationType ||
+                  (selectedNotificationType.toLowerCase() === 'action item' &&
+                    actionItemEmpty) ||
+                  (selectedNotificationType.toLowerCase() === 'alert' &&
+                    alertEmpty) ||
                   isDrafting
             }
             style={[
               styles.draftBtn,
               (selectedNotificationType.toLowerCase() === 'notification'
-                ? (recivers.length === 0 && body === '' && subject === '') ||
-                  isDrafting
-                : (actionItemName === '' &&
-                    actionItemDescription === '' &&
-                    alertName === '' &&
-                    alertDescription === '') ||
-                  (recivers.length === 0 && body === '' && subject === '') ||
+                ? !subject || isDrafting
+                : !selectedNotificationType ||
+                  (selectedNotificationType.toLowerCase() === 'action item' &&
+                    actionItemEmpty) ||
+                  (selectedNotificationType.toLowerCase() === 'alert' &&
+                    alertEmpty) ||
                   isDrafting) && styles.disabled,
             ]}
           />
@@ -562,32 +564,26 @@ const NewMessage = () => {
             handleSend={handleSend}
             isSending={isSending}
             disabled={
+              !selectedNotificationType ||
               recivers.length === 0 ||
               body === '' ||
               subject === '' ||
               (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemName === '') ||
-              (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemDescription === '') ||
+                actionItemEmpty) ||
               (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertName === '') ||
-              (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertDescription === '') ||
+                alertEmpty) ||
               isSending
             }
             style={[
               styles.sentBtn,
-              (recivers.length === 0 ||
+              (!selectedNotificationType ||
+                recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
                 (selectedNotificationType.toLowerCase() === 'action item' &&
-                  actionItemName === '') ||
-                (selectedNotificationType.toLowerCase() === 'action item' &&
-                  actionItemDescription === '') ||
+                  actionItemEmpty) ||
                 (selectedNotificationType.toLowerCase() === 'alert' &&
-                  alertName === '') ||
-                (selectedNotificationType.toLowerCase() === 'alert' &&
-                  alertDescription === '') ||
+                  alertEmpty) ||
                 isSending) &&
                 styles.disabled,
             ]}
@@ -603,12 +599,12 @@ const NewMessage = () => {
           gap: 10,
         }}>
         {/*Notification Type*/}
-        <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
+        {/* <CustomTextNew text="Type:" txtColor={COLORS.black} /> */}
         <SelectStatusDropDown
-          width={210}
+          width={'100%'}
           // width={Dimensions.get('screen').width - 40}
           height={30}
-          defaultValue={allNotificationType[0]?.title}
+          defaultValue={'Select Type'}
           data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
           border={true}
@@ -636,6 +632,7 @@ const NewMessage = () => {
               style={{width: '90%', height: 40}}
             />
           </View>
+          {/* user length > 1 icon */}
           {recivers.length > 1 && (
             <Pressable
               onPress={() => setShowModal(true)}
@@ -648,7 +645,7 @@ const NewMessage = () => {
             </Pressable>
           )}
         </View>
-
+        {/* users popup modal  */}
         <Modal
           visible={isUsersModalShow}
           transparent
@@ -757,7 +754,7 @@ const NewMessage = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
-
+        {/* single user  */}
         {recivers.length !== 0 ? (
           <View style={{flexDirection: 'row'}}>
             <View style={styles.singleRcvr}>
@@ -807,7 +804,16 @@ const NewMessage = () => {
         {/*Body*/}
         <View style={styles.lineContainerBody}>
           <TextInput
-            style={styles.textInputBody}
+            style={[
+              styles.textInputBody,
+              {
+                height:
+                  selectedNotificationType.toLowerCase() === 'notification' ||
+                  !selectedNotificationType
+                    ? 400
+                    : 200,
+              },
+            ]}
             placeholder="Body"
             value={body}
             onChangeText={text => setBody(text)}
@@ -817,15 +823,6 @@ const NewMessage = () => {
           />
         </View>
 
-        {/* {selectedNotificationType.toLowerCase() !== 'notification' && (
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>
-              {toTitleCase(selectedNotificationType)}
-            </Text>
-            <View style={styles.dividerLine} />
-          </View>
-        )} */}
         {/* Action Item   */}
         {selectedNotificationType.toLowerCase() === 'action item' && (
           <>
@@ -833,6 +830,7 @@ const NewMessage = () => {
               style={[
                 styles.withinLineContainer,
                 {
+                  width: '100%',
                   borderBottomWidth: 0.5,
                   borderBottomColor: COLORS.lightGray5,
                 },
@@ -866,6 +864,7 @@ const NewMessage = () => {
               style={[
                 styles.withinLineContainer,
                 {
+                  width: '100%',
                   borderBottomWidth: 0.5,
                   borderBottomColor: COLORS.lightGray5,
                 },
@@ -896,7 +895,7 @@ const NewMessage = () => {
   );
 };
 
-export default NewMessage;
+export default observer(NewMessage);
 
 const styles = StyleSheet.create({
   lineContainer: {
@@ -924,6 +923,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderBottomColor: COLORS.lightGray5,
+    borderBottomWidth: 0.5,
     paddingBottom: 2,
   },
   withinLineContainer: {

@@ -112,16 +112,17 @@ const RenderItems = ({
           </View>
           {/* item */}
           <Column colWidth="100%">
-            <Column colWidth="85%">
-              <CustomTextNew
-                text={item.action_item_name}
-                // txtColor={COLORS.black}
-                style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
-              />
-              <CustomTextNew
-                text={convertDate(item.last_update_date as any)}
-                style={{color: COLORS.textNewBold}}
-              />
+            <Column colWidth="85%" colStyle={{gap: 3}}>
+              <Row justify="space-between">
+                <CustomTextNew
+                  text={`ID: ${item.action_item_id}`}
+                  style={{color: COLORS.textNewBold, fontWeight: 'bold'}}
+                />
+                <CustomTextNew
+                  text={convertDate(item.last_update_date as any)}
+                  style={{color: COLORS.textNewBold}}
+                />
+              </Row>
               <Row>
                 <View
                   style={{
@@ -136,7 +137,14 @@ const RenderItems = ({
                   />
                 </View>
               </Row>
-              <Column colStyle={styles.colStyle}>
+              <CustomTextNew
+                text={item.action_item_name}
+                // txtColor={COLORS.black}
+                style={{fontSize: 15, fontWeight: 'bold', color: COLORS.black}}
+              />
+              <Column
+              // colStyle={styles.colStyle}
+              >
                 <CustomTextNew
                   text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
                   txtColor={COLORS.blackish}
@@ -337,14 +345,14 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignSelf: 'flex-start',
   },
-  colStyle: {
-    // borderBottomColor: COLORS.borderBottom,
-    // borderBottomWidth: 2,
-    marginBottom: 10,
-    paddingVertical: 5,
-  },
+  // colStyle: {
+  //   // borderBottomColor: COLORS.borderBottom,
+  //   // borderBottomWidth: 2,
+  //   // marginBottom: 10,
+  //   // paddingVertical: 5,
+  // },
   btn: {
-    width: '45%',
+    width: '46%',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',

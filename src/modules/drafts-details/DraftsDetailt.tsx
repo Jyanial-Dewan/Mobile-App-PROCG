@@ -43,6 +43,7 @@ import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
 import FooterSendButton from '../../common/components/FooterSendButton';
 import FooterDraftButton from '../../common/components/FooterDraftButton';
+import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 interface IOldMsgTypes {
   receivers?: number[];
   subject?: string;
@@ -52,7 +53,7 @@ interface IOldMsgTypes {
   actionItemName?: string;
   actionItemDescription?: string;
 }
-const DraftsDetails = observer(() => {
+const DraftsDetails = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
@@ -565,7 +566,7 @@ const DraftsDetails = observer(() => {
       setShowModal(false);
     }
   }, [recivers.length]);
-
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
   return (
     <ContainerNew
       isRefresh={false}
@@ -575,7 +576,7 @@ const DraftsDetails = observer(() => {
         <MainHeader
           last={
             <RoundedButton
-              onPress={() => handleDeleteDraftMessage(_id)}
+              onPress={() => setIsOpenDeleteModal(true)}
               child={<Feather name="trash" size={24} color="black" />}
             />
           }
@@ -597,6 +598,9 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.body === body &&
                   oldMsgState?.alertName === alertName &&
                   oldMsgState?.alertDescription === alertDescription) ||
+                !subject ||
+                !alertName ||
+                !alertDescription ||
                 isLoading ||
                 isDrafting
               }
@@ -607,6 +611,9 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.body === body &&
                   oldMsgState?.alertName === alertName &&
                   oldMsgState?.alertDescription === alertDescription) ||
+                  !subject ||
+                  !alertName ||
+                  !alertDescription ||
                   isLoading ||
                   isDrafting) &&
                   styles.disabled,
@@ -624,6 +631,9 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.actionItemName === actionItemName &&
                   oldMsgState?.actionItemDescription ===
                     actionItemDescription) ||
+                !subject ||
+                !actionItemName ||
+                !actionItemDescription ||
                 isDrafting
               }
               style={[
@@ -634,6 +644,9 @@ const DraftsDetails = observer(() => {
                   oldMsgState?.actionItemName === actionItemName &&
                   oldMsgState?.actionItemDescription ===
                     actionItemDescription) ||
+                  !subject ||
+                  !actionItemName ||
+                  !actionItemDescription ||
                   isDrafting) &&
                   styles.disabled,
               ]}
@@ -647,6 +660,7 @@ const DraftsDetails = observer(() => {
                 (!userChanged &&
                   oldMsgState?.subject === subject &&
                   oldMsgState?.body === body) ||
+                !subject ||
                 isDrafting
               }
               style={[
@@ -654,9 +668,18 @@ const DraftsDetails = observer(() => {
                 ((!userChanged &&
                   oldMsgState?.subject === subject &&
                   oldMsgState?.body === body) ||
+                  !subject ||
                   isDrafting) &&
                   styles.disabled,
               ]}
+            />
+          )}
+          {!notificationType && (
+            <FooterDraftButton
+              handleDraft={() => {}}
+              isDrafting={isDrafting}
+              disabled={true}
+              style={[styles.draftBtn, styles.disabled]}
             />
           )}
           {/* send */}
@@ -664,6 +687,7 @@ const DraftsDetails = observer(() => {
             handleSend={handleSend}
             isSending={isSending}
             disabled={
+              !notificationType ||
               recivers.length === 0 ||
               body === '' ||
               subject === '' ||
@@ -680,7 +704,8 @@ const DraftsDetails = observer(() => {
             }
             style={[
               styles.sentBtn,
-              (recivers.length === 0 ||
+              (!notificationType ||
+                recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
                 isSending ||
@@ -698,22 +723,36 @@ const DraftsDetails = observer(() => {
           />
         </View>
       }>
+      {/* delete modal  */}
+      {isOpenDeleteModal && (
+        <CustomDeleteModal
+          isModalShow={true}
+          setIsModalShow={setIsOpenDeleteModal}
+          total={1}
+          onPressCallApi={() => handleDeleteDraftMessage(_id)}
+          onCancel={() => setIsOpenDeleteModal(false)}
+          actionName="move to Recycle Bin"
+        />
+      )}
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
       ) : (
         <View style={{flex: 1, marginHorizontal: 20}}>
+          {/* notification selection  */}
           <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 10,
-            }}>
+            style={
+              {
+                // flexDirection: 'row',
+                // justifyContent: 'space-between',
+                // alignItems: 'center',
+                // gap: 10,
+              }
+            }>
             {/*Notification Type*/}
-            <CustomTextNew text="Notification Type:" txtColor={COLORS.black} />
+            {/* <CustomTextNew text="Type:" txtColor={COLORS.black} /> */}
             <SelectStatusDropDown
               isDisabled={true}
-              width={210}
+              width={'100%'}
               // width={Dimensions.get('screen').width - 40}
               height={30}
               defaultValue={toTitleCase(notificationType)}
@@ -755,6 +794,7 @@ const DraftsDetails = observer(() => {
               isHandleX={true}
             />
           </View>
+          {/* user popup modal  */}
           <Modal
             visible={isUsersModalShow}
             transparent
@@ -790,7 +830,13 @@ const DraftsDetails = observer(() => {
                     />
                     <ScrollView scrollEnabled={true} style={{height: 300}}>
                       <Pressable
-                        style={styles.selectPress}
+                        style={[
+                          styles.selectPress,
+                          {
+                            borderBottomColor: COLORS.lightGray,
+                            borderBottomWidth: 0.5,
+                          },
+                        ]}
                         onPress={handleSelectAll}>
                         <Text style={[styles.item]}>Select All</Text>
                         {isAllClicked && (
@@ -802,7 +848,7 @@ const DraftsDetails = observer(() => {
                         )}
                       </Pressable>
 
-                      {filterdUser.map(usr => (
+                      {filterdUser.map((usr, index) => (
                         <TouchableOpacity
                           onPress={() => handleReciever(usr.user_id)}
                           key={usr.user_id}>
@@ -811,6 +857,11 @@ const DraftsDetails = observer(() => {
                               flexDirection: 'row',
                               justifyContent: 'space-between',
                               alignItems: 'center',
+                              borderBottomColor:
+                                index !== filterdUser.length - 1
+                                  ? COLORS.lightGray
+                                  : 'transparent',
+                              borderBottomWidth: 0.5,
                             }}>
                             <View
                               style={{
@@ -856,6 +907,7 @@ const DraftsDetails = observer(() => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
+          {/* show single user  */}
           {recivers.length !== 0 ? (
             <View style={{flexDirection: 'row'}}>
               <View style={styles.singleRcvr}>
@@ -905,7 +957,15 @@ const DraftsDetails = observer(() => {
           {/*Body*/}
           <View style={styles.lineContainerBody}>
             <TextInput
-              style={styles.textInputBody}
+              style={[
+                styles.textInputBody,
+                {
+                  height:
+                    notificationType.toLowerCase() === 'notification'
+                      ? 400
+                      : 200,
+                },
+              ]}
               placeholderTextColor={COLORS.darkGray}
               placeholder="Body"
               value={body}
@@ -920,6 +980,7 @@ const DraftsDetails = observer(() => {
                 style={[
                   styles.withinLineContainer,
                   {
+                    width: '100%',
                     borderBottomWidth: 0.5,
                     borderBottomColor: COLORS.lightGray5,
                   },
@@ -953,6 +1014,7 @@ const DraftsDetails = observer(() => {
                 style={[
                   styles.withinLineContainer,
                   {
+                    width: '100%',
                     borderBottomWidth: 0.5,
                     borderBottomColor: COLORS.lightGray5,
                   },
@@ -982,9 +1044,9 @@ const DraftsDetails = observer(() => {
       )}
     </ContainerNew>
   );
-});
+};
 
-export default DraftsDetails;
+export default observer(DraftsDetails);
 
 const styles = StyleSheet.create({
   lineContainer: {
@@ -1012,6 +1074,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderBottomColor: COLORS.lightGray5,
+    borderBottomWidth: 0.5,
     paddingBottom: 2,
   },
   withinLineContainer: {
@@ -1133,7 +1196,7 @@ const styles = StyleSheet.create({
     top: 66,
     left: 20,
     zIndex: 99999,
-    borderBlockColor: '#b1b1b1ff',
-    borderWidth: 0.5,
+    // borderBlockColor: '#b1b1b1ff',
+    // borderWidth: 0.5,
   },
 });

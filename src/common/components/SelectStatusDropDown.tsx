@@ -5,8 +5,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {observer} from 'mobx-react-lite';
 interface Props {
   isDisabled?: boolean;
-  width: number;
-  height: number;
+  width: any;
+  height: any;
   defaultValue?: string;
   data: any;
   handleSelectedStatus: (status: string) => void;
@@ -41,8 +41,12 @@ const SelectStatusDropDown = ({
               {
                 width,
                 height,
-                borderBlockColor: border ? '#7b7b7bff' : '',
-                borderWidth: border ? 0.5 : 0,
+                borderBlockColor: border
+                  ? isDisabled
+                    ? '#dededeff'
+                    : '#7b7b7bff'
+                  : '',
+                borderWidth: border ? 1 : 0,
               },
             ]}>
             {selectedItem && (
@@ -86,7 +90,7 @@ const SelectStatusDropDown = ({
   );
 };
 
-export default observer(SelectStatusDropDown);
+export default SelectStatusDropDown;
 
 const styles = StyleSheet.create({
   dropdownButtonStyle: {
