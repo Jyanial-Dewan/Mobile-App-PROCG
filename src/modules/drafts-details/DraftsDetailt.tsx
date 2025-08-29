@@ -43,6 +43,7 @@ import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
 import FooterSendButton from '../../common/components/FooterSendButton';
 import FooterDraftButton from '../../common/components/FooterDraftButton';
+import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 interface IOldMsgTypes {
   receivers?: number[];
   subject?: string;
@@ -52,7 +53,7 @@ interface IOldMsgTypes {
   actionItemName?: string;
   actionItemDescription?: string;
 }
-const DraftsDetails = observer(() => {
+const DraftsDetails = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
@@ -565,7 +566,7 @@ const DraftsDetails = observer(() => {
       setShowModal(false);
     }
   }, [recivers.length]);
-
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
   return (
     <ContainerNew
       isRefresh={false}
@@ -575,7 +576,7 @@ const DraftsDetails = observer(() => {
         <MainHeader
           last={
             <RoundedButton
-              onPress={() => handleDeleteDraftMessage(_id)}
+              onPress={() => setIsOpenDeleteModal(true)}
               child={<Feather name="trash" size={24} color="black" />}
             />
           }
@@ -659,11 +660,20 @@ const DraftsDetails = observer(() => {
               ]}
             />
           )}
+          {!notificationType && (
+            <FooterDraftButton
+              handleDraft={() => {}}
+              isDrafting={isDrafting}
+              disabled={true}
+              style={[styles.draftBtn, styles.disabled]}
+            />
+          )}
           {/* send */}
           <FooterSendButton
             handleSend={handleSend}
             isSending={isSending}
             disabled={
+              !notificationType ||
               recivers.length === 0 ||
               body === '' ||
               subject === '' ||
@@ -680,7 +690,8 @@ const DraftsDetails = observer(() => {
             }
             style={[
               styles.sentBtn,
-              (recivers.length === 0 ||
+              (!notificationType ||
+                recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
                 isSending ||
@@ -698,22 +709,36 @@ const DraftsDetails = observer(() => {
           />
         </View>
       }>
+      {/* delete modal  */}
+      {isOpenDeleteModal && (
+        <CustomDeleteModal
+          isModalShow={true}
+          setIsModalShow={setIsOpenDeleteModal}
+          total={1}
+          onPressCallApi={() => handleDeleteDraftMessage(_id)}
+          onCancel={() => setIsOpenDeleteModal(false)}
+          actionName="move to Recycle Bin"
+        />
+      )}
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
       ) : (
         <View style={{flex: 1, marginHorizontal: 20}}>
+          {/* notification selection  */}
           <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 10,
-            }}>
+            style={
+              {
+                // flexDirection: 'row',
+                // justifyContent: 'space-between',
+                // alignItems: 'center',
+                // gap: 10,
+              }
+            }>
             {/*Notification Type*/}
-            <CustomTextNew text="Type:" txtColor={COLORS.black} />
+            {/* <CustomTextNew text="Type:" txtColor={COLORS.black} /> */}
             <SelectStatusDropDown
               isDisabled={true}
-              width={210}
+              width={'100%'}
               // width={Dimensions.get('screen').width - 40}
               height={30}
               defaultValue={toTitleCase(notificationType)}
@@ -755,6 +780,7 @@ const DraftsDetails = observer(() => {
               isHandleX={true}
             />
           </View>
+          {/* user popup modal  */}
           <Modal
             visible={isUsersModalShow}
             transparent
@@ -867,6 +893,7 @@ const DraftsDetails = observer(() => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
+          {/* show single user  */}
           {recivers.length !== 0 ? (
             <View style={{flexDirection: 'row'}}>
               <View style={styles.singleRcvr}>
@@ -1003,9 +1030,9 @@ const DraftsDetails = observer(() => {
       )}
     </ContainerNew>
   );
-});
+};
 
-export default DraftsDetails;
+export default observer(DraftsDetails);
 
 const styles = StyleSheet.create({
   lineContainer: {

@@ -39,6 +39,7 @@ import {toTitleCase} from '../../common/utility/general';
 import CustomTextNew from '../../common/components/CustomText';
 import FooterDraftButton from '../../common/components/FooterDraftButton';
 import FooterSendButton from '../../common/components/FooterSendButton';
+import {observer} from 'mobx-react-lite';
 
 interface User {
   name: string;
@@ -57,8 +58,7 @@ const NewMessage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isAllClicked, setIsAllClicked] = useState(false);
-  const [selectedNotificationType, setSelectedNotificationType] =
-    useState('NOTIFICATION');
+  const [selectedNotificationType, setSelectedNotificationType] = useState('');
   const [actionItemName, setActionItemName] = useState('');
   const [actionItemDescription, setActionItemDescription] = useState('');
   const [alertName, setAlertName] = useState('');
@@ -534,6 +534,7 @@ const NewMessage = () => {
             handleDraft={handleDraft}
             isDrafting={isDrafting}
             disabled={
+              selectedNotificationType &&
               selectedNotificationType.toLowerCase() === 'notification'
                 ? (recivers.length === 0 && body === '' && subject === '') ||
                   isDrafting
@@ -546,7 +547,8 @@ const NewMessage = () => {
             }
             style={[
               styles.draftBtn,
-              (selectedNotificationType.toLowerCase() === 'notification'
+              (selectedNotificationType &&
+              selectedNotificationType.toLowerCase() === 'notification'
                 ? (recivers.length === 0 && body === '' && subject === '') ||
                   isDrafting
                 : (actionItemName === '' &&
@@ -562,6 +564,7 @@ const NewMessage = () => {
             handleSend={handleSend}
             isSending={isSending}
             disabled={
+              !selectedNotificationType ||
               recivers.length === 0 ||
               body === '' ||
               subject === '' ||
@@ -577,7 +580,8 @@ const NewMessage = () => {
             }
             style={[
               styles.sentBtn,
-              (recivers.length === 0 ||
+              (!selectedNotificationType ||
+                recivers.length === 0 ||
                 body === '' ||
                 subject === '' ||
                 (selectedNotificationType.toLowerCase() === 'action item' &&
@@ -603,12 +607,12 @@ const NewMessage = () => {
           gap: 10,
         }}>
         {/*Notification Type*/}
-        <CustomTextNew text="Type:" txtColor={COLORS.black} />
+        {/* <CustomTextNew text="Type:" txtColor={COLORS.black} /> */}
         <SelectStatusDropDown
-          width={210}
+          width={'100%'}
           // width={Dimensions.get('screen').width - 40}
           height={30}
-          defaultValue={allNotificationType[0]?.title}
+          defaultValue={'Select Notification Type'}
           data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
           border={true}
@@ -636,6 +640,7 @@ const NewMessage = () => {
               style={{width: '90%', height: 40}}
             />
           </View>
+          {/* user length > 1 icon */}
           {recivers.length > 1 && (
             <Pressable
               onPress={() => setShowModal(true)}
@@ -648,7 +653,7 @@ const NewMessage = () => {
             </Pressable>
           )}
         </View>
-
+        {/* users popup modal  */}
         <Modal
           visible={isUsersModalShow}
           transparent
@@ -757,7 +762,7 @@ const NewMessage = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
-
+        {/* single user  */}
         {recivers.length !== 0 ? (
           <View style={{flexDirection: 'row'}}>
             <View style={styles.singleRcvr}>
@@ -811,7 +816,8 @@ const NewMessage = () => {
               styles.textInputBody,
               {
                 height:
-                  selectedNotificationType.toLowerCase() === 'notification'
+                  selectedNotificationType.toLowerCase() === 'notification' ||
+                  !selectedNotificationType
                     ? 400
                     : 200,
               },
@@ -897,7 +903,7 @@ const NewMessage = () => {
   );
 };
 
-export default NewMessage;
+export default observer(NewMessage);
 
 const styles = StyleSheet.create({
   lineContainer: {
