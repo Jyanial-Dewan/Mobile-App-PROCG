@@ -80,22 +80,25 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
           <SVGController name="Alert-Low" color={COLORS.white} />
         </View>
         <Column colWidth="100%">
-          <Column colWidth="85%">
+          <Column colWidth="85%" colStyle={{gap: 5}}>
+            <Row justify="space-between">
+              <CustomTextNew
+                text={`ID: ${item.alert_id}`}
+                style={{color: COLORS.textNewBold, fontWeight: 'bold'}}
+              />
+              <CustomTextNew
+                text={convertDate(item.last_update_date)}
+                txtColor={COLORS.textNewBold}
+              />
+            </Row>
             <CustomTextNew
               text={item.alert_name}
               style={{
                 fontSize: 15,
                 fontWeight: 'bold',
                 color: COLORS.black,
-                marginTop: 5,
               }}
             />
-            <CustomTextNew
-              text={convertDate(item.last_update_date)}
-              txtColor={COLORS.textNewBold}
-            />
-          </Column>
-          <Column colStyle={styles.colStyle} colWidth="90%">
             <CustomTextNew
               text={`${item.description.slice(0, 180)} ${item.description.length > 180 ? '...' : ''}`}
               txtColor={COLORS.blackish}
@@ -113,6 +116,17 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
                 />
               </TouchableOpacity>
             )}
+            <Row justify="flex-start">
+              <CustomButtonNew
+                disabled={item.acknowledge === false ? false : true}
+                btnText={'Acknowledge'}
+                // isLoading={false}
+                onBtnPress={handleAcknowledge}
+                btnstyle={
+                  item.acknowledge === false ? styles.btn : styles.btnDisable
+                }
+              />
+            </Row>
           </Column>
           {/* View Details Modal */}
           {/* <ViewDetailsModal
@@ -125,17 +139,6 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
             /> */}
           {/* End View Details Modal */}
           {/* Button here */}
-          <Row justify="flex-start">
-            <CustomButtonNew
-              disabled={item.acknowledge === false ? false : true}
-              btnText={'Acknowledge'}
-              // isLoading={false}
-              onBtnPress={handleAcknowledge}
-              btnstyle={
-                item.acknowledge === false ? styles.btn : styles.btnDisable
-              }
-            />
-          </Row>
         </Column>
       </Row>
     </View>

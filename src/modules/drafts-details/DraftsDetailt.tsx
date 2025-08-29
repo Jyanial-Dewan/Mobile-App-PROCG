@@ -598,6 +598,9 @@ const DraftsDetails = () => {
                   oldMsgState?.body === body &&
                   oldMsgState?.alertName === alertName &&
                   oldMsgState?.alertDescription === alertDescription) ||
+                !subject ||
+                !alertName ||
+                !alertDescription ||
                 isLoading ||
                 isDrafting
               }
@@ -608,6 +611,9 @@ const DraftsDetails = () => {
                   oldMsgState?.body === body &&
                   oldMsgState?.alertName === alertName &&
                   oldMsgState?.alertDescription === alertDescription) ||
+                  !subject ||
+                  !alertName ||
+                  !alertDescription ||
                   isLoading ||
                   isDrafting) &&
                   styles.disabled,
@@ -625,6 +631,9 @@ const DraftsDetails = () => {
                   oldMsgState?.actionItemName === actionItemName &&
                   oldMsgState?.actionItemDescription ===
                     actionItemDescription) ||
+                !subject ||
+                !actionItemName ||
+                !actionItemDescription ||
                 isDrafting
               }
               style={[
@@ -635,6 +644,9 @@ const DraftsDetails = () => {
                   oldMsgState?.actionItemName === actionItemName &&
                   oldMsgState?.actionItemDescription ===
                     actionItemDescription) ||
+                  !subject ||
+                  !actionItemName ||
+                  !actionItemDescription ||
                   isDrafting) &&
                   styles.disabled,
               ]}
@@ -648,6 +660,7 @@ const DraftsDetails = () => {
                 (!userChanged &&
                   oldMsgState?.subject === subject &&
                   oldMsgState?.body === body) ||
+                !subject ||
                 isDrafting
               }
               style={[
@@ -655,6 +668,7 @@ const DraftsDetails = () => {
                 ((!userChanged &&
                   oldMsgState?.subject === subject &&
                   oldMsgState?.body === body) ||
+                  !subject ||
                   isDrafting) &&
                   styles.disabled,
               ]}

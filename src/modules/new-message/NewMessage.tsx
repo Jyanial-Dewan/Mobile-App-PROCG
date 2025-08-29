@@ -517,6 +517,9 @@ const NewMessage = () => {
       setShowModal(false);
     }
   }, [recivers.length]);
+
+  const actionItemEmpty = !subject || !actionItemName || !actionItemDescription;
+  const alertEmpty = !subject || !alertName || !alertDescription;
   return (
     <ContainerNew
       isRefresh={false}
@@ -534,28 +537,25 @@ const NewMessage = () => {
             handleDraft={handleDraft}
             isDrafting={isDrafting}
             disabled={
-              selectedNotificationType &&
               selectedNotificationType.toLowerCase() === 'notification'
                 ? (recivers.length === 0 && body === '' && subject === '') ||
                   isDrafting
-                : (actionItemName === '' &&
-                    actionItemDescription === '' &&
-                    alertName === '' &&
-                    alertDescription === '') ||
-                  (recivers.length === 0 && body === '' && subject === '') ||
+                : !selectedNotificationType ||
+                  (selectedNotificationType.toLowerCase() === 'action item' &&
+                    actionItemEmpty) ||
+                  (selectedNotificationType.toLowerCase() === 'alert' &&
+                    alertEmpty) ||
                   isDrafting
             }
             style={[
               styles.draftBtn,
-              (selectedNotificationType &&
-              selectedNotificationType.toLowerCase() === 'notification'
-                ? (recivers.length === 0 && body === '' && subject === '') ||
-                  isDrafting
-                : (actionItemName === '' &&
-                    actionItemDescription === '' &&
-                    alertName === '' &&
-                    alertDescription === '') ||
-                  (recivers.length === 0 && body === '' && subject === '') ||
+              (selectedNotificationType.toLowerCase() === 'notification'
+                ? !subject || isDrafting
+                : !selectedNotificationType ||
+                  (selectedNotificationType.toLowerCase() === 'action item' &&
+                    actionItemEmpty) ||
+                  (selectedNotificationType.toLowerCase() === 'alert' &&
+                    alertEmpty) ||
                   isDrafting) && styles.disabled,
             ]}
           />
@@ -569,13 +569,9 @@ const NewMessage = () => {
               body === '' ||
               subject === '' ||
               (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemName === '') ||
-              (selectedNotificationType.toLowerCase() === 'action item' &&
-                actionItemDescription === '') ||
+                actionItemEmpty) ||
               (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertName === '') ||
-              (selectedNotificationType.toLowerCase() === 'alert' &&
-                alertDescription === '') ||
+                alertEmpty) ||
               isSending
             }
             style={[
@@ -585,13 +581,9 @@ const NewMessage = () => {
                 body === '' ||
                 subject === '' ||
                 (selectedNotificationType.toLowerCase() === 'action item' &&
-                  actionItemName === '') ||
-                (selectedNotificationType.toLowerCase() === 'action item' &&
-                  actionItemDescription === '') ||
+                  actionItemEmpty) ||
                 (selectedNotificationType.toLowerCase() === 'alert' &&
-                  alertName === '') ||
-                (selectedNotificationType.toLowerCase() === 'alert' &&
-                  alertDescription === '') ||
+                  alertEmpty) ||
                 isSending) &&
                 styles.disabled,
             ]}
@@ -612,7 +604,7 @@ const NewMessage = () => {
           width={'100%'}
           // width={Dimensions.get('screen').width - 40}
           height={30}
-          defaultValue={'Select Notification Type'}
+          defaultValue={'Select Type'}
           data={allNotificationType}
           handleSelectedStatus={handleNotificationType}
           border={true}

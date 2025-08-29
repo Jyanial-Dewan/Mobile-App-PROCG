@@ -99,13 +99,13 @@ const ActionItemMainIndex = () => {
     setCurrentPage(1);
   };
   const allStatus = [
-    {id: 0, title: 'All', value: 'All'},
+    {id: 0, title: 'All Status', value: 'All STATUS'},
     {id: 1, title: 'New', value: 'NEW'},
     {id: 2, title: 'In Progress', value: 'IN PROGRESS'},
     {id: 3, title: 'Completed', value: 'COMPLETED'},
   ];
   const handleSelectedStatus = (status: string) => {
-    if (status.toLowerCase() === 'all') {
+    if (status.toLowerCase() === 'all status') {
       setSelectedStatusQuery('');
     } else {
       setSelectedStatusQuery(status);

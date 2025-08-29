@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction} from 'react';
+import React, {Dispatch, SetStateAction, useState} from 'react';
 import {StyleSheet, TextInput, View} from 'react-native';
 import SVGController from '../../common/components/SVGController';
 import {COLORS} from '../constant/Themes';
@@ -9,10 +9,11 @@ interface SearchBarProps {
   placeholder: string;
 }
 const SearchBar = (props: SearchBarProps) => {
+  const [isFocused, setIsFocused] = useState(false);
   return (
     <>
       <View style={[styles.SectionStyle, props?.customStyle]}>
-        <SVGController name="SEARCH" />
+        {!isFocused && !props?.value && <SVGController name="SEARCH" />}
 
         <TextInput
           value={props?.value}
@@ -21,6 +22,8 @@ const SearchBar = (props: SearchBarProps) => {
           underlineColorAndroid="transparent"
           onChangeText={props?.onChangeText}
           placeholderTextColor={COLORS.textColor}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
       </View>
     </>
@@ -51,7 +54,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     overflow: 'hidden',
     marginBottom: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     gap: 5,
   },
 });
