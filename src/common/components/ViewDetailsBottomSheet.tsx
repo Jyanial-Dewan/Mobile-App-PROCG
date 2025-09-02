@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     padding: 10,
     borderRadius: 15,
-    marginBottom: 10,
+    marginBottom: 20,
     // elevation: 1,
   },
   colStyle: {
