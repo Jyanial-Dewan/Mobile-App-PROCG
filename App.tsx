@@ -284,10 +284,10 @@ const Main = observer(() => {
 
   //Add Device via Socket
   useEffect(() => {
-    if (userInfo?.isLoggedIn && deviceInfoData.id !== 0) {
-      addDevice(deviceInfoData);
-    }
-  }, [userInfo?.isLoggedIn, deviceInfoData.id]);
+    if (!userInfo?.user_id || !deviceInfoData.id || !deviceInfoData.user_id)
+      return;
+    addDevice(deviceInfoData);
+  }, [socket, userInfo?.user_id, deviceInfoData.id]);
 
   //Inactive Device via Socket
   useEffect(() => {

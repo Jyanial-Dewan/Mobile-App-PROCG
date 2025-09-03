@@ -19,6 +19,15 @@ export const DeviceInfoStore = types.model('DeviceInfoStore', {
         signon_id: types.maybeNull(types.string),
         login: types.maybeNull(types.string),
         logout: types.maybeNull(types.string),
+        session_log: types.maybeNull(
+          types.array(
+            types.model({
+              session_id: types.maybeNull(types.string),
+              connect_time: types.maybeNull(types.string),
+              disconnect_time: types.maybeNull(types.string),
+            }),
+          ),
+        ),
       }),
     ),
   ),
