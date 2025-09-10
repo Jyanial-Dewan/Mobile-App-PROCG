@@ -35,7 +35,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   const drawerStatus = useDrawerStatus();
   const {userInfo, logout, deviceInfoData, fcmToken, selectedUrl} =
     useRootStore();
-  const {inactiveDevice} = useSocketContext();
+  const {inactiveDevice, handleDisconnect} = useSocketContext();
   const storage = new MMKV();
   const url = selectedUrl || ProcgURL;
   const [profilePhoto, setProfilePhoto] = useState(
@@ -64,48 +64,50 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
 
   const handleSignOut = async () => {
-    setIsLogout(true);
-    const payload = {
-      is_active: 0,
-    };
+    try {
+      setIsLogout(true);
+      const payload = {
+        is_active: 0,
+      };
 
-    const api_params = {
-      url: `${api.UpdateDeviceInfo}/${userInfo?.user_id}/${deviceInfoData?.id}`,
-      data: payload,
-      method: 'put',
-      baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
+      const api_params = {
+        url: `${api.UpdateDeviceInfo}/${userInfo?.user_id}/${deviceInfoData?.id}`,
+        data: payload,
+        method: 'put',
+        baseURL: url,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
 
-    const tokenPayload = {
-      token: fcmToken?.fcmToken,
-      userId: userInfo?.user_id,
-    };
-    const tokenParams = {
-      url: api.UnregisterToken,
-      data: tokenPayload,
-      method: 'post',
-      baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
-    const res = await httpRequest(api_params, setIsLoading);
-    inactiveDevice({
-      inactiveDevices: [res],
-      userId: userInfo?.user_id || 0,
-    });
+      const tokenPayload = {
+        token: fcmToken?.fcmToken,
+        userId: userInfo?.user_id,
+      };
+      const tokenParams = {
+        url: api.UnregisterToken,
+        data: tokenPayload,
+        method: 'post',
+        baseURL: url,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      const res = await httpRequest(api_params, setIsLoading);
+      inactiveDevice({
+        inactiveDevices: [res],
+        userId: userInfo?.user_id || 0,
+      });
 
-    await httpRequest(tokenParams, setIsLoading);
-    await FastImage.clearDiskCache();
-    await FastImage.clearMemoryCache();
-    logout();
-    setIsLogout(false);
-    // toaster.show({
-    //   type: 'success',
-    //   message: 'You have been logged out successfully',
-    // });
-    // navigation.reset({index: 0, routes: [{name: 'Login'}]});
+      await httpRequest(tokenParams, setIsLoading);
+      await FastImage.clearDiskCache();
+      await FastImage.clearMemoryCache();
+      logout();
+      setIsLogout(false);
+      handleDisconnect();
+    } catch (error) {
+      if (error instanceof Error) {
+        toaster.show({type: 'error', message: error.message});
+      }
+    }
   };
 
   const handleOpenSheet = () => {

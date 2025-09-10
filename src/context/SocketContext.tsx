@@ -37,6 +37,7 @@ interface SocketContext {
   ) => void;
   addDevice: (device: DeviceModel) => void;
   inactiveDevice: (deviceInfoData: InActiveDevicesProps) => void;
+  handleDisconnect: () => void;
 }
 const SocketContext = createContext({} as SocketContext);
 
@@ -246,6 +247,10 @@ export function SocketContextProvider({children}: SocketContextProps) {
   const inactiveDevice = ({inactiveDevices, userId}: InActiveDevicesProps) => {
     socket?.emit('inactiveDevice', {inactiveDevices, userId});
   };
+
+  const handleDisconnect = () => {
+    socket?.disconnect();
+  };
   return (
     <SocketContext.Provider
       value={{
@@ -260,6 +265,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
         SendAlert,
         addDevice,
         inactiveDevice,
+        handleDisconnect,
       }}>
       {children}
     </SocketContext.Provider>
