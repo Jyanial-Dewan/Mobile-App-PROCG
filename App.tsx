@@ -1,13 +1,8 @@
-// @ts-nocheck
-import {
-  LinkingOptions,
-  NavigationContainer,
-  useNavigation,
-} from '@react-navigation/native';
-import axios from 'axios';
+import {LinkingOptions, NavigationContainer} from '@react-navigation/native';
+import axios, {AxiosError, AxiosResponse} from 'axios';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback, useEffect, useMemo} from 'react';
-import {Linking, LogBox, TextInput, Text, Alert} from 'react-native';
+import {Linking, LogBox, TextInput, Text, Alert, Platform} from 'react-native';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {
   SafeAreaProvider,
@@ -33,28 +28,24 @@ import {
 import DeviceInfo from 'react-native-device-info';
 import Geolocation from 'react-native-geolocation-service';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {onSnapshot} from 'mobx-state-tree';
 import {PermissionsAndroid} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
-import {onDisplayNotification} from './src/services/notification/notifeeServices';
 import Drawer from './src/navigations/drawer';
 import {
   SocketContextProvider,
   useSocketContext,
 } from './src/context/SocketContext';
-import useAsyncEffect from './src/common/packages/useAsyncEffect/useAsyncEffect';
 import {api} from './src/common/api/api';
 import {httpRequest} from './src/common/constant/httpRequest';
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', 'ViewPropTypes']);
-if (Text.defaultProps == null) {
-  Text.defaultProps = {};
-  Text.defaultProps.allowFontScaling = false;
+if ((Text as any).defaultProps == null) {
+  (Text as any).defaultProps = {};
+  (Text as any).defaultProps.allowFontScaling = false;
 }
-if (TextInput.defaultProps == null) {
-  TextInput.defaultProps = {};
-  TextInput.defaultProps.allowFontScaling = false;
+if ((TextInput as any).defaultProps == null) {
+  (TextInput as any).defaultProps = {};
+  (TextInput as any).defaultProps.allowFontScaling = false;
 }
 export const ProcgURL = procgURLL;
 export const ProcgURL2 = procgURLL2;
@@ -127,7 +118,7 @@ axios.interceptors.request.use(
 );
 
 axios.interceptors.response.use(
-  async response => {
+  async (response: AxiosResponse) => {
     if (
       withoutEncryptionApi.some(element =>
         response?.config?.url?.includes(element),
@@ -137,12 +128,12 @@ axios.interceptors.response.use(
     }
     let decryptedData = makeDecryption(response?.data);
     return {
-      status: response?.status,
+      ...response,
       data: decryptedData,
     };
   },
 
-  async error => {
+  async (error: AxiosError) => {
     if (error?.response?.status === 401) {
       return Promise.reject({response: {data: 401}});
     } else if (error?.response?.status === 406) {
@@ -167,7 +158,6 @@ const Main = observer(() => {
     deviceInfoData,
     deviceInfoSave,
     userInfo,
-    connectSocket,
     logout,
     messageStore,
     selectedUrl,
@@ -180,23 +170,35 @@ const Main = observer(() => {
   // Handle background messages
   messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('Received background message:', remoteMessage);
-    const data = JSON.parse(remoteMessage.data.payload);
-    const formattedData = {...data, date: new Date(data.date)};
-    messageStore.addReceivedMessage(formattedData);
-    messageStore.addNotificationMessage(formattedData);
-    messageStore.addTotalReceived();
-    // onDisplayNotification(remoteMessage);
+
+    // Check if data is available
+    if (remoteMessage.data?.payload) {
+      const data = JSON.parse(remoteMessage.data.payload);
+      const formattedData = {...data, date: new Date(data.date)};
+      messageStore.addReceivedMessage(formattedData);
+      messageStore.addNotificationMessage(formattedData);
+      messageStore.addTotalReceived();
+      // onDisplayNotification(remoteMessage);
+    } else {
+      console.error('No payload in background message');
+    }
   });
 
   // Handle notifications when the app is in quit mode
   messaging().onNotificationOpenedApp(async remoteMessage => {
     console.log('Notification opened from quit state:', remoteMessage);
-    const data = JSON.parse(remoteMessage.data.payload);
-    const formattedData = {...data, date: new Date(data.date)};
-    messageStore.addReceivedMessage(formattedData);
-    messageStore.addNotificationMessage(formattedData);
-    messageStore.addTotalReceived();
-    // onDisplayNotification(remoteMessage);
+
+    // Check if data is available
+    if (remoteMessage.data?.payload) {
+      const data = JSON.parse(remoteMessage.data.payload);
+      const formattedData = {...data, date: new Date(data.date)};
+      messageStore.addReceivedMessage(formattedData);
+      messageStore.addNotificationMessage(formattedData);
+      messageStore.addTotalReceived();
+      // onDisplayNotification(remoteMessage);
+    } else {
+      console.error('No payload in notification');
+    }
   });
 
   useEffect(() => {
@@ -284,10 +286,10 @@ const Main = observer(() => {
 
   //Add Device via Socket
   useEffect(() => {
-    if (userInfo?.isLoggedIn && deviceInfoData.id !== 0) {
-      addDevice(deviceInfoData);
-    }
-  }, [userInfo?.isLoggedIn, deviceInfoData.id]);
+    if (!userInfo?.user_id || !deviceInfoData.id || !deviceInfoData.user_id)
+      return;
+    addDevice(deviceInfoData);
+  }, [socket, userInfo?.user_id, deviceInfoData.id]);
 
   //Inactive Device via Socket
   useEffect(() => {

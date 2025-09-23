@@ -94,7 +94,7 @@ const ReplyScreen = () => {
   const handleSend = async () => {
     const sendPayload = {
       notification_id: id,
-      notification_type: parrentMessage?.notification_type,
+      notification_type: 'NOTIFICATION',
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: subject,
@@ -161,7 +161,7 @@ const ReplyScreen = () => {
   const handleDraft = async () => {
     const draftPayload = {
       notification_id: id,
-      notification_type: parrentMessage?.notification_type,
+      notification_type: 'NOTIFICATION',
       sender: userInfo?.user_id,
       recipients: recivers,
       subject: `${subject}`,

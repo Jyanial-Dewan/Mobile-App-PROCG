@@ -288,14 +288,19 @@ const RenderMessageItem = observer(
                         //     : `${item?.sender.name.slice(0, 20)}${item.sender?.name.length > 20 ? '...' : ''}`
                       }
                     />
-                    <View style={{flexDirection: 'row', gap: 5}}>
+                    <View>
                       <CustomTextNew
                         txtStyle={[styles.dateText, {color: COLORS.black}]}
                         text={item.creation_date.toLocaleString()}
                       />
                     </View>
                   </View>
-                  <Row>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
                     <View
                       style={{
                         backgroundColor: COLORS.badgeBlueLight,
@@ -308,7 +313,12 @@ const RenderMessageItem = observer(
                         txtColor={COLORS.black}
                       />
                     </View>
-                  </Row>
+                    <CustomTextNew
+                      txtStyle={[styles.subText]}
+                      txtAlign="justify"
+                      text={findOrigin(item)}
+                    />
+                  </View>
                   <CustomTextNew
                     txtStyle={styles.subText}
                     txtAlign="justify"

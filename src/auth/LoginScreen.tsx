@@ -139,6 +139,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           signon_id,
           login: new Date(),
           logout: '',
+          session_log: [],
         },
       };
       const deviceInfoApi_params = {

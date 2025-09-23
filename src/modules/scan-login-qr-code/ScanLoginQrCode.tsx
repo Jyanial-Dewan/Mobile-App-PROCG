@@ -72,6 +72,7 @@ const ScanLoginQrCode = observer(() => {
             signon_id,
             login: new Date(),
             logout: '',
+            session_log: [],
           },
         };
         const deviceInfoApi_params = {
