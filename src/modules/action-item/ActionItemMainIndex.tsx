@@ -12,7 +12,7 @@ import {Edge} from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
 import CustomTextNew from '../../common/components/CustomText';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {useRootStore} from '../../stores/rootStore';
+import {secureStorage, useRootStore} from '../../stores/rootStore';
 import {COLORS} from '../../common/constant/Themes';
 import {_todayDate} from '../../common/services/todayDate';
 import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
@@ -38,7 +38,7 @@ const ActionItemMainIndex = () => {
   const [data, setData] = useState<ActionItemsStoreSnapshotType[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const height = useWindowDimensions().height;
-
+  const savedUrls = secureStorage.getItem('app_url');
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;

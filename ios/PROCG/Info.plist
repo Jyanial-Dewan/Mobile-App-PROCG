@@ -47,6 +47,21 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
+  <key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>https</string>
+    </array>
+  </dict>
+</array>
+
+<key>com.apple.developer.associated-domains</key>
+<array>
+  <string>applinks:procg.datafluent.team</string>
+</array>
+
 	<false/>
 </dict>
 </plist>
