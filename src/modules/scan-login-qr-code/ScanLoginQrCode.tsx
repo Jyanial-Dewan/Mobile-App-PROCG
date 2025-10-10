@@ -54,7 +54,15 @@ const ScanLoginQrCode = observer(() => {
 
       const res = await httpRequest(verifyTokenParams, setIsVerifying);
       console.log(res, 'login');
-      if (res?.access_token) {
+      if (res.access_token) {
+        const combined_user = {
+          url: `${api.CombinedUser}/${res.user_id}`,
+          baseURL: ProcgURL,
+          access_token: res.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const userResponse = await httpRequest(combined_user, setIsLoading);
         const deviceInfoPayload = {
           user_id: res.user_id,
           deviceInfo: {
@@ -86,7 +94,7 @@ const ScanLoginQrCode = observer(() => {
         axios.defaults.baseURL = selectedUrl || ProcgURL;
         axios.defaults.headers.common['Authorization'] =
           `Bearer ${res.access_token}`;
-        userInfoSave(res);
+        userInfoSave({...res, ...userResponse});
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
         if (response) {

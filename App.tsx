@@ -63,17 +63,21 @@ const linking: LinkingOptions<any> = {
     /* configuration for matching screens with paths */
     initialRouteName: 'Loader',
     screens: {
-      Loader: {
-        path: 'loader/:delay?/:text?',
-        parse: {
-          delay: ms => Number(ms),
-          text: text => decodeURIComponent(text),
-        },
-        stringify: {
-          delay: ms => String(ms),
-          text: text => encodeURIComponent(text),
-        },
-      },
+      // Loader: {
+      //   path: 'loader/:delay?/:text?',
+      //   parse: {
+      //     delay: ms => Number(ms),
+      //     text: text => decodeURIComponent(text),
+      //   },
+      //   stringify: {
+      //     delay: ms => String(ms),
+      //     text: text => encodeURIComponent(text),
+      //   },
+      // },
+      Home: '',
+      Notification: 'notifications/inbox',
+      Menu: 'menu',
+      ActionItem: 'invitation',
     },
   },
 };

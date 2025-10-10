@@ -40,4 +40,5 @@ export const api = {
   GetActionItems: '/def_action_items_view',
   UpdateActionItemAssignment: '/def_action_item_assignments',
   ActionItem: '/def_action_items',
+  CombinedUser: '/combined-user',
 };

@@ -107,7 +107,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     fcmTokenSave({fcmToken: fcmToken});
 
     const payload = {
-      email: data?.email?.trim(),
+      user: data?.email?.trim(),
       password: data?.password?.trim(),
       strDeviceId: fcmToken,
     };
@@ -119,9 +119,19 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       // isConsole: true,
       // isConsoleParams: true,
     };
+
     const res = await httpRequest(api_params, setIsLoading);
-    // console.log(res.access_token, 'login');
-    if (res?.access_token) {
+
+    if (res.access_token) {
+      const combined_user = {
+        url: `${api.CombinedUser}/${res.user_id}`,
+        baseURL: ProcgURL,
+        access_token: res.access_token,
+        // isConsole: true,
+        // isConsoleParams: true,
+      };
+      const userResponse = await httpRequest(combined_user, setIsLoading);
+
       const deviceInfoPayload = {
         user_id: res.user_id,
         deviceInfo: {
@@ -153,7 +163,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       axios.defaults.baseURL = selectedUrl || ProcgURL;
       axios.defaults.headers.common['Authorization'] =
         `Bearer ${res.access_token}`;
-      userInfoSave(res);
+      userInfoSave({...res, ...userResponse});
       // navigation.replace('HomeScreen');
       const response = await httpRequest(deviceInfoApi_params, setIsLoading);
 
@@ -170,7 +180,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           is_active: response.is_active,
           ip_address: response.ip_address,
           location: response.location,
-          user: res.user_name,
+          user: userResponse.user_name,
           signon_audit: response.signon_audit,
           signon_id,
         });
@@ -207,7 +217,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         <Column>
           <Column>
             <CustomTextNew
-              text="Email"
+              text="Email or Username"
               txtSize={16}
               txtWeight={'500'}
               padBottom={14}
@@ -216,7 +226,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
               setValue={setValue}
               control={control}
               name="email"
-              label="Enter your email"
+              label="Enter your email or username"
               rules={{required: true}}
             />
           </Column>
