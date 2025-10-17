@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import OcIcon from 'react-native-vector-icons/Octicons';
-import {ProcgURL} from '../../App';
+import {ProcgURL, ProcgURL2} from '../../App';
 import Column from '../common/components/Column';
 import ContainerNew from '../common/components/Container';
 import CustomButtonNew from '../common/components/CustomButton';
@@ -121,17 +121,15 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     };
 
     const res = await httpRequest(api_params, setIsLoading);
-
     if (res.access_token) {
       const combined_user = {
-        url: `${api.CombinedUser}/${res.user_id}`,
-        baseURL: ProcgURL,
+        url: `${api.Users}/${res.user_id}`,
+        baseURL: ProcgURL2,
         access_token: res.access_token,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const userResponse = await httpRequest(combined_user, setIsLoading);
-
       const deviceInfoPayload = {
         user_id: res.user_id,
         deviceInfo: {
@@ -160,13 +158,12 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         // isConsole: true,
         // isConsoleParams: true,
       };
-      axios.defaults.baseURL = selectedUrl || ProcgURL;
-      axios.defaults.headers.common['Authorization'] =
-        `Bearer ${res.access_token}`;
-      userInfoSave({...res, ...userResponse});
+      // axios.defaults.baseURL = selectedUrl || ProcgURL;
+      // axios.defaults.headers.common['Authorization'] =
+      //   `Bearer ${res.access_token}`;
+      userInfoSave({...res, ...userResponse.user});
       // navigation.replace('HomeScreen');
       const response = await httpRequest(deviceInfoApi_params, setIsLoading);
-
       if (response) {
         deviceInfoSave({
           id: response.id,
@@ -180,7 +177,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
           is_active: response.is_active,
           ip_address: response.ip_address,
           location: response.location,
-          user: userResponse.user_name,
+          user: userResponse.user.user_name,
           signon_audit: response.signon_audit,
           signon_id,
         });

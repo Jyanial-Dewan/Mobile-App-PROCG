@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {COLORS} from '../common/constant/Themes';
 import HomeMainIndex from '../modules/home/HomeMainIndex';

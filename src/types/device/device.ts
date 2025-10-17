@@ -10,5 +10,4 @@ export interface DeviceModel {
   added_at: string | null | undefined;
   ip_address: string | null | undefined;
   location: string | null | undefined;
-  user: string | null | undefined;
 }
