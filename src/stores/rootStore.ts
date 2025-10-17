@@ -111,7 +111,7 @@ const RootStore = types
     logout() {
       self.userInfo = undefined;
       self.fcmToken = undefined;
-      secureStorage.clearAll();
+      // secureStorage.clearAll();
       applySnapshot(self.messageStore, {
         totalReceived: 0,
         totalSent: 0,

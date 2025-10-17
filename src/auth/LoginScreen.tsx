@@ -3,7 +3,7 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {useIsFocused, useRoute} from '@react-navigation/native';
 import axios from 'axios';
 import {observer} from 'mobx-react-lite';
-import React, {useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {
   BackHandler,
@@ -37,7 +37,7 @@ import CustomTextNew from '../common/components/CustomText';
 import Row from '../common/components/Row';
 import {Checkbox} from 'react-native-paper';
 import {v4 as uuidv4} from 'uuid';
-
+import {secureStorage} from '../stores/rootStore';
 interface PayloadType {
   email: string;
   password: string;
@@ -59,21 +59,27 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     email: '',
     password: '',
   };
-  //@ts-ignore
-  const {fromReset, email} = route?.params || {};
+
   const [showPass, setShowPass] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(true);
   const toaster = useToast();
   const isFocused = useIsFocused();
-
-  const {control, handleSubmit, setValue, reset} = useForm({
+  const {control, handleSubmit, setValue, reset, getValues} = useForm({
     defaultValues: initValue,
   });
 
-  if (fromReset) {
-    setValue('email', email);
-  }
+  useEffect(() => {
+    const email = secureStorage.getItem('email');
+    const password = secureStorage.getItem('password');
+
+    if (email && password) {
+      setValue('email', email);
+      setValue('password', password);
+      setChecked(true);
+    }
+  }, []);
+
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
@@ -102,6 +108,15 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   );
 
   const onSubmit = async (data: PayloadType) => {
+    // store remember me data
+    if (checked) {
+      secureStorage.setItem('email', data.email);
+      secureStorage.setItem('password', data.password);
+    } else {
+      secureStorage.removeItem('email');
+      secureStorage.removeItem('password');
+    }
+
     // Create FCM Token
     const fcmToken = await messaging().getToken();
     fcmTokenSave({fcmToken: fcmToken});
@@ -161,7 +176,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       // axios.defaults.baseURL = selectedUrl || ProcgURL;
       // axios.defaults.headers.common['Authorization'] =
       //   `Bearer ${res.access_token}`;
-      userInfoSave({...res, ...userResponse.user});
+      userInfoSave({...res, ...userResponse});
       // navigation.replace('HomeScreen');
       const response = await httpRequest(deviceInfoApi_params, setIsLoading);
       if (response) {
@@ -187,6 +202,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       }
     } else if (res === undefined || res === 401) {
       setIsModalShow(true);
+      toaster.show({message: 'Something Went Wrong!', type: 'warning'});
       return;
     } else {
       reset();
@@ -194,9 +210,11 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       toaster.show({message: 'Something Went Wrong!', type: 'warning'});
     }
   };
+
   const signOut = async () => {
     clearAllStorage();
   };
+
   return (
     <ContainerNew edges={['top', 'left', 'right']} style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />

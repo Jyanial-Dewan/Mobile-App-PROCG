@@ -94,7 +94,7 @@ const ScanLoginQrCode = observer(() => {
         // axios.defaults.baseURL = selectedUrl || ProcgURL;
         // axios.defaults.headers.common['Authorization'] =
         //   `Bearer ${res.access_token}`;
-        userInfoSave({...res, ...userResponse.user});
+        userInfoSave({...res, ...userResponse});
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
         if (response) {
@@ -120,6 +120,7 @@ const ScanLoginQrCode = observer(() => {
         }
       } else if (res === undefined || res === 401) {
         setIsModalShow(true);
+        toaster.show({message: 'Something Went Wrong!', type: 'warning'});
         return;
       } else {
         signOut();
