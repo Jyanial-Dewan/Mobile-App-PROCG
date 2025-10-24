@@ -10,7 +10,6 @@ export const DeviceInfoStore = types.model('DeviceInfoStore', {
   user_agent: types.maybeNull(types.string),
   is_active: types.maybeNull(types.number),
   added_at: types.maybeNull(types.string),
-  user: types.maybeNull(types.string),
   ip_address: types.maybeNull(types.string),
   location: types.maybeNull(types.string),
   signon_audit: types.maybeNull(

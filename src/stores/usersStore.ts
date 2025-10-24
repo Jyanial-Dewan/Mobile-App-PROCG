@@ -14,7 +14,7 @@ export const UserModel = types.model('UserModel', {
   created_on: types.maybeNull(types.string),
   last_updated_by: types.maybeNull(types.number),
   last_updated_on: types.maybeNull(types.string),
-  tenant_id: types.number,
+  tenant_id: types.maybe(types.number || null),
   profile_picture: ProfilePictureModel,
 });
 

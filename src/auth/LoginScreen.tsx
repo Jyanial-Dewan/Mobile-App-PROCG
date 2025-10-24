@@ -39,7 +39,7 @@ import {Checkbox} from 'react-native-paper';
 import {v4 as uuidv4} from 'uuid';
 import {secureStorage} from '../stores/rootStore';
 interface PayloadType {
-  email: string;
+  user: string;
   password: string;
 }
 
@@ -56,7 +56,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   } = useRootStore();
 
   const initValue = {
-    email: '',
+    user: '',
     password: '',
   };
 
@@ -70,11 +70,11 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   });
 
   useEffect(() => {
-    const email = secureStorage.getItem('email');
+    const user = secureStorage.getItem('user');
     const password = secureStorage.getItem('password');
 
-    if (email && password) {
-      setValue('email', email);
+    if (user && password) {
+      setValue('user', user);
       setValue('password', password);
       setChecked(true);
     }
@@ -110,10 +110,10 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   const onSubmit = async (data: PayloadType) => {
     // store remember me data
     if (checked) {
-      secureStorage.setItem('email', data.email);
+      secureStorage.setItem('user', data.user);
       secureStorage.setItem('password', data.password);
     } else {
-      secureStorage.removeItem('email');
+      secureStorage.removeItem('user');
       secureStorage.removeItem('password');
     }
 
@@ -121,14 +121,15 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     const fcmToken = await messaging().getToken();
     fcmTokenSave({fcmToken: fcmToken});
 
-    const payload = {
-      user: data?.email?.trim(),
+    const loginPayload = {
+      user: data?.user?.trim(),
       password: data?.password?.trim(),
       strDeviceId: fcmToken,
     };
+
     const api_params = {
       url: api.AuthAppsLogin,
-      data: payload,
+      data: loginPayload,
       method: 'post',
       baseURL: ProcgURL,
       // isConsole: true,
@@ -174,31 +175,12 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         // isConsole: true,
         // isConsoleParams: true,
       };
-      // axios.defaults.baseURL = selectedUrl || ProcgURL;
-      // axios.defaults.headers.common['Authorization'] =
-      //   `Bearer ${res.access_token}`;
-      userInfoSave({...res, ...userResponse});
-      // navigation.replace('HomeScreen');
+
       const response = await httpRequest(deviceInfoApi_params, setIsLoading);
-      if (response) {
-        deviceInfoSave({
-          id: response.id,
-          user_id: response.user_id,
-          device_type: response.device_type,
-          browser_name: response.browser_name,
-          browser_version: response.browser_version,
-          os: response.os,
-          user_agent: response.user_agent,
-          added_at: response.added_at,
-          is_active: response.is_active,
-          ip_address: response.ip_address,
-          location: response.location,
-          user: userResponse.user.user_name,
-          signon_audit: response.signon_audit,
-          signon_id,
-        });
-        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
-        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
+      if (response.id) {
+        // response is - id , user_id, device_type, browser_name, browser_version, os, user_agent, added_at, is_active , ip_address,  location, user_name, signon_audit, signon_id,
+        deviceInfoSave(response);
+        userInfoSave({...res, ...userResponse});
         toaster.show({message: 'Login Successfully', type: 'success'});
       }
     } else if (res === undefined || res === 401) {
@@ -241,7 +223,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
             <CustomInputNew
               setValue={setValue}
               control={control}
-              name="email"
+              name="user"
               label="Enter your email or username"
               rules={{
                 required: 'User name is required',
@@ -270,11 +252,6 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
               label="Enter your password"
               rules={{
                 required: 'Password is required',
-                pattern: {
-                  value: /^[a-zA-Z0-9_]+$/,
-                  message:
-                    'Password must contain only letters, numbers, and underscores',
-                },
                 minLength: {
                   value: 5,
                   message: 'Password must be at least 5 characters long',

@@ -18,7 +18,6 @@ export const DeviceModel = types.model('deviceModel', {
   added_at: types.string,
   ip_address: types.string,
   location: types.string,
-  user: types.string,
 });
 
 export const DevicesStore = types
