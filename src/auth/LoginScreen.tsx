@@ -136,6 +136,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     };
 
     const res = await httpRequest(api_params, setIsLoading);
+
     if (res.access_token) {
       const combined_user = {
         url: `${api.Users}/${res.user_id}`,
@@ -202,12 +203,12 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       }
     } else if (res === undefined || res === 401) {
       setIsModalShow(true);
-      toaster.show({message: 'Something Went Wrong!', type: 'warning'});
+      toaster.show({message: res?.message, type: 'warning'});
       return;
     } else {
       reset();
       signOut();
-      toaster.show({message: 'Something Went Wrong!', type: 'warning'});
+      toaster.show({message: res?.message, type: 'warning'});
     }
   };
 
@@ -242,7 +243,13 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
               control={control}
               name="email"
               label="Enter your email or username"
-              rules={{required: true}}
+              rules={{
+                required: 'User name is required',
+                minLength: {
+                  value: 3,
+                  message: 'User name must be at least 3 characters long',
+                },
+              }}
             />
           </Column>
 
@@ -261,7 +268,18 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
               control={control}
               name="password"
               label="Enter your password"
-              rules={{required: true}}
+              rules={{
+                required: 'Password is required',
+                pattern: {
+                  value: /^[a-zA-Z0-9_]+$/,
+                  message:
+                    'Password must contain only letters, numbers, and underscores',
+                },
+                minLength: {
+                  value: 5,
+                  message: 'Password must be at least 5 characters long',
+                },
+              }}
               secureTextEntry={showPass}
               rightIcon={() => (
                 <TouchableOpacity onPress={() => setShowPass(!showPass)}>

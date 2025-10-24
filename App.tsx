@@ -113,12 +113,7 @@ axios.interceptors.request.use(
 
     return copyOfConfig;
   },
-  async error => {
-    // console.log('error', JSON.stringify(error, null, 2));
-    let decryptedData = await makeDecryption(error?.response?.data);
-    let newError = {response: {data: decryptedData || ''}};
-    return Promise.reject(newError);
-  },
+  error => Promise.reject(error),
 );
 
 axios.interceptors.response.use(
@@ -137,23 +132,7 @@ axios.interceptors.response.use(
     };
   },
 
-  async (error: AxiosError) => {
-    if (error?.response?.status === 401) {
-      return Promise.reject({response: {data: 401}});
-    } else if (error?.response?.status === 406) {
-      return Promise.reject({response: {data: 406}});
-    } else {
-      let decryptedError = makeDecryption(error?.response?.data);
-      let modifiedError = {response: {data: decryptedError || ''}};
-      if (
-        modifiedError?.response?.data?.message ===
-        'No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).'
-      ) {
-      } else {
-        return Promise.reject(modifiedError);
-      }
-    }
-  },
+  error => Promise.reject(error),
 );
 
 const Main = observer(() => {

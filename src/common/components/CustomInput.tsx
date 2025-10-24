@@ -5,10 +5,23 @@ import {Platform, StyleSheet, Text, TextInput, View} from 'react-native';
 import {COLORS, SIZES} from '../constant/Themes';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 
+interface ValidationRules {
+  required?: boolean | string | {value: boolean; message: string};
+  pattern?: {value: RegExp; message: string};
+  minLength?: {value: number; message: string};
+  maxLength?: {value: number; message: string};
+  min?: {value: number; message: string};
+  max?: {value: number; message: string};
+  validate?: {[key: string]: (value: any) => boolean | string};
+  valueAsNumber?: boolean;
+  valueAsDate?: boolean;
+  disabled?: boolean;
+}
+
 interface Props {
   control: any;
   name: any;
-  rules?: {};
+  rules?: ValidationRules;
   placeholder?: string;
   secureTextEntry?: boolean;
   label?: string;
@@ -30,7 +43,7 @@ interface Props {
 const CustomInputNew = ({
   control,
   name,
-  rules = {},
+  rules,
   placeholder,
   secureTextEntry = false,
   label,
@@ -143,9 +156,8 @@ const styles = StyleSheet.create({
   },
   error: {
     color: 'red',
-    fontSize: 10,
-    marginTop: -18,
-    marginBottom: 10,
+    fontSize: 12,
+    marginLeft: 16,
   },
 
   newInput: {
