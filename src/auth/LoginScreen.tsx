@@ -3,7 +3,7 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {useIsFocused, useRoute} from '@react-navigation/native';
 import axios from 'axios';
 import {observer} from 'mobx-react-lite';
-import React, {useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {
   BackHandler,
@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import OcIcon from 'react-native-vector-icons/Octicons';
-import {ProcgURL} from '../../App';
+import {ProcgURL, ProcgURL2} from '../../App';
 import Column from '../common/components/Column';
 import ContainerNew from '../common/components/Container';
 import CustomButtonNew from '../common/components/CustomButton';
@@ -37,9 +37,9 @@ import CustomTextNew from '../common/components/CustomText';
 import Row from '../common/components/Row';
 import {Checkbox} from 'react-native-paper';
 import {v4 as uuidv4} from 'uuid';
-
+import {secureStorage} from '../stores/rootStore';
 interface PayloadType {
-  email: string;
+  user: string;
   password: string;
 }
 
@@ -56,24 +56,30 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   } = useRootStore();
 
   const initValue = {
-    email: '',
+    user: '',
     password: '',
   };
-  //@ts-ignore
-  const {fromReset, email} = route?.params || {};
+
   const [showPass, setShowPass] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(true);
   const toaster = useToast();
   const isFocused = useIsFocused();
-
-  const {control, handleSubmit, setValue, reset} = useForm({
+  const {control, handleSubmit, setValue, reset, getValues} = useForm({
     defaultValues: initValue,
   });
 
-  if (fromReset) {
-    setValue('email', email);
-  }
+  useEffect(() => {
+    const user = secureStorage.getItem('user');
+    const password = secureStorage.getItem('password');
+
+    if (user && password) {
+      setValue('user', user);
+      setValue('password', password);
+      setChecked(true);
+    }
+  }, []);
+
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
@@ -102,18 +108,28 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
   );
 
   const onSubmit = async (data: PayloadType) => {
+    // store remember me data
+    if (checked) {
+      secureStorage.setItem('user', data.user);
+      secureStorage.setItem('password', data.password);
+    } else {
+      secureStorage.removeItem('user');
+      secureStorage.removeItem('password');
+    }
+
     // Create FCM Token
     const fcmToken = await messaging().getToken();
     fcmTokenSave({fcmToken: fcmToken});
 
-    const payload = {
-      user: data?.email?.trim(),
+    const loginPayload = {
+      user: data?.user?.trim(),
       password: data?.password?.trim(),
       strDeviceId: fcmToken,
     };
+
     const api_params = {
       url: api.AuthAppsLogin,
-      data: payload,
+      data: loginPayload,
       method: 'post',
       baseURL: ProcgURL,
       // isConsole: true,
@@ -124,14 +140,13 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
 
     if (res.access_token) {
       const combined_user = {
-        url: `${api.CombinedUser}/${res.user_id}`,
-        baseURL: ProcgURL,
+        url: `${api.Users}/${res.user_id}`,
+        baseURL: ProcgURL2,
         access_token: res.access_token,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const userResponse = await httpRequest(combined_user, setIsLoading);
-
       const deviceInfoPayload = {
         user_id: res.user_id,
         deviceInfo: {
@@ -160,46 +175,29 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         // isConsole: true,
         // isConsoleParams: true,
       };
-      axios.defaults.baseURL = selectedUrl || ProcgURL;
-      axios.defaults.headers.common['Authorization'] =
-        `Bearer ${res.access_token}`;
-      userInfoSave({...res, ...userResponse});
-      // navigation.replace('HomeScreen');
-      const response = await httpRequest(deviceInfoApi_params, setIsLoading);
 
-      if (response) {
-        deviceInfoSave({
-          id: response.id,
-          user_id: response.user_id,
-          device_type: response.device_type,
-          browser_name: response.browser_name,
-          browser_version: response.browser_version,
-          os: response.os,
-          user_agent: response.user_agent,
-          added_at: response.added_at,
-          is_active: response.is_active,
-          ip_address: response.ip_address,
-          location: response.location,
-          user: userResponse.user_name,
-          signon_audit: response.signon_audit,
-          signon_id,
-        });
-        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
-        // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
+      const response = await httpRequest(deviceInfoApi_params, setIsLoading);
+      if (response.id) {
+        // response is - id , user_id, device_type, browser_name, browser_version, os, user_agent, added_at, is_active , ip_address,  location, user_name, signon_audit, signon_id,
+        deviceInfoSave(response);
+        userInfoSave({...res, ...userResponse});
         toaster.show({message: 'Login Successfully', type: 'success'});
       }
     } else if (res === undefined || res === 401) {
       setIsModalShow(true);
+      toaster.show({message: res?.message, type: 'warning'});
       return;
     } else {
       reset();
       signOut();
-      toaster.show({message: 'Something Went Wrong!', type: 'warning'});
+      toaster.show({message: res?.message, type: 'warning'});
     }
   };
+
   const signOut = async () => {
     clearAllStorage();
   };
+
   return (
     <ContainerNew edges={['top', 'left', 'right']} style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
@@ -225,9 +223,15 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
             <CustomInputNew
               setValue={setValue}
               control={control}
-              name="email"
+              name="user"
               label="Enter your email or username"
-              rules={{required: true}}
+              rules={{
+                required: 'User name is required',
+                minLength: {
+                  value: 3,
+                  message: 'User name must be at least 3 characters long',
+                },
+              }}
             />
           </Column>
 
@@ -246,7 +250,13 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
               control={control}
               name="password"
               label="Enter your password"
-              rules={{required: true}}
+              rules={{
+                required: 'Password is required',
+                minLength: {
+                  value: 5,
+                  message: 'Password must be at least 5 characters long',
+                },
+              }}
               secureTextEntry={showPass}
               rightIcon={() => (
                 <TouchableOpacity onPress={() => setShowPass(!showPass)}>

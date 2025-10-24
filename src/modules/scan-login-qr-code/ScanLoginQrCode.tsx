@@ -10,7 +10,7 @@ import {UserInfoStoreType} from '../../stores/userInfo';
 import {useRootStore} from '../../stores/rootStore';
 import {Buffer} from 'buffer';
 import {api} from '../..//common/api/api';
-import {ProcgURL} from '../../../App';
+import {ProcgURL, ProcgURL2} from '../../../App';
 import {httpRequest} from '../../common/constant/httpRequest';
 import axios from 'axios';
 import ContainerNew from '../../common/components/Container';
@@ -56,8 +56,8 @@ const ScanLoginQrCode = observer(() => {
       console.log(res, 'login');
       if (res.access_token) {
         const combined_user = {
-          url: `${api.CombinedUser}/${res.user_id}`,
-          baseURL: ProcgURL,
+          url: `${api.Users}/${res.user_id}`,
+          baseURL: ProcgURL2,
           access_token: res.access_token,
           // isConsole: true,
           // isConsoleParams: true,
@@ -91,9 +91,9 @@ const ScanLoginQrCode = observer(() => {
           // isConsole: true,
           // isConsoleParams: true,
         };
-        axios.defaults.baseURL = selectedUrl || ProcgURL;
-        axios.defaults.headers.common['Authorization'] =
-          `Bearer ${res.access_token}`;
+        // axios.defaults.baseURL = selectedUrl || ProcgURL;
+        // axios.defaults.headers.common['Authorization'] =
+        //   `Bearer ${res.access_token}`;
         userInfoSave({...res, ...userResponse});
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
@@ -110,7 +110,7 @@ const ScanLoginQrCode = observer(() => {
             is_active: response.is_active,
             ip_address: response.ip_address,
             location: response.location,
-            user: res.user_name,
+            user: userResponse.user.user_name,
             signon_audit: response.signon_audit,
             signon_id,
           });
@@ -120,6 +120,7 @@ const ScanLoginQrCode = observer(() => {
         }
       } else if (res === undefined || res === 401) {
         setIsModalShow(true);
+        toaster.show({message: 'Something Went Wrong!', type: 'warning'});
         return;
       } else {
         signOut();
