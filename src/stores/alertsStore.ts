@@ -25,19 +25,48 @@ export const AlertsStore = types
       self.refreshing = value;
     },
 
-    saveAlerts(alerts: AlertStoreSnapshotType[]) {
-      self.alerts.forEach(detach);
-
-      const formattedAlerts = alerts?.map(alert => ({
-        ...alert,
-        creation_date: new Date(alert.creation_date),
-        last_update_date: new Date(alert.last_update_date),
-      }));
-
-      const newAlerts = formattedAlerts?.map(data => AlertModel.create(data));
-
-      self.alerts.replace(newAlerts);
+    initialAlerts(alerts: Array<AlertStoreSnapshotType>) {
+      const initialAlerts = alerts.map(alert =>
+        AlertModel.create({
+          ...alert,
+          creation_date: new Date(alert.creation_date),
+          last_update_date: new Date(alert.last_update_date),
+        }),
+      );
+      self.alerts.replace(initialAlerts);
     },
+
+    saveAlerts(alerts: Array<AlertStoreSnapshotType>) {
+      const validAlerts = alerts.map(alert =>
+        AlertModel.create({
+          ...alert,
+          creation_date: new Date(alert.creation_date),
+          last_update_date: new Date(alert.last_update_date),
+        }),
+      );
+
+      const incommingAlerts = new Set(
+        validAlerts.map(alert => alert.notification_id),
+      );
+      const existAlerts = self.alerts.filter(
+        alert => !incommingAlerts.has(alert.notification_id),
+      );
+      self.alerts.replace([...existAlerts, ...validAlerts]);
+    },
+
+    // saveAlerts(alerts: AlertStoreSnapshotType[]) {
+    //   self.alerts.forEach(detach);
+
+    //   const formattedAlerts = alerts?.map(alert => ({
+    //     ...alert,
+    //     creation_date: new Date(alert.creation_date),
+    //     last_update_date: new Date(alert.last_update_date),
+    //   }));
+
+    //   const newAlerts = formattedAlerts?.map(data => AlertModel.create(data));
+
+    //   self.alerts.replace(newAlerts);
+    // },
 
     saveNotificationAlerts(alerts: AlertStoreSnapshotType[]) {
       self.notificationAlerts.forEach(detach);
@@ -48,10 +77,18 @@ export const AlertsStore = types
         last_update_date: new Date(alert.last_update_date),
       }));
 
-      const newAlerts = formattedAlerts?.map(data => AlertModel.create(data));
+      const newAlerts = formattedAlerts?.map(alert =>
+        AlertModel.create({
+          ...alert,
+          creation_date: new Date(alert.creation_date),
+          last_update_date: new Date(alert.last_update_date),
+        }),
+      );
 
       self.notificationAlerts.replace(newAlerts);
-      self.notificationAlertsCount = newAlerts?.length ?? 0;
+    },
+    addTotalAlertsCount(count: number) {
+      self.notificationAlertsCount = count;
     },
 
     addAlert(alert: AlertStoreSnapshotType) {

@@ -296,7 +296,7 @@ const DraftsDetails = () => {
             status: 'SENT',
           };
           const sendAlertParams = {
-            url: `${api.CreateAlert}/${alert_id}`,
+            url: `${api.Alerts}/${alert_id}`,
             data: SendAlertPayload,
             method: 'put',
             baseURL: urlNode,
@@ -401,7 +401,7 @@ const DraftsDetails = () => {
             status: 'DRAFT',
           };
           const draftAlertParams = {
-            url: `${api.CreateAlert}/${alert_id}`,
+            url: `${api.Alerts}/${alert_id}`,
             data: SendAlertPayload,
             method: 'put',
             baseURL: urlNode,

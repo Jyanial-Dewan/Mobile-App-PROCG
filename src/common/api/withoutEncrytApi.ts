@@ -35,7 +35,7 @@ const withoutEncryptionApi = [
   // api.addDevice,
   api.inactiveDevice,
   api.GetAlerts,
-  api.CreateAlert,
+  api.Alerts,
   api.UpdateAlert,
   api.GetNotificationAlerts,
   api.GetActionItems,

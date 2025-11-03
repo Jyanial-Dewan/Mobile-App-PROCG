@@ -170,7 +170,7 @@ const NewMessage = () => {
             status: 'SENT',
           };
           const sendAlertParams = {
-            url: api.CreateAlert,
+            url: api.Alerts,
             data: SendAlertPayload,
             method: 'post',
             baseURL: urlNode,
@@ -325,7 +325,7 @@ const NewMessage = () => {
             status: 'DRAFT',
           };
           const sendAlertParams = {
-            url: api.CreateAlert,
+            url: api.Alerts,
             data: SendAlertPayload,
             method: 'post',
             baseURL: urlNode,

@@ -35,16 +35,17 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
   const handleAcknowledge = async () => {
     try {
       const api_params = {
-        url: api.UpdateAlert + `/${item.alert_id}` + `/${userInfo?.user_id}`,
+        url: `${api.Alerts}/acknowledge/${item.alert_id}/${userInfo?.user_id}`,
         data: {acknowledge: true},
         baseURL: url,
         method: 'put',
-        // isConsole: true,
-        // isConsoleParams: true,
+        isConsole: true,
+        isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
+
       if (res) {
-        toaster.show({message: `Alert acknowledged.`, type: 'success'});
+        toaster.show({message: res.message, type: 'success'});
         SendAlert(item.alert_id, [userInfo?.user_id!], true);
         alertsStore.readAlert(item.alert_id);
       }

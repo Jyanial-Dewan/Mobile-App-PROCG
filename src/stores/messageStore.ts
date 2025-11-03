@@ -105,7 +105,13 @@ export const MessageStore = types
 
     //ReceivedMessages
     initialReceivedMessages(msgs: Array<MessageSnapshotType>) {
-      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      const initialMsg = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
+        }),
+      );
       self.receivedMessages.replace(initialMsg);
     },
 
@@ -157,7 +163,13 @@ export const MessageStore = types
 
     //SentMessages
     initialSentMessages(msgs: Array<MessageSnapshotType>) {
-      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      const initialMsg = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
+        }),
+      );
       self.sentMessages.replace(initialMsg);
     },
 
@@ -205,7 +217,13 @@ export const MessageStore = types
 
     //DraftMessages
     initialDraftMessages(msgs: Array<MessageSnapshotType>) {
-      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      const initialMsg = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
+        }),
+      );
       self.draftMessages.replace(initialMsg);
     },
 
@@ -290,7 +308,13 @@ export const MessageStore = types
 
     //BinMessages
     initialBinMessages(msgs: Array<MessageSnapshotType>) {
-      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      const initialMsg = msgs.map(msg =>
+        MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
+        }),
+      );
       self.binMessages.replace(initialMsg);
     },
 
