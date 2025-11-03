@@ -53,19 +53,19 @@ const RecycleBinDetail = observer(() => {
         return null;
       }
       const api_params = {
-        url: api.Messages + '/' + _id,
+        url: `${api.UniqueMessages}?notification_id=${_id}&user_id=${userInfo?.user_id}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
-      const res: MessageSnapshotType = await httpRequest(
+      const res: {result: MessageSnapshotType} = await httpRequest(
         api_params,
         setIsLoading,
       );
-
+      console.log('res recycle bin...........', res);
       if (res) {
-        setParrentMessage(res);
-        setTotalInvolvedUsers(res.involved_users);
+        setParrentMessage(res.result);
+        setTotalInvolvedUsers(res.result.involved_users);
       }
     },
     [isFocused, _id],
@@ -92,7 +92,7 @@ const RecycleBinDetail = observer(() => {
       if (holdersNumber > 0) {
         const response = await httpRequest(putParams, setIsLoading);
         if (response) {
-          deleteMessage(msg.id);
+          deleteMessage(msg.id, 'Recycle');
           // socket?.emit('deleteMessage', {
           //   notificationId: msg.id,
           //   sender: userInfo?.user_id,
@@ -109,7 +109,7 @@ const RecycleBinDetail = observer(() => {
         if (recycleBinNumber > 1) {
           const response = await httpRequest(putParams, setIsLoading);
           if (response) {
-            deleteMessage(msg.id);
+            deleteMessage(msg.id, 'Recycle');
             // socket?.emit('deleteMessage', {
             //   notificationId: msg.id,
             //   sender: userInfo?.user_id,
@@ -125,7 +125,7 @@ const RecycleBinDetail = observer(() => {
         } else if (recycleBinNumber === 1) {
           const response = await httpRequest(deleteParams, setIsLoading);
           if (response) {
-            deleteMessage(msg.id);
+            deleteMessage(msg.id, 'Recycle');
             // socket?.emit('deleteMessage', {
             //   notificationId: msg.id,
             //   sender: userInfo?.user_id,

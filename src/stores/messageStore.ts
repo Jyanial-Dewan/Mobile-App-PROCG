@@ -6,22 +6,44 @@ const userModeL = types.model('userModel', {
 });
 
 export const MessageModel = types.model('messageModel', {
-  notification_id: types.string,
-  notification_type: types.string,
-  sender: types.number,
-  recipients: types.array(types.number),
-  subject: types.string,
-  notification_body: types.string,
-  creation_date: types.Date,
-  status: types.string,
-  parent_notification_id: types.string,
-  involved_users: types.array(types.number),
-  readers: types.array(types.number),
-  holders: types.array(types.number),
-  recycle_bin: types.array(types.number),
   action_item_id: types.maybeNull(types.number),
   alert_id: types.maybeNull(types.number),
+  created_by: types.number,
+  creation_date: types.Date,
+  holder: types.boolean,
+  involved_users: types.array(types.number),
+  last_update_date: types.Date,
+  last_updated_by: types.number,
+  notification_body: types.string,
+  notification_id: types.string,
+  notification_type: types.string,
+  parent_notification_id: types.string,
+  reader: types.boolean,
+  recipient: types.boolean,
+  recipients: types.array(types.number),
+  recycle_bin: types.boolean,
+  sender: types.number,
+  status: types.string,
+  subject: types.string,
+  user_id: types.number,
 });
+// export const MessageModel = types.model('messageModel', {
+//   notification_id: types.string,
+//   notification_type: types.string,
+//   sender: types.number,
+//   recipients: types.array(types.number),
+//   subject: types.string,
+//   notification_body: types.string,
+//   creation_date: types.Date,
+//   status: types.string,
+//   parent_notification_id: types.string,
+//   involved_users: types.array(types.number),
+//   readers: types.array(types.number),
+//   holders: types.array(types.number),
+//   recycle_bin: types.array(types.number),
+//   action_item_id: types.maybeNull(types.number),
+//   alert_id: types.maybeNull(types.number),
+// });
 
 export const MessageStore = types
   .model('messageStore', {
@@ -47,13 +69,16 @@ export const MessageStore = types
         MessageModel.create({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }),
       );
       self.notificationMessages.replace(validMsgs);
     },
+
     addNotificationMessage(msg: MessageSnapshotType) {
       self.notificationMessages.unshift(msg);
     },
+
     readNotificationMessage(notificationId: string) {
       const messageToRemove = self.notificationMessages.find(
         message => message.notification_id === notificationId,
@@ -74,11 +99,17 @@ export const MessageStore = types
     },
 
     //ReceivedMessages
+    // saveInitialReceivedMessages(msgs: Array<MessageSnapshotType>) {
+    //   const initialMsg = msgs.map(msg => MessageModel.create(msg));
+    //   self.receivedMessages.replace(initialMsg);
+    // },
+
     saveReceivedMessages(msgs: Array<MessageSnapshotType>) {
       const validMsgs = msgs.map(msg =>
         MessageModel.create({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }),
       );
 
@@ -88,17 +119,19 @@ export const MessageStore = types
       );
       self.receivedMessages.replace([...existMsgs, ...validMsgs]);
     },
+
     addReceivedMessage(msg: MessageSnapshotType) {
       const clonedMessage = {
         ...msg,
         recipients: [...msg.recipients],
         involved_users: [...msg.involved_users],
-        readers: [...msg.readers],
-        holders: [...msg.holders],
-        recycle_bin: [...msg.recycle_bin],
+        // readers: [...msg.readers],
+        // holders: [...msg.holders],
+        // recycle_bin: [...msg.recycle_bin],
       };
       self.receivedMessages.unshift(clonedMessage);
     },
+
     removeReceivedMessage(notificationId: string) {
       const messageToRemove = self.receivedMessages.find(
         message => message.notification_id === notificationId,
@@ -110,9 +143,11 @@ export const MessageStore = types
         this.addBinMessage(cloned);
       }
     },
+
     setTotalReceived(total: number) {
       self.totalReceived = total;
     },
+
     addTotalReceived() {
       self.totalReceived++;
     },
@@ -126,6 +161,7 @@ export const MessageStore = types
         MessageModel.create({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }),
       );
 
@@ -140,9 +176,9 @@ export const MessageStore = types
         ...msg,
         recipients: [...msg.recipients],
         involved_users: [...msg.involved_users],
-        readers: [...msg.readers],
-        holders: [...msg.holders],
-        recycle_bin: [...msg.recycle_bin],
+        // readers: [...msg.readers],
+        // holders: [...msg.holders],
+        // recycle_bin: [...msg.recycle_bin],
       };
       self.sentMessages.unshift(clonedMessage);
     },
@@ -153,7 +189,6 @@ export const MessageStore = types
       if (messageToRemove) {
         const cloned = getSnapshot(messageToRemove);
         self.sentMessages.remove(messageToRemove);
-        console.log(messageToRemove, 'removed');
         this.addBinMessage(cloned);
         self.totalSent--;
       }
@@ -173,6 +208,7 @@ export const MessageStore = types
         MessageModel.create({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }),
       );
 
@@ -194,6 +230,7 @@ export const MessageStore = types
       self.draftMessages.replace(uniqueMessages);
     },
     addDraftMessage(msg: MessageSnapshotType) {
+      console.log(msg, '------msg------');
       const existingIndex = self.draftMessages.findIndex(
         m => m.notification_id === msg.notification_id,
       );
@@ -203,6 +240,7 @@ export const MessageStore = types
         self.draftMessages[existingIndex] = MessageModel.create({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         });
       } else {
         // Add new message at the start as a model instance
@@ -210,9 +248,9 @@ export const MessageStore = types
           ...msg,
           recipients: [...msg.recipients],
           involved_users: [...msg.involved_users],
-          readers: [...msg.readers],
-          holders: [...msg.holders],
-          recycle_bin: [...msg.recycle_bin],
+          // readers: [...msg.readers],
+          // holders: [...msg.holders],
+          // recycle_bin: [...msg.recycle_bin],
         };
         self.draftMessages.unshift(clonedMessage);
       }
@@ -251,6 +289,7 @@ export const MessageStore = types
         MessageModel.create({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }),
       );
 
@@ -271,7 +310,6 @@ export const MessageStore = types
 
       if (messageToRemove) {
         self.binMessages.remove(messageToRemove);
-        console.log(messageToRemove, 'removed');
         self.totalBin--;
       }
     },

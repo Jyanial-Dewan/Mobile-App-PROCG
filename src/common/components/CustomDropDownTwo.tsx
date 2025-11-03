@@ -114,25 +114,25 @@ const CustomDropDownNew = observer(
           return null;
         }
         const api_paramsReceivedTotal = {
-          url: api.totalReceived + userInfo?.user_id,
+          url: `${api.totalReceived}?user_id=${userInfo?.user_id}`,
           baseURL: ProcgURL,
           // isConsole: true,
           // isConsoleParams: true,
         };
         const api_paramsSentTotal = {
-          url: api.totalSent + userInfo?.user_id,
+          url: `${api.totalSent}?user_id=${userInfo?.user_id}`,
           baseURL: ProcgURL,
           // isConsole: true,
           // isConsoleParams: true,
         };
         const api_paramsDraftTotal = {
-          url: api.totalDraft + userInfo?.user_id,
+          url: `${api.totalDraft}?user_id=${userInfo?.user_id}`,
           baseURL: ProcgURL,
           // isConsole: true,
           // isConsoleParams: true,
         };
         const api_paramsBinTotal = {
-          url: api.totalRecycleBin + userInfo?.user_id,
+          url: `${api.totalRecycleBin}?user_id=${userInfo?.user_id}`,
           baseURL: ProcgURL,
           // isConsole: true,
           // isConsoleParams: true,

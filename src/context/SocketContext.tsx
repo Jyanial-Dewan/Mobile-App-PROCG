@@ -1,4 +1,3 @@
-import {View, Text} from 'react-native';
 import React, {
   createContext,
   ReactNode,
@@ -13,7 +12,16 @@ import {DeviceModel} from '../types/device/device';
 import {MsgBroker} from '../../App';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {MessageSnapshotType} from '../stores/messageStore';
-
+export type NotificationType = 'Drafts' | 'Sent' | 'Inbox' | 'Recycle';
+export type DraftNotificationType = 'New' | 'Old';
+export type MessagePayload = {
+  notification: MessageSnapshotType;
+  type: NotificationType;
+};
+export type DraftPayload = {
+  notification: MessageSnapshotType;
+  type: DraftNotificationType;
+};
 interface SocketContextProps {
   children: ReactNode;
 }
@@ -24,10 +32,17 @@ interface InActiveDevicesProps {
 interface SocketContext {
   socket: Socket;
   setUserId: (userId: number | null | undefined) => void;
-  sendMessage: (notificationId: string) => void;
-  draftMessageId: (notificationId: string) => void;
-  sendDraft: (notificationId: string) => void;
-  deleteMessage: (notificationId: string) => void;
+  sendMessage: (
+    notificationId: string,
+    sender: number,
+    recipients: number[],
+  ) => void;
+  draftMessage: (
+    notificationId: string,
+    sender: number,
+    type: DraftNotificationType,
+  ) => void;
+  deleteMessage: (notificationId: string, type: NotificationType) => void;
   multipleDeleteMessage: (notificationIds: string[]) => void;
   readMessage: (parentId: string) => void;
   SendAlert: (
@@ -79,6 +94,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       const formattedData = {
         ...data,
         creation_date: new Date(data.creation_date),
+        last_update_date: new Date(data.last_update_date),
       };
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
@@ -88,22 +104,55 @@ export function SocketContextProvider({children}: SocketContextProps) {
       const formattedData = {
         ...data,
         creation_date: new Date(data.creation_date),
+        last_update_date: new Date(data.last_update_date),
       };
       messageStore.addSentMessage(formattedData);
       messageStore.addTotalSent();
     });
-    socket?.on('draftMessage', data => {
-      const formattedData = {
-        ...data,
-        creation_date: new Date(data.creation_date),
-      };
-      messageStore.addDraftMessage(formattedData);
+    socket?.on('draftMessage', ({notification, type}: DraftPayload) => {
+      messageStore.addDraftMessage(notification);
       messageStore.addTotalDraft();
     });
+    // socket?.on('draftMessage', ({notification, type}: DraftPayload) => {
+    //   if (type === 'Old') {
+    //     const newDraftMessages = messageStore.draftMessages.filter(
+    //       msg => msg.notification_id === notification.notification_id,
+    //     );
+    //     if (newDraftMessages) {
+    //       messageStore.addDraftMessage({...newDraftMessages});
+    //     }
+    //     // if (notification.recipients === undefined) {
+    //     //   messageStore.addDraftMessage({
+    //     //     ...notification,
+    //     //     recipients: [],
+    //     //   });
+    //     // } else {
+    //     //   messageStore.addDraftMessage(notification);
+    //     // }
+    //   } else {
+    //     if (notification.recipients === undefined) {
+    //       messageStore.addDraftMessage({
+    //         ...notification,
+    //         recipients: [],
+    //       });
+    //     } else {
+    //       messageStore.addDraftMessage(notification);
+    //     }
+    //     messageStore.addTotalDraft();
+    //   }
 
-    socket?.on('draftMessageId', id => {
-      messageStore.sendDraftMessage(id);
-    });
+    //   // const formattedData = {
+    //   //   ...data,
+    //   //   creation_date: new Date(data.creation_date),
+    //   //   last_update_date: new Date(data.last_update_date),
+    //   // };
+    //   // messageStore.addDraftMessage(formattedData);
+    //   // messageStore.addTotalDraft();
+    // });
+
+    // socket?.on('draftMessage', id => {
+    //   messageStore.sendDraftMessage(id);
+    // });
 
     socket?.on('sync', id => {
       messageStore.readNotificationMessage(id);
@@ -152,6 +201,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
         const formattedData: MessageSnapshotType = {
           ...message,
           creation_date: new Date(message.creation_date).getTime(),
+          last_update_date: new Date(message.last_update_date).getTime(),
         };
         if (formattedData?.status.toLocaleLowerCase() === 'draft') {
           messageStore.addDraftMessage(formattedData);
@@ -186,35 +236,44 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('sentMessage');
       socket?.off('sync');
       socket?.off('deletedMessage');
-      socket?.off('draftMessageId');
       socket?.off('addDevice');
       socket?.off('restoreMessage');
       socket?.off('SentAlert');
     };
   }, [socket, userId]);
 
-  const sendMessage = (notificationId: string) => {
+  const sendMessage = (
+    notificationId: string,
+    sender: number,
+    recipients: number[],
+  ) => {
     socket?.emit('sendMessage', {
       notificationId,
-      sender: userId,
+      sender,
+      recipients,
     });
   };
-  const draftMessageId = (notificationId: string) => {
-    socket?.emit('draftMsgId', {
-      notificationId,
-      sender: userId,
-    });
-  };
-  const sendDraft = (notificationId: string) => {
+  const draftMessage = (
+    notificationId: string,
+    sender: number,
+    type: DraftNotificationType,
+  ) => {
     socket?.emit('sendDraft', {
       notificationId,
-      sender: userId,
+      sender,
+      type,
     });
   };
-  const deleteMessage = (notificationId: string) => {
+  // const sendDraft = (notificationId: string, sender: number) => {
+  //   socket?.emit('sendDraft', {
+  //     notificationId,
+  //     sender,
+  //   });
+  // };
+  const deleteMessage = (notificationId: string, type: NotificationType) => {
     socket?.emit('deleteMessage', {
       notificationId,
-      sender: userId,
+      type,
     });
   };
   const multipleDeleteMessage = (selectedIds: string[]) => {
@@ -234,6 +293,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
     recipients: number[],
     isAcknowledge: boolean,
   ) => {
+    console.log(alertId, recipients, isAcknowledge, 'SendAlert');
     socket.emit('SendAlert', {
       alertId,
       recipients,
@@ -257,8 +317,8 @@ export function SocketContextProvider({children}: SocketContextProps) {
         socket,
         setUserId,
         sendMessage,
-        draftMessageId,
-        sendDraft,
+        draftMessage,
+        // sendDraft,
         deleteMessage,
         multipleDeleteMessage,
         readMessage,

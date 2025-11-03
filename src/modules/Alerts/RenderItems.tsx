@@ -46,11 +46,6 @@ const RenderItems = ({url, item, refSheet, setSelectedItem}: any) => {
       if (res) {
         toaster.show({message: `Alert acknowledged.`, type: 'success'});
         SendAlert(item.alert_id, [userInfo?.user_id!], true);
-        // socket.emit('SendAlert', {
-        //   alertId: item.alert_id,
-        //   recipients: [userInfo?.user_id],
-        //   isAcknowledge: true,
-        // });
         alertsStore.readAlert(item.alert_id);
       }
     } catch (error) {

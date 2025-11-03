@@ -375,26 +375,22 @@ const RecycleBin = observer(() => {
         return null;
       }
       const api_params = {
-        url:
-          api.RecycleBinMessages +
-          userInfo?.user_id +
-          `/${currentPage}` +
-          `/${limit}`,
+        url: `${api.RecycleBinMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        setHasMore(res.length);
-        const formattedRes = res.map((msg: MessageSnapshotType) => ({
+        setHasMore(res.result.length);
+        const formattedRes = res.result.map((msg: MessageSnapshotType) => ({
           ...msg,
           creation_date: new Date(msg.creation_date),
         }));
         messageStore.saveBinMessages(formattedRes);
         messageStore.setRefreshing(false);
       }
-      if (res.length < 5) {
+      if (res.result.length < 5) {
         setIsLoading(false);
         return;
       }
@@ -455,10 +451,7 @@ const RecycleBin = observer(() => {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
         multipleDeleteMessage(selectedIds);
-        // socket?.emit('multipleDelete', {
-        //   ids: selectedIds,
-        //   user: userInfo?.user_id,
-        // });
+
         toaster.show({
           message: response.message,
           type: 'success',
@@ -475,28 +468,16 @@ const RecycleBin = observer(() => {
 
   const handleDeleteFromRecycleBin = async (msg: MessageSnapshotType) => {
     const putParams = {
-      url:
-        api.DeleteFromRecycle + msg.notification_id + `/${userInfo?.user_id}`,
+      url: `${api.DeleteFromRecycle}?notification_id=${msg.notification_id}&user_id=${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       // isConsole: true,
       // isConsoleParams: true,
     };
-    // const deleteParams = {
-    //   url: api.Messages + '/' + msg.notification_id,
-    //   method: 'delete',
-    //   baseURL: url,
-    //   isConsole: true,
-    //   isConsoleParams: true,
-    // };
     try {
       const response = await httpRequest(putParams, setIsLoading);
       if (response.status === 200) {
-        deleteMessage(msg.notification_id);
-        // socket?.emit('deleteMessage', {
-        //   id: msg.notification_id,
-        //   user: userInfo?.user_id,
-        // });
+        deleteMessage(msg.notification_id, 'Recycle');
         toaster.show({
           message: response.message,
           type: 'success',
@@ -507,53 +488,6 @@ const RecycleBin = observer(() => {
         toaster.show({message: error.message, type: 'error'});
       }
     }
-    // try {
-    //   const holdersNumber = msg.holders?.length ?? 0;
-    //   const recycleBinNumber = msg.recyclebin?.length ?? 0;
-    //   if (holdersNumber > 0) {
-    //     const response = await httpRequest(putParams, setIsLoading);
-    //     if (response) {
-    //       socket?.emit('deleteMessage', {
-    //         id: msg.id,
-    //         user: userInfo?.user_name,
-    //       });
-    //       toaster.show({
-    //         message: 'Message has been deleted.',
-    //         type: 'success',
-    //       });
-    //     }
-    //   } else {
-    //     if (recycleBinNumber > 1) {
-    //       const response = await httpRequest(putParams, setIsLoading);
-    //       if (response) {
-    //         socket?.emit('deleteMessage', {
-    //           id: msg.id,
-    //           user: userInfo?.user_name,
-    //         });
-    //         toaster.show({
-    //           message: 'Message has been deleted.',
-    //           type: 'success',
-    //         });
-    //       }
-    //     } else if (recycleBinNumber === 1) {
-    //       const response = await httpRequest(deleteParams, setIsLoading);
-    //       if (response) {
-    //         socket?.emit('deleteMessage', {
-    //           id: msg.id,
-    //           user: userInfo?.user_name,
-    //         });
-    //         toaster.show({
-    //           message: 'Message has been deleted.',
-    //           type: 'success',
-    //         });
-    //       }
-    //     }
-    //   }
-    // } catch (error) {
-    //   if (error instanceof Error) {
-    //     toaster.show({message: error.message, type: 'error'});
-    //   }
-    // }
   };
 
   const MessageGroups = () => {

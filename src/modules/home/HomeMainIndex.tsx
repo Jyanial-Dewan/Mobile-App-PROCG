@@ -24,7 +24,7 @@ import {httpRequest} from '../../common/constant/httpRequest';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
 import {secureStorage, useRootStore} from '../../stores/rootStore';
 import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
+import {ProcgURL, ProcgURL2} from '../../../App';
 import messaging from '@react-native-firebase/messaging';
 import SVGController from '../../common/components/SVGController';
 // import Image from 'react-native-image-fallback';
@@ -66,6 +66,7 @@ const HomeMainIndex = () => {
   const [isLoading, setIsLoading] = useState(false);
   const resPushNotificaton = secureStorage.getItem('pushNotificaton');
   const url = selectedUrl || ProcgURL;
+  const PythonURL = ProcgURL2;
   const [profilePhoto, setProfilePhoto] = useState(
     `${url}/${userInfo?.profile_picture.original}`,
   );
@@ -81,13 +82,13 @@ const HomeMainIndex = () => {
         return null;
       }
       const api_params = {
-        url: api.Users + `/` + Number(userInfo?.user_id),
-        baseURL: url,
+        url: `${api.Users}/${userInfo?.user_id}`,
+        baseURL: PythonURL,
+        access_token: userInfo?.access_token,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      // console.log(res);
       setProfilePhoto(`${url}/${res.profile_picture.original}`);
     },
 
@@ -100,17 +101,18 @@ const HomeMainIndex = () => {
       if (!isMounted()) {
         return null;
       }
+
       const api_params = {
         url: api.Users,
-        baseURL: url,
-        headers: {Authorization: `Bearer ${userInfo?.access_token}`},
+        baseURL: PythonURL,
+        access_token: userInfo?.access_token,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       usersStore.saveUsers(res);
     },
-    [isFocused],
+    [isFocused, userInfo?.access_token],
   );
 
   //Fetch Menu
@@ -122,14 +124,14 @@ const HomeMainIndex = () => {
       const api_params = {
         url: api.GetMenu,
         baseURL: url,
-        headers: {Authorization: `Bearer ${userInfo?.access_token}`},
+        access_token: userInfo?.access_token,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       menuStore?.saveMobileMenu(res[0].menu_structure);
     },
-    [isFocused],
+    [isFocused, userInfo?.access_token],
   );
 
   //Fetch Devices
@@ -156,7 +158,7 @@ const HomeMainIndex = () => {
 
   //     devicesStore.setDevices(formattedWithUsername);
   //   },
-  //   [isFocused],
+  //   [isFocused, userInfo?.access_token],
   // );
 
   //Post_Notification Permission
