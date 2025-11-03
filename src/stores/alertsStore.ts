@@ -28,13 +28,13 @@ export const AlertsStore = types
     saveAlerts(alerts: AlertStoreSnapshotType[]) {
       self.alerts.forEach(detach);
 
-      const formattedAlerts = alerts.map(alert => ({
+      const formattedAlerts = alerts?.map(alert => ({
         ...alert,
         creation_date: new Date(alert.creation_date),
         last_update_date: new Date(alert.last_update_date),
       }));
 
-      const newAlerts = formattedAlerts.map(data => AlertModel.create(data));
+      const newAlerts = formattedAlerts?.map(data => AlertModel.create(data));
 
       self.alerts.replace(newAlerts);
     },
@@ -42,16 +42,16 @@ export const AlertsStore = types
     saveNotificationAlerts(alerts: AlertStoreSnapshotType[]) {
       self.notificationAlerts.forEach(detach);
 
-      const formattedAlerts = alerts.map(alert => ({
+      const formattedAlerts = alerts?.map(alert => ({
         ...alert,
         creation_date: new Date(alert.creation_date),
         last_update_date: new Date(alert.last_update_date),
       }));
 
-      const newAlerts = formattedAlerts.map(data => AlertModel.create(data));
+      const newAlerts = formattedAlerts?.map(data => AlertModel.create(data));
 
       self.notificationAlerts.replace(newAlerts);
-      self.notificationAlertsCount = newAlerts.length;
+      self.notificationAlertsCount = newAlerts?.length ?? 0;
     },
 
     addAlert(alert: AlertStoreSnapshotType) {

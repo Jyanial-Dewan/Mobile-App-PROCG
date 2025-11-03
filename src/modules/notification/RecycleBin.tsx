@@ -386,12 +386,16 @@ const RecycleBin = observer(() => {
         const formattedRes = res.result.map((msg: MessageSnapshotType) => ({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }));
-        messageStore.saveBinMessages(formattedRes);
+        if (currentPage === 1) {
+          messageStore.initialBinMessages(formattedRes ?? []);
+        } else {
+          messageStore.saveBinMessages(formattedRes ?? []);
+        }
         messageStore.setRefreshing(false);
       }
       if (res.result.length < 5) {
-        setIsLoading(false);
         return;
       }
     },

@@ -368,14 +368,13 @@ const InboxScreen = observer(() => {
           creation_date: new Date(msg.creation_date),
           last_update_date: new Date(msg.last_update_date),
         }));
-        // if (currentPage === 1) {
-        //   messageStore.saveInitialReceivedMessages(formattedRes);
-        // } else {
-        //   messageStore.saveReceivedMessages(formattedRes);
-        // }
-        messageStore.saveReceivedMessages(formattedRes);
+        if (currentPage === 1) {
+          messageStore.initialReceivedMessages(formattedRes ?? []);
+        } else {
+          messageStore.saveReceivedMessages(formattedRes ?? []);
+        }
         messageStore.setRefreshing(false);
-        messageStore.setTotalReceived(res.total);
+        messageStore.setTotalReceived(res.total ?? 0);
       }
 
       if (res.result.length < 5) {
@@ -451,7 +450,7 @@ const InboxScreen = observer(() => {
   };
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
-      url: `${api.DeleteMessage}notification_id=${msgId}&user_id=${userInfo?.user_id}`,
+      url: `${api.DeleteMessage}?notification_id=${msgId}&user_id=${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       // isConsole: true,
@@ -459,7 +458,6 @@ const InboxScreen = observer(() => {
     };
 
     try {
-      setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
         deleteMessage(msgId, 'Inbox');
@@ -694,6 +692,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 20,
   },
   flexGrow: {
     flexGrow: 1,

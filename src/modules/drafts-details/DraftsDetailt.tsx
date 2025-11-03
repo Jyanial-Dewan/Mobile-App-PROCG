@@ -342,7 +342,7 @@ const DraftsDetails = () => {
 
         await httpRequest(pushNotificationParams, setIsSending);
         sendMessage(notificationId, userInfo?.user_id!, recipients);
-        deleteMessage(notificationId, 'Drafts');
+        // deleteMessage(notificationId, 'Drafts');
         if (notificationType.toLowerCase() === 'notification') {
           toaster.show({
             message: response.message,

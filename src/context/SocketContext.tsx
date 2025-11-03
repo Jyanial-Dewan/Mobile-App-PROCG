@@ -98,20 +98,28 @@ export function SocketContextProvider({children}: SocketContextProps) {
       };
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
-      messageStore.addTotalReceived();
+      // messageStore.addTotalReceived();
     });
+
     socket?.on('sentMessage', data => {
       const formattedData = {
         ...data,
         creation_date: new Date(data.creation_date),
         last_update_date: new Date(data.last_update_date),
       };
+      const existDraftMsg = messageStore.draftMessages.find(
+        msg => msg.notification_id === formattedData.notification_id,
+      );
+      if (existDraftMsg) {
+        messageStore.removeDraftMessage(formattedData.notification_id);
+      }
       messageStore.addSentMessage(formattedData);
-      messageStore.addTotalSent();
+      // messageStore.addTotalSent();
     });
+
     socket?.on('draftMessage', ({notification, type}: DraftPayload) => {
       messageStore.addDraftMessage(notification);
-      messageStore.addTotalDraft();
+      // messageStore.addTotalDraft();
     });
     // socket?.on('draftMessage', ({notification, type}: DraftPayload) => {
     //   if (type === 'Old') {
@@ -158,32 +166,45 @@ export function SocketContextProvider({children}: SocketContextProps) {
       messageStore.readNotificationMessage(id);
     });
 
-    socket?.on('deletedMessage', id => {
-      // Message is not in the bin → Move it to the bin
-      if (
-        messageStore.receivedMessages.some(msg => msg.notification_id === id)
-      ) {
-        messageStore.removeReceivedMessage(id);
-      } else if (
-        messageStore.notificationMessages.some(
-          msg => msg.notification_id === id,
-        )
-      ) {
-        messageStore.removeNotificationMessage(id);
-      } else if (
-        messageStore.sentMessages.some(msg => msg.notification_id === id)
-      ) {
-        console.log('App tsx', id);
-        messageStore.removeSentMessage(id);
-      } else if (
-        messageStore.draftMessages.some(msg => msg.notification_id === id)
-      ) {
-        messageStore.removeDraftMessage(id);
-      } else if (
-        messageStore.binMessages.some(msg => msg.notification_id === id)
-      ) {
-        messageStore.removeBinMessage(id);
+    socket?.on('deletedMessage', ({notification, type}) => {
+      if (type === 'Inbox') {
+        // messageStore.addBinMessage(notification);
+        messageStore.removeReceivedMessage(notification.notification_id);
+        messageStore.removeNotificationMessage(notification.notification_id);
+      } else if (type === 'Sent') {
+        // messageStore.addBinMessage(notification);
+        messageStore.removeSentMessage(notification.notification_id);
+      } else if (type === 'Drafts') {
+        // messageStore.addBinMessage(notification);
+        messageStore.removeDraftMessage(notification.notification_id);
+      } else if (type === 'Recycle') {
+        messageStore.removeBinMessage(notification.notification_id);
       }
+      // Message is not in the bin → Move it to the bin
+      // if (
+      //   messageStore.receivedMessages.some(msg => msg.notification_id === id)
+      // ) {
+      //   messageStore.removeReceivedMessage(id);
+      // } else if (
+      //   messageStore.notificationMessages.some(
+      //     msg => msg.notification_id === id,
+      //   )
+      // ) {
+      //   messageStore.removeNotificationMessage(id);
+      // } else if (
+      //   messageStore.sentMessages.some(msg => msg.notification_id === id)
+      // ) {
+      //   console.log('App tsx', id);
+      //   messageStore.removeSentMessage(id);
+      // } else if (
+      //   messageStore.draftMessages.some(msg => msg.notification_id === id)
+      // ) {
+      //   messageStore.removeDraftMessage(id);
+      // } else if (
+      //   messageStore.binMessages.some(msg => msg.notification_id === id)
+      // ) {
+      //   messageStore.removeBinMessage(id);
+      // }
     });
 
     // Device Action
@@ -191,35 +212,55 @@ export function SocketContextProvider({children}: SocketContextProps) {
       devicesStore.addDevice(device);
     });
 
-    socket.on('restoreMessage', id => {
-      // messageStore.setRefreshing(true);
-      const message = messageStore.binMessages.find(
-        msg => msg.notification_id === id,
-      );
+    socket.on('restoreMessage', ({notification, type}) => {
+      console.log('restoreMessage', notification, type);
       try {
-        if (!message || !userId) return;
-        const formattedData: MessageSnapshotType = {
-          ...message,
-          creation_date: new Date(message.creation_date).getTime(),
-          last_update_date: new Date(message.last_update_date).getTime(),
-        };
-        if (formattedData?.status.toLocaleLowerCase() === 'draft') {
-          messageStore.addDraftMessage(formattedData);
-          messageStore.addTotalDraft();
-        } else {
-          if (formattedData?.sender === userId) {
-            messageStore.addSentMessage(formattedData);
-            messageStore.addTotalSent();
-          } else {
-            messageStore.addReceivedMessage(formattedData);
-            messageStore.addTotalReceived();
+        if (type === 'Drafts') {
+          messageStore.addDraftMessage(notification);
+          // messageStore.addTotalDraft();
+        } else if (type === 'Sent') {
+          messageStore.addSentMessage(notification);
+          // messageStore.addTotalSent();
+        } else if (type === 'Inbox') {
+          messageStore.addReceivedMessage(notification);
+          // messageStore.addTotalReceived();
+          if (notification.reader === true) {
+            messageStore.saveNotificationMessages(notification);
           }
         }
       } catch (error) {
         console.log(error);
       } finally {
-        messageStore.removeBinMessage(id);
+        messageStore.removeBinMessage(notification.notification_id);
       }
+      // // messageStore.setRefreshing(true);
+      // const message = messageStore.binMessages.find(
+      //   msg => msg.notification_id === notification.notification_id,
+      // );
+      // try {
+      //   if (!message || !userId) return;
+      //   const formattedData: MessageSnapshotType = {
+      //     ...message,
+      //     creation_date: new Date(message.creation_date).getTime(),
+      //     last_update_date: new Date(message.last_update_date).getTime(),
+      //   };
+      //   if (formattedData?.status.toLocaleLowerCase() === 'draft') {
+      //     messageStore.addDraftMessage(formattedData);
+      //     messageStore.addTotalDraft();
+      //   } else {
+      //     if (formattedData?.sender === userId) {
+      //       messageStore.addSentMessage(formattedData);
+      //       messageStore.addTotalSent();
+      //     } else {
+      //       messageStore.addReceivedMessage(formattedData);
+      //       messageStore.addTotalReceived();
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.log(error);
+      // } finally {
+      //   messageStore.removeBinMessage(id);
+      // }
     });
 
     socket.on('SentAlert', ({alert, isAcknowledge}) => {
@@ -273,6 +314,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
   const deleteMessage = (notificationId: string, type: NotificationType) => {
     socket?.emit('deleteMessage', {
       notificationId,
+      sender: userId,
       type,
     });
   };

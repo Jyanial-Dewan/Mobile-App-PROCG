@@ -347,7 +347,6 @@ const DraftScreen = observer(() => {
       if (!isMounted()) {
         return null;
       }
-      ///notifications/drafts?user_id=${userId}&page=${currentPage}&limit=${limit}
       const api_params = {
         url: `${api.DraftMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
@@ -361,12 +360,16 @@ const DraftScreen = observer(() => {
         const formattedRes = res.result.map((msg: MessageSnapshotType) => ({
           ...msg,
           creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         }));
-        messageStore.saveDraftMessages(formattedRes);
+        if (currentPage === 1) {
+          messageStore.initialDraftMessages(formattedRes ?? []);
+        } else {
+          messageStore.saveDraftMessages(formattedRes ?? []);
+        }
         messageStore.setRefreshing(false);
       }
       if (res.result.length < 5) {
-        setIsLoading(false);
         return;
       }
     },
@@ -416,14 +419,13 @@ const DraftScreen = observer(() => {
 
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
-      url: `${api.DeleteMessage}notification_id=${msgId}&user_id=${userInfo?.user_id}`,
+      url: `${api.DeleteMessage}?notification_id=${msgId}&user_id=${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       // isConsole: true,
       // isConsoleParams: true,
     };
     try {
-      setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       deleteMessage(msgId, 'Drafts');
       if (response) {
@@ -452,10 +454,6 @@ const DraftScreen = observer(() => {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
         multipleDeleteMessage(selectedIds);
-        // socket?.emit('multipleDelete', {
-        //   ids: selectedIds,
-        //   user: userInfo?.user_id,
-        // });
         toaster.show({
           message: response.message,
           type: 'success',

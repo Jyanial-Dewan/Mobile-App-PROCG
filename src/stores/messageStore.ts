@@ -76,7 +76,12 @@ export const MessageStore = types
     },
 
     addNotificationMessage(msg: MessageSnapshotType) {
-      self.notificationMessages.unshift(msg);
+      const clonedMessage = {
+        ...msg,
+        creation_date: new Date(msg.creation_date),
+        last_update_date: new Date(msg.last_update_date),
+      };
+      self.notificationMessages.unshift(clonedMessage);
     },
 
     readNotificationMessage(notificationId: string) {
@@ -99,10 +104,10 @@ export const MessageStore = types
     },
 
     //ReceivedMessages
-    // saveInitialReceivedMessages(msgs: Array<MessageSnapshotType>) {
-    //   const initialMsg = msgs.map(msg => MessageModel.create(msg));
-    //   self.receivedMessages.replace(initialMsg);
-    // },
+    initialReceivedMessages(msgs: Array<MessageSnapshotType>) {
+      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      self.receivedMessages.replace(initialMsg);
+    },
 
     saveReceivedMessages(msgs: Array<MessageSnapshotType>) {
       const validMsgs = msgs.map(msg =>
@@ -123,13 +128,11 @@ export const MessageStore = types
     addReceivedMessage(msg: MessageSnapshotType) {
       const clonedMessage = {
         ...msg,
-        recipients: [...msg.recipients],
-        involved_users: [...msg.involved_users],
-        // readers: [...msg.readers],
-        // holders: [...msg.holders],
-        // recycle_bin: [...msg.recycle_bin],
+        creation_date: new Date(msg.creation_date),
+        last_update_date: new Date(msg.last_update_date),
       };
       self.receivedMessages.unshift(clonedMessage);
+      self.totalReceived++;
     },
 
     removeReceivedMessage(notificationId: string) {
@@ -148,15 +151,17 @@ export const MessageStore = types
       self.totalReceived = total;
     },
 
-    addTotalReceived() {
-      self.totalReceived++;
-    },
+    // addTotalReceived() {
+    //   self.totalReceived++;
+    // },
 
     //SentMessages
-    saveSentMessages(msgs: Array<MessageSnapshotType>) {
-      // const validMsgs = msgs.map(msg => MessageModel.create(msg));
-      // self.sentMessages.replace(validMsgs);
+    initialSentMessages(msgs: Array<MessageSnapshotType>) {
+      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      self.sentMessages.replace(initialMsg);
+    },
 
+    saveSentMessages(msgs: Array<MessageSnapshotType>) {
       const validMsgs = msgs.map(msg =>
         MessageModel.create({
           ...msg,
@@ -174,13 +179,11 @@ export const MessageStore = types
     addSentMessage(msg: MessageSnapshotType) {
       const clonedMessage = {
         ...msg,
-        recipients: [...msg.recipients],
-        involved_users: [...msg.involved_users],
-        // readers: [...msg.readers],
-        // holders: [...msg.holders],
-        // recycle_bin: [...msg.recycle_bin],
+        creation_date: new Date(msg.creation_date),
+        last_update_date: new Date(msg.last_update_date),
       };
       self.sentMessages.unshift(clonedMessage);
+      self.totalSent++;
     },
     removeSentMessage(notificationId: string) {
       const messageToRemove = self.sentMessages.find(
@@ -196,11 +199,16 @@ export const MessageStore = types
     setTotalSent(total: number) {
       self.totalSent = total;
     },
-    addTotalSent() {
-      self.totalSent++;
-    },
+    // addTotalSent() {
+    //   self.totalSent++;
+    // },
 
     //DraftMessages
+    initialDraftMessages(msgs: Array<MessageSnapshotType>) {
+      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      self.draftMessages.replace(initialMsg);
+    },
+
     saveDraftMessages(msgs: Array<MessageSnapshotType>) {
       // const validMsgs = msgs.map(msg => MessageModel.create(msg));
       // self.draftMessages.replace(validMsgs);
@@ -230,7 +238,6 @@ export const MessageStore = types
       self.draftMessages.replace(uniqueMessages);
     },
     addDraftMessage(msg: MessageSnapshotType) {
-      console.log(msg, '------msg------');
       const existingIndex = self.draftMessages.findIndex(
         m => m.notification_id === msg.notification_id,
       );
@@ -246,13 +253,11 @@ export const MessageStore = types
         // Add new message at the start as a model instance
         const clonedMessage = {
           ...msg,
-          recipients: [...msg.recipients],
-          involved_users: [...msg.involved_users],
-          // readers: [...msg.readers],
-          // holders: [...msg.holders],
-          // recycle_bin: [...msg.recycle_bin],
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
         };
         self.draftMessages.unshift(clonedMessage);
+        self.totalDraft++;
       }
     },
     sendDraftMessage(notificationId: string) {
@@ -279,11 +284,16 @@ export const MessageStore = types
     setTotalDraft(total: number) {
       self.totalDraft = total;
     },
-    addTotalDraft() {
-      self.totalDraft++;
-    },
+    // addTotalDraft() {
+    //   self.totalDraft++;
+    // },
 
     //BinMessages
+    initialBinMessages(msgs: Array<MessageSnapshotType>) {
+      const initialMsg = msgs.map(msg => MessageModel.create(msg));
+      self.binMessages.replace(initialMsg);
+    },
+
     saveBinMessages(msgs: Array<MessageSnapshotType>) {
       const validMsgs = msgs.map(msg =>
         MessageModel.create({
@@ -300,7 +310,12 @@ export const MessageStore = types
       self.binMessages.replace([...existMsgs, ...validMsgs]);
     },
     addBinMessage(msg: MessageSnapshotType) {
-      self.binMessages.unshift(msg);
+      const clonedMessage = {
+        ...msg,
+        creation_date: new Date(msg.creation_date),
+        last_update_date: new Date(msg.last_update_date),
+      };
+      self.binMessages.unshift(clonedMessage);
       self.totalBin++;
     },
     removeBinMessage(notificationId: string) {
@@ -316,9 +331,9 @@ export const MessageStore = types
     setTotalBin(total: number) {
       self.totalBin = total;
     },
-    addTotalBin() {
-      self.totalBin++;
-    },
+    // addTotalBin() {
+    //   self.totalBin++;
+    // },
   }));
 
 export type MessageType = Instance<typeof MessageModel>;

@@ -42,7 +42,13 @@ const CustomFlatListThree: React.FC<Props> = ({
 }: Props) => {
   const renderMoreDataLoader = () => {
     return (
-      isLoading && <ActivityIndicator size="large" color={COLORS.primary} />
+      isLoading && (
+        <ActivityIndicator
+          size="large"
+          color={COLORS.primary}
+          style={{marginTop: 20}}
+        />
+      )
     );
   };
   const onEndReached = () => {

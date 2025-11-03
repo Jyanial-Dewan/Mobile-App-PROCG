@@ -160,7 +160,7 @@ const Main = observer(() => {
       const formattedData = {...data, date: new Date(data.date)};
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
-      messageStore.addTotalReceived();
+      // messageStore.addTotalReceived();
       // onDisplayNotification(remoteMessage);
     } else {
       console.error('No payload in background message');
@@ -177,7 +177,7 @@ const Main = observer(() => {
       const formattedData = {...data, date: new Date(data.date)};
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
-      messageStore.addTotalReceived();
+      // messageStore.addTotalReceived();
       // onDisplayNotification(remoteMessage);
     } else {
       console.error('No payload in notification');

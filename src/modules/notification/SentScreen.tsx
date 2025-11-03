@@ -365,12 +365,14 @@ const SentScreen = observer(() => {
           creation_date: new Date(msg.creation_date),
           last_update_date: new Date(msg.last_update_date),
         }));
-
-        messageStore.saveSentMessages(formattedRes);
-        setIsLoading(false);
+        console.log('formattedRes', formattedRes);
+        if (currentPage === 1) {
+          messageStore.initialSentMessages(formattedRes ?? []);
+        } else {
+          messageStore.saveSentMessages(formattedRes ?? []);
+        }
       }
       if (res.result.length < 5) {
-        setIsLoading(false);
         return;
       }
     },
@@ -419,21 +421,16 @@ const SentScreen = observer(() => {
 
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
-      url: `${api.DeleteMessage}notification_id=${msgId}&user_id=${userInfo?.user_id}`,
+      url: `${api.DeleteMessage}?notification_id=${msgId}&user_id=${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       // isConsole: true,
       // isConsoleParams: true,
     };
     try {
-      setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
         deleteMessage(msgId, 'Sent');
-        // socket?.emit('deleteMessage', {
-        //   notificationId: msgId,
-        //   sender: userInfo?.user_id,
-        // });
         toaster.show({
           message: response.message,
           type: 'success',
@@ -458,10 +455,6 @@ const SentScreen = observer(() => {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
         multipleDeleteMessage(selectedIds);
-        // socket?.emit('multipleDelete', {
-        //   ids: selectedIds,
-        //   user: userInfo?.user_id,
-        // });
         toaster.show({
           message: response.message,
           type: 'success',
