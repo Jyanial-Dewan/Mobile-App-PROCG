@@ -27,7 +27,7 @@ export const api = {
   UnregisterToken: '/push-notification/unregister-token',
   SendNotification: '/push-notification/send-notification',
   GetMenu: '/mobile-menu',
-  getViewRequest: '/asynchronous-requests-and-task-schedules/view_requests',
+  getViewRequest: '/view_requests',
   GetARMTasks: '/arm-tasks/def_async_tasks',
   GetParemeterByTaskName: '/arm-tasks/task-params/',
   PostTask: '/asynchronous-requests-and-task-schedules/create-task-schedule',
