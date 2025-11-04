@@ -27,7 +27,6 @@ const CustomDeleteModal = ({
   deleteText = 'Continue',
   isDisabled = false,
 }: props) => {
-  console.log(isModalShow, 'isModalShow');
   return (
     <Modal
       animationType="fade"

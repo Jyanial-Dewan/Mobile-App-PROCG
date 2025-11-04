@@ -59,7 +59,6 @@ const CustomFlatListThree: React.FC<Props> = ({
     if (!isLoading && hasMore) {
       setCurrentPage((prev: any) => prev + 1);
     }
-    console.log(currentPage, 'current Page');
   };
 
   // const keyExtractor = useCallback((item: any) => item?.id?.toString(), []);

@@ -213,7 +213,6 @@ export function SocketContextProvider({children}: SocketContextProps) {
     });
 
     socket.on('restoreMessage', ({notification, type}) => {
-      console.log('restoreMessage', notification, type);
       try {
         if (type === 'Drafts') {
           messageStore.addDraftMessage(notification);
@@ -335,7 +334,6 @@ export function SocketContextProvider({children}: SocketContextProps) {
     recipients: number[],
     isAcknowledge: boolean,
   ) => {
-    console.log(alertId, recipients, isAcknowledge, 'SendAlert');
     socket.emit('SendAlert', {
       alertId,
       recipients,

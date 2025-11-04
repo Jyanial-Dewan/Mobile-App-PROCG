@@ -175,8 +175,6 @@ const ViewRequestsScreen = observer(() => {
     [selectedItem],
   );
 
-  console.log(JSON.stringify(selectedItem), 'selectedItem');
-
   return (
     <ContainerNew
       isScrollView={false}

@@ -29,7 +29,7 @@ const ProfileScreen = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const {userInfo, logout, deviceInfoData, fcmToken} = useRootStore();
-  console.log(deviceInfoData, 'profile');
+
   const {socket} = useSocketContext();
   const [isLoading, setIsLoading] = useState(false);
 

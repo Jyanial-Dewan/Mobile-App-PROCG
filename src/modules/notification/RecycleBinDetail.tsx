@@ -62,7 +62,6 @@ const RecycleBinDetail = observer(() => {
         api_params,
         setIsLoading,
       );
-      console.log('res recycle bin...........', res);
       if (res) {
         setParrentMessage(res.result);
         setTotalInvolvedUsers(res.result.involved_users);

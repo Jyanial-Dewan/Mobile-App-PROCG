@@ -296,22 +296,14 @@ const Main = observer(() => {
       const url = selectedUrl || ProcgURL;
       if (!userInfo?.user_id) return;
       const api_params = {
-        url:
-          api.RecycleBinMessages +
-          userInfo?.user_id +
-          `/${currentPage}` +
-          `/${limit}`,
+        url: `${api.RecycleBinMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, () => {});
       if (res) {
-        const formattedRes = res.map((msg: any) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-        }));
-        messageStore.saveBinMessages(formattedRes);
+        messageStore.saveBinMessages(res.result);
       }
     })();
   }, [userInfo?.isLoggedIn]);

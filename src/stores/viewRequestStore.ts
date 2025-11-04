@@ -32,7 +32,7 @@ export const viewRequestStore = types
   .actions(self => ({
     getRequests: flow(function* (page: number, limit: number, url: string) {
       self.loading = true;
-      console.log(`${url}${api.getViewRequest}/${page}/${limit}`);
+
       try {
         const res = yield axios.get(
           `${url}${api.getViewRequest}/${page}/${limit}`,
