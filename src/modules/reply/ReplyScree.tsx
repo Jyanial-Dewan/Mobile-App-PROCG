@@ -144,6 +144,7 @@ const ReplyScreen = () => {
           sendPayload.notification_id,
           userInfo?.user_id!,
           recipients,
+          'Sent',
         );
         toaster.show({message: response.message, type: 'success'});
       }

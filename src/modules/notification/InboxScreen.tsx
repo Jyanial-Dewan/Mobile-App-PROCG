@@ -453,9 +453,9 @@ const InboxScreen = observer(() => {
     };
 
     try {
+      deleteMessage(msgId, 'Inbox');
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        deleteMessage(msgId, 'Inbox');
         toaster.show({
           message: response.message,
           type: 'success',
@@ -470,7 +470,7 @@ const InboxScreen = observer(() => {
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleToRecycleBin + userInfo?.user_id,
+      url: `${api.MoveMultipleToRecycleBin}/${userInfo?.user_id}`,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
@@ -480,7 +480,7 @@ const InboxScreen = observer(() => {
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds);
+        multipleDeleteMessage(selectedIds, 'Inbox');
         toaster.show({
           message: response.message,
           type: 'success',

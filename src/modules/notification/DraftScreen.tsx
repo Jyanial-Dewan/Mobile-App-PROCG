@@ -438,17 +438,17 @@ const DraftScreen = observer(() => {
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleToRecycleBin + userInfo?.user_id,
+      url: `${api.MoveMultipleToRecycleBin}/${userInfo?.user_id}`,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
+      isConsole: true,
+      isConsoleParams: true,
     };
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds);
+        multipleDeleteMessage(selectedIds, 'Drafts');
         toaster.show({
           message: response.message,
           type: 'success',

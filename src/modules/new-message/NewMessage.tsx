@@ -218,6 +218,7 @@ const NewMessage = () => {
           sendPayload.notification_id,
           userInfo?.user_id!,
           recipients,
+          'Sent',
         );
         if (selectedNotificationType.toLowerCase() === 'notification') {
           toaster.show({

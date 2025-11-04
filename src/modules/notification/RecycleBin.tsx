@@ -439,17 +439,17 @@ const RecycleBin = observer(() => {
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleFromRecycleBin + userInfo?.user_id,
+      url: `${api.MoveMultipleFromRecycleBin}/${userInfo?.user_id}`,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
+      isConsole: true,
+      isConsoleParams: true,
     };
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds);
+        multipleDeleteMessage(selectedIds, 'Recycle');
 
         toaster.show({
           message: response.message,
@@ -475,7 +475,7 @@ const RecycleBin = observer(() => {
     };
     try {
       const response = await httpRequest(putParams, setIsLoading);
-      if (response.status === 200) {
+      if (response) {
         deleteMessage(msg.notification_id, 'Recycle');
         toaster.show({
           message: response.message,
