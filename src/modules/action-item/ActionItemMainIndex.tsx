@@ -42,7 +42,7 @@ const ActionItemMainIndex = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const url = ProcgURL2;
+  const PythonURL = ProcgURL2;
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
     ActionItemsStoreSnapshotType | undefined
@@ -51,9 +51,10 @@ const ActionItemMainIndex = () => {
 
   const searchActionItems = async () => {
     setIsLoading(true);
+    //url: `${flaskApi.DefActionItems}/${token.user_id}/${currentPage}/${limit}?status=${selectedOption}`,
     const api_params = {
       url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}&action_item_name=${searchQuery}`,
-      baseURL: url,
+      baseURL: PythonURL,
       access_token: userInfo?.access_token,
       // isConsole: true,
       // isConsoleParams: true,
@@ -63,7 +64,11 @@ const ActionItemMainIndex = () => {
     if (res) {
       setHasMore(res.items.length);
       setData(res.items);
-      actionItems.saveActionItems(res.items);
+      if (currentPage === 1) {
+        actionItems.initialActionItems(res.items);
+      } else {
+        actionItems.saveActionItems(res.items);
+      }
       actionItems.setRefreshing(false);
     }
   };

@@ -24,21 +24,29 @@ export const ActionItemsStore = types
       self.refreshing = value;
     },
 
+    initialActionItems(items: Array<ActionItemsStoreSnapshotType>) {
+      const newAlerts = items.map(actionItem =>
+        ActionItemsModel.create({
+          ...actionItem,
+          creation_date: new Date(actionItem.creation_date),
+          last_update_date: new Date(actionItem.last_update_date),
+        }),
+      );
+      self.actionItems.replace(newAlerts);
+    },
+
     saveActionItems(items: ActionItemsStoreSnapshotType[]) {
-      self.actionItems.forEach(detach);
-
-      const formattedActionItems = items.map(actionItem => ({
-        ...actionItem,
-        creation_date: new Date(actionItem.creation_date),
-        last_update_date: new Date(actionItem.last_update_date),
-      }));
-
-      const newAlerts = formattedActionItems.map(data =>
-        ActionItemsModel.create(data),
+      const newAlerts = items.map(actionItem =>
+        ActionItemsModel.create({
+          ...actionItem,
+          creation_date: new Date(actionItem.creation_date),
+          last_update_date: new Date(actionItem.last_update_date),
+        }),
       );
 
       self.actionItems.replace(newAlerts);
     },
+
     updateActionItem(actionItemId: number, status: string) {
       this.setRefreshing(true);
       self.actionItems.forEach(item => {

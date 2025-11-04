@@ -357,15 +357,10 @@ const DraftScreen = observer(() => {
 
       if (res) {
         setHasMore(res.result.length);
-        const formattedRes = res.result.map((msg: MessageSnapshotType) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-          last_update_date: new Date(msg.last_update_date),
-        }));
         if (currentPage === 1) {
-          messageStore.initialDraftMessages(formattedRes ?? []);
+          messageStore.initialDraftMessages(res.result ?? []);
         } else {
-          messageStore.saveDraftMessages(formattedRes ?? []);
+          messageStore.saveDraftMessages(res.result ?? []);
         }
         messageStore.setRefreshing(false);
       }

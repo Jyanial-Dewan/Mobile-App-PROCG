@@ -131,7 +131,6 @@ const DraftsDetails = () => {
         setNotificationType(res.result.notification_type);
         setAlert_id(res.result.alert_id);
         setAction_item_id(res.result.action_item_id);
-        console.log(res.result, 'res.result');
         if (res.result.notification_type.toLowerCase() === 'alert') {
           const api_params = {
             url: `${api.GetAlerts}?user_id=${userInfo?.user_id}&alert_id=${res.result.alert_id}`,
@@ -141,7 +140,6 @@ const DraftsDetails = () => {
           };
           const alertResponse: {result: AlertStoreSnapshotType} =
             await httpRequest(api_params, setIsLoading);
-          console.log(api_params, 'api_params----------');
           if (alertResponse) {
             setOldMsgState((prev: any) => ({
               ...prev,
@@ -316,11 +314,11 @@ const DraftsDetails = () => {
         }
         if (notificationType.toLowerCase() === 'action item') {
           const SendActionItemPayload = {
-            // action_item_id: action_item_id,
             action_item_name: actionItemName,
             description: actionItemDescription,
-            status: 'NEW',
+            action: 'SENT',
             user_ids: recipients,
+            notification_id: notificationId,
           };
           const sendActionItemParams = {
             url: `${api.ActionItem}/${action_item_id}`,
@@ -420,8 +418,9 @@ const DraftsDetails = () => {
           const SendActionItemPayload = {
             action_item_name: actionItemName,
             description: actionItemDescription,
-            status: 'NEW',
+            action: 'DRAFT',
             user_ids: recipients,
+            notification_id: notificationId,
           };
           const sendActionItemParams = {
             url: `${api.ActionItem}/${action_item_id}`,
@@ -705,6 +704,7 @@ const DraftsDetails = () => {
                 To
               </Text>
               <Pressable
+                disabled={subject.includes('Re: ')}
                 onPress={() => setIsUsersModalShow(true)}
                 style={{width: '90%', height: 40}}
               />
@@ -865,10 +865,12 @@ const DraftsDetails = () => {
                     )}
                   </Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleX(recipients[recipients.length - 1])}>
-                  <Feather name="x" size={16} color="black" />
-                </TouchableOpacity>
+                {!subject.includes('Re: ') ? (
+                  <TouchableOpacity
+                    onPress={() => handleX(recipients[recipients.length - 1])}>
+                    <Feather name="x" size={16} color="black" />
+                  </TouchableOpacity>
+                ) : null}
               </View>
             </View>
           ) : (
@@ -883,7 +885,14 @@ const DraftsDetails = () => {
           <View style={styles.lineContainer}>
             <Text style={{color: COLORS.darkGray}}>Subject</Text>
             <TextInput
-              style={{height: 40, width: '80%', color: COLORS.black}}
+              editable={!subject.includes('Re: ')}
+              style={{
+                height: 40,
+                width: '80%',
+                color: subject.includes('Re: ')
+                  ? COLORS.darkGray
+                  : COLORS.black,
+              }}
               value={subject}
               maxLength={100}
               onChangeText={text => setSubject(text)}

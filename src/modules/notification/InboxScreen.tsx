@@ -363,15 +363,10 @@ const InboxScreen = observer(() => {
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
         setHasMore(res.result.length);
-        const formattedRes = res.result.map((msg: MessageSnapshotType) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-          last_update_date: new Date(msg.last_update_date),
-        }));
         if (currentPage === 1) {
-          messageStore.initialReceivedMessages(formattedRes ?? []);
+          messageStore.initialReceivedMessages(res.result ?? []);
         } else {
-          messageStore.saveReceivedMessages(formattedRes ?? []);
+          messageStore.saveReceivedMessages(res.result ?? []);
         }
         messageStore.setRefreshing(false);
         messageStore.setTotalReceived(res.total ?? 0);

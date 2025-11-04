@@ -357,19 +357,12 @@ const SentScreen = observer(() => {
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      console.log('res sent', res);
       if (res) {
         setHasMore(res.result.length);
-        const formattedRes = res.result.map((msg: MessageSnapshotType) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-          last_update_date: new Date(msg.last_update_date),
-        }));
-        console.log('formattedRes', formattedRes);
         if (currentPage === 1) {
-          messageStore.initialSentMessages(formattedRes ?? []);
+          messageStore.initialSentMessages(res.result ?? []);
         } else {
-          messageStore.saveSentMessages(formattedRes ?? []);
+          messageStore.saveSentMessages(res.result ?? []);
         }
       }
       if (res.result.length < 5) {

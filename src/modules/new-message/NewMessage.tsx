@@ -182,7 +182,6 @@ const NewMessage = () => {
             sendAlertParams,
             setIsSending,
           );
-          console.log('alertResponse', alertResponse);
           if (alertResponse) {
             if (selectedNotificationType.toLowerCase() === 'alert') {
               toaster.show({
@@ -198,8 +197,9 @@ const NewMessage = () => {
           const SendActionItemPayload = {
             action_item_name: actionItemName,
             description: actionItemDescription,
-            status: 'NEW',
             user_ids: recipients,
+            notification_id: id,
+            action: 'SENT',
           };
           const sendActionItemParams = {
             url: api.ActionItem,
@@ -210,44 +210,7 @@ const NewMessage = () => {
             // isConsole: true,
             // isConsoleParams: true,
           };
-          const actionItemResponse = await httpRequest(
-            sendActionItemParams,
-            setIsSending,
-          );
-          console.log('actionItemResponse', actionItemResponse);
-          if (actionItemResponse) {
-            const params1 = {
-              baseURL: urlNode,
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              setLoading: setIsSending,
-              payload: {
-                action_item_id: actionItemResponse.action_item_id,
-              },
-              method: 'put',
-              access_token: userInfo?.access_token,
-            };
-            const ress = await httpRequest(params1, setIsSending);
-            console.log('ress', ress);
-            const params2 = {
-              url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
-              data: {
-                notification_id: notificationResponse.result.notification_id,
-              },
-              method: 'put',
-              baseURL: urlPython,
-              access_token: userInfo?.access_token,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            const ress2 = await httpRequest(params2, setIsSending);
-            console.log('ress2', ress2);
-            if (selectedNotificationType.toLowerCase() === 'action item') {
-              toaster.show({
-                message: 'Action Item Send Successfully',
-                type: 'success',
-              });
-            }
-          }
+          await httpRequest(sendActionItemParams, setIsSending);
         }
 
         await httpRequest(sendNotificationParams, setIsSending);
@@ -281,7 +244,7 @@ const NewMessage = () => {
       }
     }
   };
-  console.log(selectedNotificationType, 'selectedNotificationType');
+
   // draft
   const handleDraft = async () => {
     const draftPayload = {
@@ -314,7 +277,7 @@ const NewMessage = () => {
         draftParams,
         setIsDrafting,
       );
-      console.log('draftPayload===========', draftPayload);
+
       if (notificationResponse) {
         if (selectedNotificationType.toLowerCase() === 'alert') {
           const SendAlertPayload = {
@@ -351,8 +314,9 @@ const NewMessage = () => {
           const SendActionItemPayload = {
             action_item_name: actionItemName ?? ' ',
             description: actionItemDescription ?? ' ',
-            status: 'NEW',
             user_ids: recipients ?? [],
+            notification_id: id,
+            action: 'DRAFT',
           };
           const sendActionItemParams = {
             url: api.ActionItem,
@@ -363,50 +327,7 @@ const NewMessage = () => {
             // isConsole: true,
             // isConsoleParams: true,
           };
-          const actionItemResponse = await httpRequest(
-            sendActionItemParams,
-            setIsDrafting,
-          );
-          if (actionItemResponse) {
-            const params1 = {
-              url: `${api.Messages}/${notificationResponse.result.notification_id}`,
-              data: {
-                action_item_id: actionItemResponse.action_item_id,
-              },
-              method: 'put',
-              baseURL: urlNode,
-              access_token: userInfo?.access_token,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            const updateActionItemResponse = await httpRequest(
-              params1,
-              setIsDrafting,
-            );
-            console.log('updateActionItemResponse', updateActionItemResponse);
-            const params2 = {
-              url: `${api.ActionItem}/${actionItemResponse.action_item_id}`,
-              data: {
-                notification_id: notificationResponse.result.notification_id,
-              },
-              method: 'put',
-              baseURL: urlPython,
-              access_token: userInfo?.access_token,
-              // isConsole: true,
-              // isConsoleParams: true,
-            };
-            const updateActionItemResponse2 = await httpRequest(
-              params2,
-              setIsDrafting,
-            );
-            console.log('updateActionItemResponse2', updateActionItemResponse2);
-            if (selectedNotificationType.toLowerCase() === 'action item') {
-              toaster.show({
-                message: 'Action Item Save to Drafts Successfully',
-                type: 'success',
-              });
-            }
-          }
+          await httpRequest(sendActionItemParams, setIsDrafting);
         }
 
         draftMessage(draftPayload.notification_id, userInfo?.user_id!, 'New');
