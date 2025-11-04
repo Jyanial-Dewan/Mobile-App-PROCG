@@ -355,27 +355,24 @@ const InboxScreen = observer(() => {
       }
       setIsLoading(true);
       const api_params = {
-        url:
-          api.ReceivedMessages +
-          userInfo?.user_id +
-          `/${currentPage}` +
-          `/${limit}`,
+        url: `${api.ReceivedMessages}/received?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        setHasMore(res.length);
-        const formattedRes = res.map((msg: MessageSnapshotType) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-        }));
-        messageStore.saveReceivedMessages(formattedRes);
+        setHasMore(res.result.length);
+        if (currentPage === 1) {
+          messageStore.initialReceivedMessages(res.result ?? []);
+        } else {
+          messageStore.saveReceivedMessages(res.result ?? []);
+        }
         messageStore.setRefreshing(false);
+        messageStore.setTotalReceived(res.total ?? 0);
       }
 
-      if (res.length < 5) {
+      if (res.result.length < 5) {
         return;
       }
     },
@@ -398,7 +395,7 @@ const InboxScreen = observer(() => {
       setSelectedIds(prev => [msgId, ...prev]);
     } else {
       const readerParams = {
-        url: api.UpdateReaders + parentId + `/${userInfo?.user_id}`,
+        url: `${api.UpdateReaders}?parent_notification_id=${parentId}&user_id=${userInfo?.user_id}`,
         method: 'put',
         baseURL: url,
         // isConsole: true,
@@ -409,10 +406,6 @@ const InboxScreen = observer(() => {
         if (response) {
           if (notificationIds.includes(parentId)) {
             readMessage(parentId);
-            // socket?.emit('read', {
-            //   parentID: parentId,
-            //   sender: userInfo?.user_id,
-            // });
           }
           navigation.navigate('NotificationDetails', {
             _id: parentId,
@@ -452,7 +445,7 @@ const InboxScreen = observer(() => {
   };
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
-      url: api.DeleteMessage + msgId + `/${userInfo?.user_id}`,
+      url: `${api.DeleteMessage}?notification_id=${msgId}&user_id=${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       // isConsole: true,
@@ -460,14 +453,9 @@ const InboxScreen = observer(() => {
     };
 
     try {
-      setIsLoading(true);
+      deleteMessage(msgId, 'Inbox');
       const response = await httpRequest(deleteParams, setIsLoading);
       if (response) {
-        deleteMessage(msgId);
-        // socket?.emit('deleteMessage', {
-        //   notificationId: msgId,
-        //   sender: userInfo?.user_id,
-        // });
         toaster.show({
           message: response.message,
           type: 'success',
@@ -482,7 +470,7 @@ const InboxScreen = observer(() => {
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleToRecycleBin + userInfo?.user_id,
+      url: `${api.MoveMultipleToRecycleBin}/${userInfo?.user_id}`,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
@@ -492,11 +480,7 @@ const InboxScreen = observer(() => {
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds);
-        // socket?.emit('multipleDelete', {
-        //   ids: selectedIds,
-        //   user: userInfo?.user_id,
-        // });
+        multipleDeleteMessage(selectedIds, 'Inbox');
         toaster.show({
           message: response.message,
           type: 'success',
@@ -703,6 +687,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 20,
   },
   flexGrow: {
     flexGrow: 1,

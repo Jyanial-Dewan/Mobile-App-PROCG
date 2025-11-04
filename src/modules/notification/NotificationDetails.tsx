@@ -56,34 +56,34 @@ const NotificationDetails = observer(() => {
         return null;
       }
       const reply_params = {
-        url: api.ReplyMessages + _id + `/${userInfo?.user_id}`,
-        baseURL: ProcgURL,
+        url: `${api.ReplyMessages}?parent_notification_id=${_id}`,
+        baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(reply_params, setIsLoading);
       if (res) {
-        setTotalMessages(res);
+        setTotalMessages(res.result);
       }
     },
     [isFocused, _id],
   );
-
   //Fetch SingleMessage
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
         return null;
       }
+
       const api_params = {
-        url: api.Messages + '/' + _id,
+        url: `${api.UniqueMessages}?notification_id=${_id}&user_id=${userInfo?.user_id}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        setParrentMessage(res);
+        setParrentMessage(res.result);
         // setTotalInvolvedUsers(res.involvedusers);
       }
     },
@@ -130,6 +130,7 @@ const NotificationDetails = observer(() => {
   }
   const renderItem = ({item}: Props) => {
     const {datePart, timePart} = formateDateTime(item?.creation_date as any);
+
     return (
       <View style={[styles.rowContainer]}>
         {/* Image Section */}

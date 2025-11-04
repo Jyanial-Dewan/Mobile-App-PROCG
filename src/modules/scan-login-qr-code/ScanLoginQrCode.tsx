@@ -53,7 +53,6 @@ const ScanLoginQrCode = observer(() => {
       };
 
       const res = await httpRequest(verifyTokenParams, setIsVerifying);
-      console.log(res, 'login');
       if (res.access_token) {
         const combined_user = {
           url: `${api.Users}/${res.user_id}`,
@@ -94,26 +93,12 @@ const ScanLoginQrCode = observer(() => {
         // axios.defaults.baseURL = selectedUrl || ProcgURL;
         // axios.defaults.headers.common['Authorization'] =
         //   `Bearer ${res.access_token}`;
-        userInfoSave({...res, ...userResponse});
+
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
         if (response) {
-          deviceInfoSave({
-            id: response.id,
-            user_id: response.user_id,
-            device_type: response.device_type,
-            browser_name: response.browser_name,
-            browser_version: response.browser_version,
-            os: response.os,
-            user_agent: response.user_agent,
-            added_at: response.added_at,
-            is_active: response.is_active,
-            ip_address: response.ip_address,
-            location: response.location,
-            user: userResponse.user.user_name,
-            signon_audit: response.signon_audit,
-            signon_id,
-          });
+          userInfoSave({...res, ...userResponse});
+          deviceInfoSave(response);
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
           toaster.show({message: 'Login Successfully', type: 'success'});

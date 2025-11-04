@@ -50,37 +50,40 @@ const Alerts = () => {
   const url = selectedUrl || ProcgURL;
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const [data, setData] = useState<AlertStoreSnapshotType[]>([]);
+  // const [data, setData] = useState<AlertStoreSnapshotType[]>([]);
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
     AlertStoreSnapshotType | undefined
   >(undefined);
+
   // const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState({
   //   id: 0,
   //   visible: false,
   // });
+
   useAsyncEffect(
     async isMounted => {
       if (!isMounted()) {
         return null;
       }
-      //api call here
-      setIsLoading(true);
+
       const api_params = {
-        url:
-          api.GetAlerts +
-          `/${userInfo?.user_id}` +
-          `/${currentPage}` +
-          `/${limit}`,
+        url: `${api.GetAlerts}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
+
       if (res) {
-        setHasMore(res.items.length);
-        setData(res.items);
-        alertsStore.saveAlerts(res.items);
+        if (currentPage === 1) {
+          alertsStore.initialAlerts(res.result ?? []);
+        } else {
+          alertsStore.saveAlerts(res.result ?? []);
+        }
+        setHasMore(res.result.length ?? 0);
+        // setData(res.result ?? []);
+
         alertsStore.setRefreshing(false);
       }
     },
@@ -92,24 +95,26 @@ const Alerts = () => {
       alertsStore.notificationAlerts.length,
     ],
   );
-  useEffect(() => {
-    const searchActionItems = () => {
-      const filteredItems = data.filter(item =>
-        item.alert_name.toLowerCase().includes(search.toLowerCase()),
-      );
-      if (filteredItems.length) {
-        setData(filteredItems);
-      } else {
-        setData([]);
-        setNoResult(true);
-      }
-    };
-    if (search.length) {
-      searchActionItems();
-    } else {
-      setData(alertsStore.alerts.map(alert => getSnapshot(alert)));
-    }
-  }, [search]);
+
+  // useEffect(() => {
+  //   const searchActionItems = () => {
+  //     const filteredItems = data.filter(item =>
+  //       item.alert_name.toLowerCase().includes(search.toLowerCase()),
+  //     );
+  //     if (filteredItems.length) {
+  //       setData(filteredItems);
+  //     } else {
+  //       setData([]);
+  //       setNoResult(true);
+  //     }
+  //   };
+  //   if (search.length) {
+  //     searchActionItems();
+  //   } else {
+  //     setData(alertsStore.alerts.map(alert => getSnapshot(alert)));
+  //   }
+  // }, [search]);
+
   const handleRefresh = () => {
     alertsStore.setRefreshing(true);
     setCurrentPage(1);

@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
-import {ProcgURL} from '../../../App';
+import {ProcgURL, ProcgURL2} from '../../../App';
 import MainHeader from '../../common/components/MainHeader';
 import {COLORS} from '../../common/constant/Themes';
 import CustomTextNew from '../../common/components/CustomText';
@@ -143,7 +143,7 @@ const ViewRequestsScreen = observer(() => {
   axios.defaults.headers.common['Authorization'] =
     `Bearer ${userInfo?.access_token}`;
 
-  const url = selectedUrl || ProcgURL;
+  const PythonURL = ProcgURL2;
 
   const refSheet = useRef<RBSheet>(null);
 
@@ -151,14 +151,24 @@ const ViewRequestsScreen = observer(() => {
 
   useEffect(() => {
     if (isFocused) {
-      viewRequestStore.getRequests(currentPage, limit, url);
+      viewRequestStore.getRequests(
+        currentPage,
+        limit,
+        PythonURL,
+        userInfo?.access_token as string,
+      );
     }
   }, [isFocused, currentPage]);
 
   const onRefresh = useCallback(async () => {
     setCurrentPage(1);
     setIsRefreshing(true);
-    await viewRequestStore.getRequests(currentPage, limit, url);
+    await viewRequestStore.getRequests(
+      currentPage,
+      limit,
+      PythonURL,
+      userInfo?.access_token as string,
+    );
     setIsRefreshing(false);
   }, []);
 
@@ -174,8 +184,6 @@ const ViewRequestsScreen = observer(() => {
     ),
     [selectedItem],
   );
-
-  console.log(JSON.stringify(selectedItem), 'selectedItem');
 
   return (
     <ContainerNew

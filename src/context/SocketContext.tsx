@@ -1,4 +1,3 @@
-import {View, Text} from 'react-native';
 import React, {
   createContext,
   ReactNode,
@@ -7,46 +6,33 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import {io, Socket} from 'socket.io-client';
+import {io} from 'socket.io-client';
 import {useRootStore} from '../stores/rootStore';
 import {DeviceModel} from '../types/device/device';
 import {MsgBroker} from '../../App';
 import {useNetInfo} from '@react-native-community/netinfo';
-import {MessageSnapshotType} from '../stores/messageStore';
-
+import {
+  NotificationType,
+  DraftNotificationType,
+  SentNotificationType,
+  MessagePayload,
+  DraftPayload,
+  SentPayload,
+  SocketContextType,
+  InActiveDevicesProps,
+} from '../types/notifications/notificationTypes';
 interface SocketContextProps {
   children: ReactNode;
 }
-interface InActiveDevicesProps {
-  inactiveDevices: DeviceModel[];
-  userId: number;
-}
-interface SocketContext {
-  socket: Socket;
-  setUserId: (userId: number | null | undefined) => void;
-  sendMessage: (notificationId: string) => void;
-  draftMessageId: (notificationId: string) => void;
-  sendDraft: (notificationId: string) => void;
-  deleteMessage: (notificationId: string) => void;
-  multipleDeleteMessage: (notificationIds: string[]) => void;
-  readMessage: (parentId: string) => void;
-  SendAlert: (
-    alertId: number,
-    recipients: number[],
-    isAcknowledge: boolean,
-  ) => void;
-  addDevice: (device: DeviceModel) => void;
-  inactiveDevice: (deviceInfoData: InActiveDevicesProps) => void;
-  handleDisconnect: () => void;
-}
-const SocketContext = createContext({} as SocketContext);
+
+const SocketContext = createContext({} as SocketContextType);
 
 export function useSocketContext() {
   return useContext(SocketContext);
 }
 
 export function SocketContextProvider({children}: SocketContextProps) {
-  const {userInfo, deviceInfoData, messageStore, devicesStore, alertsStore} =
+  const {deviceInfoData, messageStore, devicesStore, alertsStore} =
     useRootStore();
   const [userId, setUserId] = useState<number | null | undefined>(null);
   const hasInternet = useNetInfo().isConnected;
@@ -79,61 +65,40 @@ export function SocketContextProvider({children}: SocketContextProps) {
       const formattedData = {
         ...data,
         creation_date: new Date(data.creation_date),
+        last_update_date: new Date(data.last_update_date),
       };
       messageStore.addReceivedMessage(formattedData);
       messageStore.addNotificationMessage(formattedData);
-      messageStore.addTotalReceived();
-    });
-    socket?.on('sentMessage', data => {
-      const formattedData = {
-        ...data,
-        creation_date: new Date(data.creation_date),
-      };
-      messageStore.addSentMessage(formattedData);
-      messageStore.addTotalSent();
-    });
-    socket?.on('draftMessage', data => {
-      const formattedData = {
-        ...data,
-        creation_date: new Date(data.creation_date),
-      };
-      messageStore.addDraftMessage(formattedData);
-      messageStore.addTotalDraft();
     });
 
-    socket?.on('draftMessageId', id => {
-      messageStore.sendDraftMessage(id);
+    socket?.on('sentMessage', ({notification, type}: SentPayload) => {
+      if (type === 'Draft') {
+        messageStore.removeDraftMessage(notification.notification_id);
+      }
+      messageStore.addSentMessage(notification);
+    });
+
+    socket?.on('draftMessage', ({notification, type}: DraftPayload) => {
+      messageStore.addDraftMessage(notification);
     });
 
     socket?.on('sync', id => {
       messageStore.readNotificationMessage(id);
     });
 
-    socket?.on('deletedMessage', id => {
-      // Message is not in the bin → Move it to the bin
-      if (
-        messageStore.receivedMessages.some(msg => msg.notification_id === id)
-      ) {
-        messageStore.removeReceivedMessage(id);
-      } else if (
-        messageStore.notificationMessages.some(
-          msg => msg.notification_id === id,
-        )
-      ) {
-        messageStore.removeNotificationMessage(id);
-      } else if (
-        messageStore.sentMessages.some(msg => msg.notification_id === id)
-      ) {
-        console.log('App tsx', id);
-        messageStore.removeSentMessage(id);
-      } else if (
-        messageStore.draftMessages.some(msg => msg.notification_id === id)
-      ) {
-        messageStore.removeDraftMessage(id);
-      } else if (
-        messageStore.binMessages.some(msg => msg.notification_id === id)
-      ) {
-        messageStore.removeBinMessage(id);
+    socket?.on('deletedMessage', ({notification, type}: MessagePayload) => {
+      if (type === 'Inbox') {
+        messageStore.removeReceivedMessage(notification.notification_id);
+        messageStore.removeNotificationMessage(notification.notification_id);
+        messageStore.addBinMessage(notification);
+      } else if (type === 'Sent') {
+        messageStore.removeSentMessage(notification.notification_id);
+        messageStore.addBinMessage(notification);
+      } else if (type === 'Drafts') {
+        messageStore.removeDraftMessage(notification.notification_id);
+        messageStore.addBinMessage(notification);
+      } else if (type === 'Recycle') {
+        messageStore.removeBinMessage(notification.notification_id);
       }
     });
 
@@ -142,33 +107,25 @@ export function SocketContextProvider({children}: SocketContextProps) {
       devicesStore.addDevice(device);
     });
 
-    socket.on('restoreMessage', id => {
-      // messageStore.setRefreshing(true);
-      const message = messageStore.binMessages.find(
-        msg => msg.notification_id === id,
-      );
+    socket.on('restoreMessage', ({notification, type}: MessagePayload) => {
       try {
-        if (!message || !userId) return;
-        const formattedData: MessageSnapshotType = {
-          ...message,
-          creation_date: new Date(message.creation_date).getTime(),
-        };
-        if (formattedData?.status.toLocaleLowerCase() === 'draft') {
-          messageStore.addDraftMessage(formattedData);
-          messageStore.addTotalDraft();
-        } else {
-          if (formattedData?.sender === userId) {
-            messageStore.addSentMessage(formattedData);
-            messageStore.addTotalSent();
-          } else {
-            messageStore.addReceivedMessage(formattedData);
-            messageStore.addTotalReceived();
+        if (type === 'Drafts') {
+          messageStore.addDraftMessage(notification);
+          // messageStore.addTotalDraft();
+        } else if (type === 'Sent') {
+          messageStore.addSentMessage(notification);
+          // messageStore.addTotalSent();
+        } else if (type === 'Inbox') {
+          messageStore.addReceivedMessage(notification);
+          // messageStore.addTotalReceived();
+          if (notification.reader === true) {
+            messageStore.addNotificationMessage(notification);
           }
         }
       } catch (error) {
         console.log(error);
       } finally {
-        messageStore.removeBinMessage(id);
+        messageStore.removeBinMessage(notification.notification_id);
       }
     });
 
@@ -186,41 +143,52 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('sentMessage');
       socket?.off('sync');
       socket?.off('deletedMessage');
-      socket?.off('draftMessageId');
       socket?.off('addDevice');
       socket?.off('restoreMessage');
       socket?.off('SentAlert');
     };
   }, [socket, userId]);
 
-  const sendMessage = (notificationId: string) => {
+  const sendMessage = (
+    notificationId: string,
+    sender: number,
+    recipients: number[],
+    type: SentNotificationType,
+  ) => {
     socket?.emit('sendMessage', {
       notificationId,
-      sender: userId,
+      sender,
+      recipients,
+      type,
     });
   };
-  const draftMessageId = (notificationId: string) => {
-    socket?.emit('draftMsgId', {
-      notificationId,
-      sender: userId,
-    });
-  };
-  const sendDraft = (notificationId: string) => {
+  const draftMessage = (
+    notificationId: string,
+    sender: number,
+    type: DraftNotificationType,
+  ) => {
     socket?.emit('sendDraft', {
       notificationId,
-      sender: userId,
+      sender,
+      type,
     });
   };
-  const deleteMessage = (notificationId: string) => {
+
+  const deleteMessage = (notificationId: string, type: NotificationType) => {
     socket?.emit('deleteMessage', {
       notificationId,
       sender: userId,
+      type,
     });
   };
-  const multipleDeleteMessage = (selectedIds: string[]) => {
+  const multipleDeleteMessage = (
+    selectedIds: string[],
+    type: NotificationType,
+  ) => {
     socket?.emit('multipleDelete', {
       ids: selectedIds,
       user: userId,
+      type,
     });
   };
   const readMessage = (parentId: string) => {
@@ -257,8 +225,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
         socket,
         setUserId,
         sendMessage,
-        draftMessageId,
-        sendDraft,
+        draftMessage,
         deleteMessage,
         multipleDeleteMessage,
         readMessage,

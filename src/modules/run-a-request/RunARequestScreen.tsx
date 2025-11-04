@@ -44,8 +44,6 @@ const RunARequestScreen = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const url = selectedUrl || ProcgURL;
 
-  console.log(isVisible, 'isvisible');
-
   const selectData = [{title: 'True'}, {title: 'False'}];
 
   //Fetch ARM Tasks

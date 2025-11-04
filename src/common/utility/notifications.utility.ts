@@ -16,11 +16,11 @@ export const renderSlicedUsername = (
 ) => {
   const user = users.find(usr => usr.user_id === id);
 
-  if (user) {
+  if (user?.user_name) {
     const userName = user?.user_name;
     return (
-      userName.slice(0, limit) +
-      `${user?.user_name.length > limit ? '...' : ''}`
+      userName?.slice(0, limit) +
+      `${user?.user_name?.length > limit ? '...' : ''}`
     );
   }
 };
@@ -30,6 +30,5 @@ export const renderProfilePicture = (
   users: UserSnapshotType[],
 ) => {
   const user = users.find(usr => usr.user_id === id);
-
   return user?.profile_picture.thumbnail;
 };

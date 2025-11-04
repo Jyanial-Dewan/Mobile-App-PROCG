@@ -27,7 +27,6 @@ const CustomDeleteModal = ({
   deleteText = 'Continue',
   isDisabled = false,
 }: props) => {
-  console.log(isModalShow, 'isModalShow');
   return (
     <Modal
       animationType="fade"
@@ -58,7 +57,7 @@ const CustomDeleteModal = ({
               </Text>
             ) : (
               <Text style={styles.title}>
-                Are you sure you want to {actionName}?
+                Are you sure, want to {actionName}?
               </Text>
             )}
             {children}

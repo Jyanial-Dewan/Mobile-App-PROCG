@@ -41,7 +41,7 @@ const RenderItems = ({
   setIsLoading,
   allStatus,
 }: Props) => {
-  const url = ProcgURL2;
+  const PythonURL = ProcgURL2;
   const {userInfo, actionItems} = useRootStore();
   const toaster = useToast();
   const refRBSheetViewDetails = useRef<RBSheet>(null);
@@ -51,8 +51,8 @@ const RenderItems = ({
     try {
       // setIsLoading(true);
       const api_params = {
-        url: `${api.UpdateActionItemAssignment}/${userInfo?.user_id}/${action_item_id}`,
-        baseURL: url,
+        url: `${api.UpdateActionItemAssignment}/update_status/${userInfo?.user_id}/${action_item_id}`,
+        baseURL: PythonURL,
         method: 'put',
         data: {status},
         access_token: userInfo?.access_token,

@@ -31,17 +31,17 @@ const BottomTab = observer(() => {
       if (!isMounted()) {
         return null;
       }
-      //api call here
-      setIsLoading(true);
+
       const api_params = {
-        url: api.GetNotificationAlerts + `/${userInfo?.user_id}`,
+        url: `${api.GetAlerts}?user_id=${userInfo?.user_id}`,
         baseURL: ProcgURL,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        alertsStore.saveNotificationAlerts(res);
+        alertsStore.saveNotificationAlerts(res.result ?? []);
+        alertsStore.addTotalAlertsCount(res.total ?? 0);
         alertsStore.setRefreshing(false);
       }
     },
@@ -53,18 +53,14 @@ const BottomTab = observer(() => {
         return null;
       }
       const api_params = {
-        url: api.Notifications + userInfo?.user_id,
+        url: `${api.Notifications}?user_id=${userInfo?.user_id}`,
         baseURL: ProcgURL,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
       if (res) {
-        const formattedRes = res.map((msg: MessageSnapshotType) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-        }));
-        messageStore.saveNotificationMessages(formattedRes);
+        messageStore.saveNotificationMessages(res.result ?? []);
       }
     },
     [

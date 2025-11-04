@@ -347,29 +347,24 @@ const DraftScreen = observer(() => {
       if (!isMounted()) {
         return null;
       }
-
       const api_params = {
-        url:
-          api.DraftMessages +
-          userInfo?.user_id +
-          `/${currentPage}` +
-          `/${limit}`,
+        url: `${api.DraftMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
+
       if (res) {
-        setHasMore(res.length);
-        const formattedRes = res.map((msg: MessageSnapshotType) => ({
-          ...msg,
-          creation_date: new Date(msg.creation_date),
-        }));
-        messageStore.saveDraftMessages(formattedRes);
+        setHasMore(res.result.length);
+        if (currentPage === 1) {
+          messageStore.initialDraftMessages(res.result ?? []);
+        } else {
+          messageStore.saveDraftMessages(res.result ?? []);
+        }
         messageStore.setRefreshing(false);
       }
-      if (res.length < 5) {
-        setIsLoading(false);
+      if (res.result.length < 5) {
         return;
       }
     },
@@ -419,20 +414,15 @@ const DraftScreen = observer(() => {
 
   const handleSingleDeleteMessage = async (msgId: string) => {
     const deleteParams = {
-      url: api.DeleteMessage + msgId + `/${userInfo?.user_id}`,
+      url: `${api.DeleteMessage}?notification_id=${msgId}&user_id=${userInfo?.user_id}`,
       method: 'put',
       baseURL: url,
       // isConsole: true,
       // isConsoleParams: true,
     };
     try {
-      setIsLoading(true);
       const response = await httpRequest(deleteParams, setIsLoading);
-      deleteMessage(msgId);
-      // socket?.emit('deleteMessage', {
-      //   notificationId: msgId,
-      //   sender: userInfo?.user_id,
-      // });
+      deleteMessage(msgId, 'Drafts');
       if (response) {
         toaster.show({
           message: response.message,
@@ -448,21 +438,17 @@ const DraftScreen = observer(() => {
 
   const handleMultipleDelete = async () => {
     const params = {
-      url: api.MoveMultipleToRecycleBin + userInfo?.user_id,
+      url: `${api.MoveMultipleToRecycleBin}/${userInfo?.user_id}`,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
+      isConsole: true,
+      isConsoleParams: true,
     };
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds);
-        // socket?.emit('multipleDelete', {
-        //   ids: selectedIds,
-        //   user: userInfo?.user_id,
-        // });
+        multipleDeleteMessage(selectedIds, 'Drafts');
         toaster.show({
           message: response.message,
           type: 'success',

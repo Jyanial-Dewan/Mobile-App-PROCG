@@ -42,12 +42,12 @@ const ReplyScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
-  const {socket, sendMessage, sendDraft} = useSocketContext();
+  const {socket, sendMessage, draftMessage} = useSocketContext();
   const {_id} = route.params as {_id: string};
   const isFocused = useIsFocused();
   const [parrentMessage, setParrentMessage] =
     useState<MessageSnapshotType | null>(null);
-  const [recivers, setRecivers] = useState<number[]>([]);
+  const [recipients, setRecipients] = useState<number[]>([]);
   const [subject, setSubject] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [isSending, setIsSending] = useState(false);
@@ -68,24 +68,25 @@ const ReplyScreen = () => {
         return null;
       }
       const api_params = {
-        url: api.Messages + '/' + _id,
+        url: `${api.UniqueMessages}?notification_id=${_id}&user_id=${userInfo?.user_id}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
-      const res: MessageSnapshotType = await httpRequest(
+      const res: {result: MessageSnapshotType} = await httpRequest(
         api_params,
         setIsLoading,
       );
+
       if (res) {
-        setParrentMessage(res);
-        setSubject(`Re: ${res.subject}`);
-        const totalInvolved = [...res.recipients, res.sender];
+        setParrentMessage(res.result);
+        setSubject(`Re: ${res.result.subject}`);
+        const totalInvolved = [...res.result.recipients, res.result.sender];
         const newRecivers = totalInvolved.filter(
           usr => usr !== userInfo?.user_id,
         );
-        setRecivers(newRecivers);
-        setOldBody(res.notification_body);
+        setRecipients(newRecivers);
+        setOldBody(res.result.notification_body);
       }
     },
     [isFocused, _id],
@@ -96,14 +97,14 @@ const ReplyScreen = () => {
       notification_id: id,
       notification_type: 'NOTIFICATION',
       sender: userInfo?.user_id,
-      recipients: recivers,
+      recipients: recipients,
       subject: subject,
       notification_body: body,
       status: 'SENT',
       creation_date: new Date(),
       parent_notification_id: parrentMessage?.parent_notification_id,
       involved_users: parrentMessage?.involved_users,
-      readers: recivers,
+      readers: recipients,
       holders: parrentMessage?.involved_users,
       recycle_bin: [],
       action_item_id: parrentMessage?.action_item_id,
@@ -114,7 +115,7 @@ const ReplyScreen = () => {
       data: sendPayload,
       method: 'post',
       baseURL: url,
-      isConsole: true,
+      // isConsole: true,
       // isConsoleParams: true,
     };
     // notificationID, parentId, date, sender, recipients, subject, body;
@@ -123,7 +124,7 @@ const ReplyScreen = () => {
       parentId: parrentMessage?.parent_notification_id,
       date: new Date(),
       sender: userInfo?.user_name,
-      recipients: recivers,
+      recipients: recipients,
       subject,
       body,
     };
@@ -132,18 +133,19 @@ const ReplyScreen = () => {
       data: sendNotificationPayload,
       method: 'post',
       baseURL: url,
-      isConsole: true,
-      isConsoleParams: true,
+      // isConsole: true,
+      // isConsoleParams: true,
     };
     try {
       const response = await httpRequest(sendParams, setIsSending);
       await httpRequest(sendNotificationParams, setIsSending);
       if (response) {
-        sendMessage(sendPayload.notification_id);
-        // socket?.emit('sendMessage', {
-        //   notificationId: sendPayload.notification_id,
-        //   sender: sendPayload.sender,
-        // });
+        sendMessage(
+          sendPayload.notification_id,
+          userInfo?.user_id!,
+          recipients,
+          'Sent',
+        );
         toaster.show({message: response.message, type: 'success'});
       }
     } catch (error) {
@@ -163,14 +165,14 @@ const ReplyScreen = () => {
       notification_id: id,
       notification_type: 'NOTIFICATION',
       sender: userInfo?.user_id,
-      recipients: recivers,
+      recipients: recipients,
       subject: `${subject}`,
       notification_body: body,
       status: 'DRAFT',
       creation_date: new Date(),
       parent_notification_id: parrentMessage?.parent_notification_id,
       involved_users: parrentMessage?.involved_users,
-      readers: recivers,
+      readers: recipients,
       holders: [userInfo?.user_id],
       recycle_bin: [],
       action_item_id: parrentMessage?.action_item_id,
@@ -181,17 +183,13 @@ const ReplyScreen = () => {
       data: draftPayload,
       method: 'post',
       baseURL: url,
-      isConsole: true,
+      // isConsole: true,
       // isConsoleParams: true,
     };
     try {
       const response = await httpRequest(draftParams, setIsDrafting);
       if (response) {
-        sendDraft(draftPayload.notification_id);
-        // socket?.emit('sendDraft', {
-        //   notificationId: draftPayload.notification_id,
-        //   sender: draftPayload.sender,
-        // });
+        draftMessage(draftPayload.notification_id, userInfo?.user_id!, 'New');
         toaster.show({
           message: response.message,
           type: 'success',
@@ -205,7 +203,7 @@ const ReplyScreen = () => {
         toaster.show({message: error.message, type: 'error'});
       }
     } finally {
-      setRecivers([]);
+      setRecipients([]);
       setSubject('');
       setBody('');
     }
@@ -235,12 +233,12 @@ const ReplyScreen = () => {
           <FooterSendButton
             handleSend={handleSend}
             isSending={isSending}
-            disabled={recivers.length === 0 || body === '' || isSending}
+            disabled={recipients.length === 0 || body === '' || isSending}
             style={[
               styles.sentBtn,
               {
                 opacity:
-                  recivers.length === 0 || body === '' || isSending ? 0.5 : 1,
+                  recipients.length === 0 || body === '' || isSending ? 0.5 : 1,
               },
             ]}
           />
@@ -254,19 +252,19 @@ const ReplyScreen = () => {
             showModal={showModal}
             handleX={() => console.log('hello')}
             setShowModal={setShowModal}
-            recivers={recivers}
+            recivers={recipients}
             isHandleX={false}
           />
           <View style={styles.withinLineContainer}>
             <Text style={{color: COLORS.darkGray}}>To</Text>
-            {recivers.length !== 0 && (
+            {recipients.length !== 0 && (
               <View style={{flexDirection: 'row'}}>
                 <View style={styles.singleRcvr}>
                   <View style={styles.withinSinglRcve}>
                     <Image
                       style={styles.profileImage}
                       source={{
-                        uri: `${url}/${renderProfilePicture(recivers[recivers.length - 1], usersStore.users)}`,
+                        uri: `${url}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
                         // headers: {
                         //   Authorization: `Bearer ${userInfo?.access_token}`,
                         // },
@@ -275,7 +273,7 @@ const ReplyScreen = () => {
                     />
                     <Text style={styles.textGreen}>
                       {renderSlicedUsername(
-                        recivers[recivers.length - 1],
+                        recipients[recipients.length - 1],
                         usersStore.users,
                         15,
                       )}
@@ -285,7 +283,7 @@ const ReplyScreen = () => {
               </View>
             )}
           </View>
-          {recivers.length > 1 && (
+          {recipients.length > 1 && (
             <Pressable
               onPress={() => setShowModal(true)}
               style={styles.downBtnContainer}>
