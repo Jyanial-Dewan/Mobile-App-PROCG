@@ -13,26 +13,26 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import ContainerNew from '../../common/components/Container';
-import CustomTextNew from '../../common/components/CustomText';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {useRootStore} from '../../stores/rootStore';
-import {COLORS} from '../../common/constant/Themes';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import MainHeader from '../../common/components/MainHeader';
-import {_todayDate} from '../../common/services/todayDate';
-import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
-import {httpRequest} from '../../common/constant/httpRequest';
+import ContainerNew from '../../../common/components/Container';
+import CustomTextNew from '../../../common/components/CustomText';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
+import {useRootStore} from '../../../stores/rootStore';
+import {COLORS} from '../../../common/constant/Themes';
+import CustomFlatList from '../../../common/components/CustomFlatList';
+import MainHeader from '../../../common/components/MainHeader';
+import {_todayDate} from '../../../common/services/todayDate';
+import {api} from '../../../common/api/api';
+import {ProcgURL} from '../../../../App';
+import {httpRequest} from '../../../common/constant/httpRequest';
 import Feather from 'react-native-vector-icons/Feather';
-import CustomDropDownNew from '../../common/components/CustomDropDownTwo';
+import CustomDropDownNew from '../../../common/components/CustomDropDownTwo';
 import {useForm} from 'react-hook-form';
 import {observer} from 'mobx-react-lite';
-import {NotificationDetailsNavigationProp} from '../../navigations/NotificationStack';
-import LongPressedHeader from '../../common/components/LongPressedHeader';
-import {useToast} from '../../common/components/CustomToast';
-import PlusButton from '../../common/components/PlusButton';
-import {formateDateTime} from '../../common/services/dateFormater';
+import {NotificationDetailsNavigationProp} from '../../../navigations/NotificationStack';
+import LongPressedHeader from '../../../common/components/LongPressedHeader';
+import {useToast} from '../../../common/components/CustomToast';
+import PlusButton from '../../../common/components/PlusButton';
+import {formateDateTime} from '../../../common/services/dateFormater';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -42,16 +42,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Image from 'react-native-image-fallback';
-import {useSocketContext} from '../../context/SocketContext';
-import CustomDeleteModal from '../../common/components/CustomDeleteModal';
+import {useSocketContext} from '../../../context/SocketContext';
+import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import {MessageSnapshotType} from '../../stores/messageStore';
-import CustomFlatListThree from '../../common/components/CustomFlatListThree';
-import {toTitleCase} from '../../common/utility/general';
-import Row from '../../common/components/Row';
+} from '../../../common/utility/notifications.utility';
+import {MessageSnapshotType} from '../../../stores/messageStore';
+import CustomFlatListThree from '../../../common/components/CustomFlatListThree';
+import {toTitleCase} from '../../../common/utility/general';
+import Row from '../../../common/components/Row';
 
 export interface RenderMessageItemProps {
   item: MessageSnapshotType;
@@ -89,7 +89,7 @@ const RenderMessageItem = ({
   const [openModal, setOpenModal] = useState(false);
 
   const url = selectedUrl || ProcgURL;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
 
   const openDeleteModal = () => {
     setOpenModal(true);

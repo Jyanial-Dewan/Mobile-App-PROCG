@@ -1,29 +1,27 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
-import ContainerNew from '../../common/components/Container';
-import MainHeader from '../../common/components/MainHeader';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import {COLORS} from '../../common/constant/Themes';
 import {ActivityIndicator} from 'react-native-paper';
-import Feather from 'react-native-vector-icons/Feather';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
-import {httpRequest} from '../../common/constant/httpRequest';
-import {useRootStore} from '../../stores/rootStore';
-import {useToast} from '../../common/components/CustomToast';
-import {observer} from 'mobx-react-lite';
-import CustomTextNew from '../../common/components/CustomText';
-import {formateDateTime} from '../../common/services/dateFormater';
 import Image from 'react-native-image-fallback';
-import {useSocketContext} from '../../context/SocketContext';
-import {MessageSnapshotType} from '../../stores/messageStore';
+import {useRootStore} from '../../../stores/rootStore';
+import {useToast} from '../../../common/components/CustomToast';
+import {observer} from 'mobx-react-lite';
+import {formateDateTime} from '../../../common/services/dateFormater';
+import {useSocketContext} from '../../../context/SocketContext';
+import {MessageSnapshotType} from '../../../stores/messageStore';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import Receivers from '../../common/components/Receivers';
+} from '../../../common/utility/notifications.utility';
+import Receivers from '../../../common/components/Receivers';
+import {ProcgURL} from '../../../../App';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
+import {api} from '../../../common/api/api';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import ContainerNew from '../../../common/components/Container';
+import MainHeader from '../../../common/components/MainHeader';
+import {COLORS} from '../../../common/constant/Themes';
+import CustomTextNew from '../../../common/components/CustomText';
 
 const RecycleBinDetail = observer(() => {
   const isFocused = useIsFocused();
@@ -44,8 +42,8 @@ const RecycleBinDetail = observer(() => {
   );
   const [showModal, setShowModal] = useState(false);
   const url = selectedUrl || ProcgURL;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
-  const noUserFallback = [require('../../assets/prifileImages/person.png')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
+  const noUserFallback = [require('../../../assets/prifileImages/person.png')];
   //Fetch SingleMessage
   useAsyncEffect(
     async isMounted => {

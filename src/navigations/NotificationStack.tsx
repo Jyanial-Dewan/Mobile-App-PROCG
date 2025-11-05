@@ -4,10 +4,10 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
-import SentScreen from '../modules/notification/SentScreen';
-import InboxScreen from '../modules/notification/InboxScreen';
-import DraftScreen from '../modules/notification/DraftScreen';
-import RecycleBin from '../modules/notification/RecycleBin';
+import SentScreen from '../modules/notifications/sent/SentScreen';
+import InboxScreen from '../modules/notifications/inbox/InboxScreen';
+import DraftScreen from '../modules/notifications/drafts/DraftScreen';
+import RecycleBin from '../modules/notifications/recyclebin/RecycleBin';
 const {Navigator, Screen} = createNativeStackNavigator<any>();
 
 export interface NavigationStackParamList {

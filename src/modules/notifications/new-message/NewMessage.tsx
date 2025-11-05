@@ -13,33 +13,32 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import ContainerNew from '../../common/components/Container';
-import MainHeader from '../../common/components/MainHeader';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
-import {COLORS} from '../../common/constant/Themes';
-import {useRootStore} from '../../stores/rootStore';
-import {useToast} from '../../common/components/CustomToast';
-import {httpRequest} from '../../common/constant/httpRequest';
-import {api} from '../../common/api/api';
-import {ProcgURL, ProcgURL2} from '../../../App';
+import {observer} from 'mobx-react-lite';
+import {useRootStore} from '../../../stores/rootStore';
+import {useToast} from '../../../common/components/CustomToast';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import {api} from '../../../common/api/api';
 import {v4 as uuidv4} from 'uuid';
-import ReceiversModal from '../../common/components/ReceiversModal';
-import SVGController from '../../common/components/SVGController';
+import ReceiversModal from '../../../common/components/ReceiversModal';
 import Image from 'react-native-image-fallback';
-import {useSocketContext} from '../../context/SocketContext';
+import {useSocketContext} from '../../../context/SocketContext';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
-import {toTitleCase} from '../../common/utility/general';
-import CustomTextNew from '../../common/components/CustomText';
-import FooterDraftButton from '../../common/components/FooterDraftButton';
-import FooterSendButton from '../../common/components/FooterSendButton';
-import {observer} from 'mobx-react-lite';
+} from '../../../common/utility/notifications.utility';
+import SelectStatusDropDown from '../../../common/components/SelectStatusDropDown';
+import {toTitleCase} from '../../../common/utility/general';
+import CustomTextNew from '../../../common/components/CustomText';
+import FooterDraftButton from '../../../common/components/FooterDraftButton';
+import FooterSendButton from '../../../common/components/FooterSendButton';
+import {ProcgURL, ProcgURL2} from '../../../../App';
+import ContainerNew from '../../../common/components/Container';
+import MainHeader from '../../../common/components/MainHeader';
+import {COLORS} from '../../../common/constant/Themes';
 
 interface User {
   name: string;
@@ -86,7 +85,7 @@ const NewMessage = () => {
 
   const urlNode = selectedUrl || ProcgURL;
   const urlPython = ProcgURL2;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
 
   const handleReciever = (reciever: number) => {
     if (recipients.includes(reciever)) {

@@ -2,30 +2,29 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Image from 'react-native-image-fallback';
 import React, {useEffect, useState} from 'react';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {ProcgURL} from '../../../App';
-import {api} from '../../common/api/api';
-import {useRootStore} from '../../stores/rootStore';
-import {httpRequest} from '../../common/constant/httpRequest';
-import MainHeader from '../../common/components/MainHeader';
-import {COLORS} from '../../common/constant/Themes';
 import {observer} from 'mobx-react-lite';
-import {useToast} from '../../common/components/CustomToast';
-import ContainerNew from '../../common/components/Container';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import CustomTextNew from '../../common/components/CustomText';
-import {formateDateTime} from '../../common/services/dateFormater';
-import ReplyButton from '../../common/components/ReplyButton';
-import Receivers from '../../common/components/Receivers';
-import {useSocketContext} from '../../context/SocketContext';
 import Autolink from 'react-native-autolink';
 import {ActivityIndicator} from 'react-native-paper';
+import {useSocketContext} from '../../../context/SocketContext';
+import {useToast} from '../../../common/components/CustomToast';
+import {useRootStore} from '../../../stores/rootStore';
+import {MessageSnapshotType} from '../../../stores/messageStore';
+import {ProcgURL} from '../../../../App';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
+import {api} from '../../../common/api/api';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import {formateDateTime} from '../../../common/services/dateFormater';
+import {COLORS} from '../../../common/constant/Themes';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import {MessageSnapshotType} from '../../stores/messageStore';
-import CustomFlatListThree from '../../common/components/CustomFlatListThree';
+} from '../../../common/utility/notifications.utility';
+import CustomTextNew from '../../../common/components/CustomText';
+import Receivers from '../../../common/components/Receivers';
+import ContainerNew from '../../../common/components/Container';
+import MainHeader from '../../../common/components/MainHeader';
+import CustomFlatListThree from '../../../common/components/CustomFlatListThree';
+import ReplyButton from '../../../common/components/ReplyButton';
 
 const NotificationDetails = observer(() => {
   const isFocused = useIsFocused();
@@ -47,7 +46,7 @@ const NotificationDetails = observer(() => {
   >(undefined);
 
   const url = selectedUrl || ProcgURL;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
 
   // Fetch total Reply Messages
   useAsyncEffect(

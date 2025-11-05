@@ -12,38 +12,38 @@ import {
 } from 'react-native';
 import Image from 'react-native-image-fallback';
 import React, {useEffect, useState} from 'react';
-import ContainerNew from '../../common/components/Container';
+import ContainerNew from '../../../common/components/Container';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import MainHeader from '../../common/components/MainHeader';
-import {COLORS} from '../../common/constant/Themes';
-import {httpRequest} from '../../common/constant/httpRequest';
-import {ProcgURL, ProcgURL2} from '../../../App';
-import {api} from '../../common/api/api';
-import {useRootStore} from '../../stores/rootStore';
+import MainHeader from '../../../common/components/MainHeader';
+import {COLORS} from '../../../common/constant/Themes';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import {ProcgURL, ProcgURL2} from '../../../../App';
+import {api} from '../../../common/api/api';
+import {useRootStore} from '../../../stores/rootStore';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {v4 as uuidv4} from 'uuid';
-import {useToast} from '../../common/components/CustomToast';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
+import {useToast} from '../../../common/components/CustomToast';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
 import {observer} from 'mobx-react-lite';
-import ReceiversModal from '../../common/components/ReceiversModal';
-import RoundedButton from '../../common/components/RoundedButton';
-import SVGController from '../../common/components/SVGController';
-import {useSocketContext} from '../../context/SocketContext';
+import ReceiversModal from '../../../common/components/ReceiversModal';
+import RoundedButton from '../../../common/components/RoundedButton';
+import SVGController from '../../../common/components/SVGController';
+import {useSocketContext} from '../../../context/SocketContext';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import {MessageSnapshotType} from '../../stores/messageStore';
-import {AlertStoreSnapshotType} from '../../stores/alertsStore';
-import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
-import SelectStatusDropDown from '../../common/components/SelectStatusDropDown';
-import {toTitleCase} from '../../common/utility/general';
-import CustomTextNew from '../../common/components/CustomText';
-import FooterSendButton from '../../common/components/FooterSendButton';
-import FooterDraftButton from '../../common/components/FooterDraftButton';
-import CustomDeleteModal from '../../common/components/CustomDeleteModal';
+} from '../../../common/utility/notifications.utility';
+import {MessageSnapshotType} from '../../../stores/messageStore';
+import {AlertStoreSnapshotType} from '../../../stores/alertsStore';
+import {ActionItemsStoreSnapshotType} from '../../../stores/actionItems';
+import SelectStatusDropDown from '../../../common/components/SelectStatusDropDown';
+import {toTitleCase} from '../../../common/utility/general';
+import CustomTextNew from '../../../common/components/CustomText';
+import FooterSendButton from '../../../common/components/FooterSendButton';
+import FooterDraftButton from '../../../common/components/FooterDraftButton';
+import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
 interface IOldMsgTypes {
   receivers?: number[];
   subject?: string;
@@ -87,7 +87,7 @@ const DraftsDetails = () => {
   const date = new Date();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
   const totalusers = [...recipients, userInfo?.user_id];
   const involvedusers = [...new Set(totalusers)];
   const actualUsers = usersStore.users.filter(
