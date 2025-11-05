@@ -12,24 +12,6 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import ContainerNew from '../../common/components/Container';
-import CustomTextNew from '../../common/components/CustomText';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {useRootStore} from '../../stores/rootStore';
-import Feather from 'react-native-vector-icons/Feather';
-import {COLORS} from '../../common/constant/Themes';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import MainHeader from '../../common/components/MainHeader';
-import {_todayDate} from '../../common/services/todayDate';
-import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
-import {httpRequest} from '../../common/constant/httpRequest';
-import CustomDropDownNew from '../../common/components/CustomDropDownTwo';
-import {useForm} from 'react-hook-form';
-import {NotificationDetailsNavigationProp} from '../../navigations/NotificationStack';
-import {observer} from 'mobx-react-lite';
-import LongPressedHeader from '../../common/components/LongPressedHeader';
-import PlusButton from '../../common/components/PlusButton';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -37,30 +19,46 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import {formateDateTime} from '../../common/services/dateFormater';
+import Feather from 'react-native-vector-icons/Feather';
+import {useForm} from 'react-hook-form';
+import {observer} from 'mobx-react-lite';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
-import {useToast} from '../../common/components/CustomToast';
-import {RenderMessageItemProps} from './InboxScreen';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackScreensParms} from '../../../types/navigationTs/RootStackScreenParams';
+import {RenderMessageItemProps} from '../inbox/InboxScreen';
+import {formateDateTime} from '../../../common/services/dateFormater';
+import {useRootStore} from '../../../stores/rootStore';
+import {ProcgURL} from '../../../../App';
+import {COLORS} from '../../../common/constant/Themes';
+import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
 import Image from 'react-native-image-fallback';
-import {useSocketContext} from '../../context/SocketContext';
-import CustomDeleteModal from '../../common/components/CustomDeleteModal';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import CustomFlatListThree from '../../common/components/CustomFlatListThree';
-import {MessageSnapshotType} from '../../stores/messageStore';
-import {toTitleCase} from '../../common/utility/general';
-import Row from '../../common/components/Row';
+} from '../../../common/utility/notifications.utility';
+import CustomTextNew from '../../../common/components/CustomText';
+import Row from '../../../common/components/Row';
+import {toTitleCase} from '../../../common/utility/general';
+import {useSocketContext} from '../../../context/SocketContext';
+import {useToast} from '../../../common/components/CustomToast';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
+import {api} from '../../../common/api/api';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import CustomDropDownNew from '../../../common/components/CustomDropDownTwo';
+import ContainerNew from '../../../common/components/Container';
+import LongPressedHeader from '../../../common/components/LongPressedHeader';
+import MainHeader from '../../../common/components/MainHeader';
+import CustomFlatListThree from '../../../common/components/CustomFlatListThree';
+import {MessageSnapshotType} from '../../../stores/messageStore';
+import PlusButton from '../../../common/components/PlusButton';
 
 const ITEMHEIGHT = 105;
-
 const RenderMessageItem = ({
   item,
-  selectedIds,
-  setIsLongPressed,
-  setSelectedIds,
   userInfo,
+  selectedIds,
+  setSelectedIds,
+  setIsLongPressed,
   handleLongPress,
   handlePress,
   handleSingleDeleteMessage,
@@ -68,8 +66,8 @@ const RenderMessageItem = ({
   const screenWidth = useWindowDimensions().width;
   const SWIPE_THRESHOLD = -screenWidth * 0.6;
   const translateX = useSharedValue(0);
-  const marginY = useSharedValue(10);
   const scaleX = useSharedValue(0);
+  const marginY = useSharedValue(5);
   const hasExecuted = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const {datePart, timePart} = formateDateTime(item.creation_date as any);
@@ -77,7 +75,8 @@ const RenderMessageItem = ({
   const [openModal, setOpenModal] = useState(false);
 
   const url = selectedUrl || ProcgURL;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
+  const noUserFallback = [require('../../../assets/prifileImages/person.png')];
 
   const openDeleteModal = () => {
     setOpenModal(true);
@@ -145,7 +144,7 @@ const RenderMessageItem = ({
   const height = useAnimatedStyle(() => {
     return {
       height: scaleX.value,
-      marginTop: marginY.value,
+      marginVertical: marginY.value,
     };
   });
 
@@ -154,6 +153,7 @@ const RenderMessageItem = ({
   const backgroundColor = selectedIds.includes(item.notification_id)
     ? 'transparent'
     : COLORS.primaryRed;
+
   return (
     <View style={{paddingVertical: 5}}>
       {openModal && (
@@ -226,13 +226,15 @@ const RenderMessageItem = ({
                   <Image
                     style={styles.profileImage}
                     source={{
+                      // uri: `${url}/${item.recivers[0]?.profile_picture}`,
                       uri: `${url}/${renderProfilePicture(item.recipients[0], usersStore.users)}`,
-                      // uri: `${url}/${item.recivers[0].profile_picture}`,
                       // headers: {
                       //   Authorization: `Bearer ${userInfo?.access_token}`,
                       // },
                     }}
-                    fallback={fallbacks}
+                    fallback={
+                      item.recipients.length === 0 ? noUserFallback : fallbacks
+                    }
                   />
                 )}
               </View>
@@ -251,15 +253,21 @@ const RenderMessageItem = ({
                   }}>
                   <CustomTextNew
                     txtStyle={styles.headText}
-                    text={renderSlicedUsername(
-                      item.recipients[0],
-                      usersStore.users,
-                      15,
-                    )}
+                    text={
+                      item?.recipients.length > 0
+                        ? `${renderSlicedUsername(
+                            item.recipients[0],
+                            usersStore.users,
+                            15,
+                          )}${item.recipients.length > 1 ? ', ...' : ''}`
+                        : '(no user)'
+                    }
                     // text={
-                    //   item.recivers.length > 1
-                    //     ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name?.length > 20 ? '...' : ''}`
-                    //     : item.recivers[0].name
+                    //   item?.recivers.length > 0 && item?.recivers[0]?.name
+                    //     ? item?.recivers.length > 1
+                    //       ? `${item.recivers[0].name.slice(0, 20)}${item.recivers[0].name.length > 20 ? '...' : ''}`
+                    //       : item.recivers[0].name
+                    //     : '(no user)'
                     // }
                   />
                   <View style={{flexDirection: 'row', gap: 5}}>
@@ -269,16 +277,6 @@ const RenderMessageItem = ({
                     />
                   </View>
                 </View>
-                {/* <View
-                style={[
-                  styles.itemListWrapper,
-                  {
-                    borderColor: selectedIds.includes(item?.id)
-                      ? COLORS.white
-                      : '#E4E9F2',
-                  },
-                ]}
-              /> */}
                 <Row>
                   <View
                     style={{
@@ -296,7 +294,7 @@ const RenderMessageItem = ({
                 <CustomTextNew
                   txtStyle={styles.subText}
                   txtAlign="justify"
-                  text={item?.subject}
+                  text={item?.subject ?? '(empty subject)'}
                   // text={`${item?.subject.slice(0, 40)}${item?.subject?.length > 40 ? '...' : ''}`}
                 />
                 {/* <CustomTextNew
@@ -317,62 +315,62 @@ const RenderMessageItem = ({
   );
 };
 
-const SentScreen = observer(() => {
+const DraftScreen = observer(() => {
   const isFocused = useIsFocused();
-  const navigation = useNavigation<NotificationDetailsNavigationProp>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackScreensParms>>();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
   const {socket, deleteMessage, multipleDeleteMessage} = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalShow, setIsModalShow] = useState(false);
   const {control, setValue} = useForm();
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(0);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const toaster = useToast();
+  const routeName = route.name;
+  const [hasMore, setHasMore] = useState(0);
   const url = selectedUrl || ProcgURL;
   const limit = 50;
 
   useFocusEffect(
     useCallback(() => {
-      setValue('routeName', {label: route.name});
+      setValue('routeName', {label: routeName});
     }, [isFocused]),
   );
-
   useAsyncEffect(
     async isMounted => {
+      setIsLoading(true);
       if (!isMounted()) {
         return null;
       }
-
-      if (messageStore.sentMessages.length === messageStore.totalSent) {
-        setIsLoading(false);
-        return;
-      }
       const api_params = {
-        url: `${api.SentMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
+        url: `${api.DraftMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
         baseURL: url,
         // isConsole: true,
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
+
       if (res) {
         setHasMore(res.result.length);
         if (currentPage === 1) {
-          messageStore.initialSentMessages(res.result ?? []);
+          messageStore.initialDraftMessages(res.result ?? []);
         } else {
-          messageStore.saveSentMessages(res.result ?? []);
+          messageStore.saveDraftMessages(res.result ?? []);
         }
+        messageStore.setRefreshing(false);
       }
       if (res.result.length < 5) {
         return;
       }
     },
     [
+      socket,
       isFocused,
       currentPage,
-      messageStore.sentMessages.length,
+      messageStore.draftMessages.length,
       messageStore.refreshing,
     ],
   );
@@ -386,8 +384,8 @@ const SentScreen = observer(() => {
     if (isLongPressed) {
       setSelectedIds(prev => [msgId, ...prev]);
     } else {
-      navigation.navigate('NotificationDetails', {
-        _id: parentId,
+      navigation.navigate('Drafts_Detail', {
+        _id: msgId,
       });
     }
     if (selectedIds.includes(msgId)) {
@@ -422,8 +420,8 @@ const SentScreen = observer(() => {
     };
     try {
       const response = await httpRequest(deleteParams, setIsLoading);
+      deleteMessage(msgId, 'Drafts');
       if (response) {
-        deleteMessage(msgId, 'Sent');
         toaster.show({
           message: response.message,
           type: 'success',
@@ -435,19 +433,20 @@ const SentScreen = observer(() => {
       }
     }
   };
+
   const handleMultipleDelete = async () => {
     const params = {
       url: `${api.MoveMultipleToRecycleBin}/${userInfo?.user_id}`,
       data: {ids: selectedIds},
       method: 'put',
       baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
+      isConsole: true,
+      isConsoleParams: true,
     };
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds, 'Sent');
+        multipleDeleteMessage(selectedIds, 'Drafts');
         toaster.show({
           message: response.message,
           type: 'success',
@@ -496,14 +495,13 @@ const SentScreen = observer(() => {
             handleShowModal={() => setIsModalShow(true)}
           />
         ) : (
-          <MainHeader routeName="Sent" style={{fontWeight: '700'}} />
+          <MainHeader routeName={routeName} style={{fontWeight: '700'}} />
         )
       }
-      footer={<PlusButton />}
       style={styles.container}>
       <MessageGroups />
       <CustomFlatListThree
-        data={messageStore.sentMessages}
+        data={messageStore.draftMessages}
         keyExtractor={(item: MessageSnapshotType, index: number) =>
           item.notification_id + index
         }
@@ -520,20 +518,21 @@ const SentScreen = observer(() => {
           />
         )}
         isLoading={isLoading}
-        hasMore={hasMore}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
-        contentContainerStyle={
-          messageStore.sentMessages.length === 0 ? styles.flexGrow : null
-        }
-        refreshing={messageStore.refreshing}
-        onRefresh={handleRefresh}
+        hasMore={hasMore}
         emptyItem={
-          !isLoading && messageStore.sentMessages.length === 0
+          !isLoading && messageStore.draftMessages.length === 0
             ? EmptyListItem
             : null
         }
+        contentContainerStyle={
+          messageStore.draftMessages.length === 0 ? styles.flexGrow : null
+        }
+        refreshing={messageStore.refreshing}
+        onRefresh={handleRefresh}
       />
+      <PlusButton />
       <CustomDeleteModal
         total={selectedIds.length}
         isModalShow={isModalShow}
@@ -546,12 +545,16 @@ const SentScreen = observer(() => {
   );
 });
 
-export default SentScreen;
+export default DraftScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: '700',
   },
   rowContainer: {
     // height: ITEMHEIGHT,
@@ -560,10 +563,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 13,
     borderRadius: 14,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: '700',
   },
   imageStyle: {
     borderRadius: 50,

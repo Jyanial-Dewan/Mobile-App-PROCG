@@ -9,29 +9,29 @@ import {
   View,
 } from 'react-native';
 import React, {useState} from 'react';
-import ContainerNew from '../../common/components/Container';
-import MainHeader from '../../common/components/MainHeader';
+import ContainerNew from '../../../common/components/Container';
+import MainHeader from '../../../common/components/MainHeader';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {COLORS} from '../../common/constant/Themes';
-import {useRootStore} from '../../stores/rootStore';
-import {useToast} from '../../common/components/CustomToast';
-import {httpRequest} from '../../common/constant/httpRequest';
-import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
+import {COLORS} from '../../../common/constant/Themes';
+import {useRootStore} from '../../../stores/rootStore';
+import {useToast} from '../../../common/components/CustomToast';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import {api} from '../../../common/api/api';
+import {ProcgURL} from '../../../../App';
 import {v4 as uuidv4} from 'uuid';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import ReceiversModal from '../../common/components/ReceiversModal';
-import SVGController from '../../common/components/SVGController';
-import {useSocketContext} from '../../context/SocketContext';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
+import ReceiversModal from '../../../common/components/ReceiversModal';
+import SVGController from '../../../common/components/SVGController';
+import {useSocketContext} from '../../../context/SocketContext';
 import Image from 'react-native-image-fallback';
-import {MessageSnapshotType} from '../../stores/messageStore';
+import {MessageSnapshotType} from '../../../stores/messageStore';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import FooterSendButton from '../../common/components/FooterSendButton';
-import FooterDraftButton from '../../common/components/FooterDraftButton';
+} from '../../../common/utility/notifications.utility';
+import FooterSendButton from '../../../common/components/FooterSendButton';
+import FooterDraftButton from '../../../common/components/FooterDraftButton';
 
 interface User {
   name: string;
@@ -59,7 +59,7 @@ const ReplyScreen = () => {
   const date = new Date();
   const toaster = useToast();
   const url = selectedUrl || ProcgURL;
-  const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
+  const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
 
   //Fetch SingleMessage
   useAsyncEffect(

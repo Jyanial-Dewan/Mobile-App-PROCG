@@ -12,27 +12,6 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import ContainerNew from '../../common/components/Container';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {useRootStore} from '../../stores/rootStore';
-import {COLORS} from '../../common/constant/Themes';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import MainHeader from '../../common/components/MainHeader';
-import {_todayDate} from '../../common/services/todayDate';
-import {api} from '../../common/api/api';
-import {ProcgURL} from '../../../App';
-import {httpRequest} from '../../common/constant/httpRequest';
-import Feather from 'react-native-vector-icons/Feather';
-import CustomDropDownNew from '../../common/components/CustomDropDownTwo';
-import {useForm} from 'react-hook-form';
-import {observer} from 'mobx-react-lite';
-import {NotificationDetailsNavigationProp} from '../../navigations/NotificationStack';
-import LongPressedHeader from '../../common/components/LongPressedHeader';
-import PlusButton from '../../common/components/PlusButton';
-import CustomDeleteModal from '../../common/components/CustomDeleteModal';
-import {formateDateTime} from '../../common/services/dateFormater';
-import {useToast} from '../../common/components/CustomToast';
-import CustomTextNew from '../../common/components/CustomText';
 import {
   runOnJS,
   useAnimatedStyle,
@@ -43,15 +22,34 @@ import {
 import Animated from 'react-native-reanimated';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Image from 'react-native-image-fallback';
-import {useSocketContext} from '../../context/SocketContext';
-import {MessageSnapshotType} from '~/stores/messageStore';
+import {MessageSnapshotType} from '../../../stores/messageStore';
+import {formateDateTime} from '../../../common/services/dateFormater';
+import {useRootStore} from '../../../stores/rootStore';
+import {ProcgURL} from '../../../../App';
+import {COLORS} from '../../../common/constant/Themes';
+import {observer} from 'mobx-react-lite';
+import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
+import {useToast} from '../../../common/components/CustomToast';
+import CustomTextNew from '../../../common/components/CustomText';
+import Row from '../../../common/components/Row';
+import {httpRequest} from '../../../common/constant/httpRequest';
+import {api} from '../../../common/api/api';
 import {
   renderProfilePicture,
   renderSlicedUsername,
-} from '../../common/utility/notifications.utility';
-import CustomFlatListThree from '../../common/components/CustomFlatListThree';
-import {toTitleCase} from '../../common/utility/general';
-import Row from '../../common/components/Row';
+} from '../../../common/utility/notifications.utility';
+import Feather from 'react-native-vector-icons/Feather';
+import {toTitleCase} from '../../../common/utility/general';
+import {NotificationDetailsNavigationProp} from '../../../navigations/NotificationStack';
+import {useSocketContext} from '../../../context/SocketContext';
+import {useForm} from 'react-hook-form';
+import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
+import CustomDropDownNew from '../../../common/components/CustomDropDownTwo';
+import ContainerNew from '../../../common/components/Container';
+import LongPressedHeader from '../../../common/components/LongPressedHeader';
+import MainHeader from '../../../common/components/MainHeader';
+import CustomFlatListThree from '../../../common/components/CustomFlatListThree';
+import PlusButton from '../../../common/components/PlusButton';
 
 interface RenderMessageItemProps {
   item: MessageSnapshotType;
@@ -83,8 +81,10 @@ const RenderMessageItem = observer(
     const {usersStore, selectedUrl} = useRootStore();
     const [openModal, setOpenModal] = useState(false);
     const url = selectedUrl || ProcgURL;
-    const fallbacks = [require('../../assets/prifileImages/thumbnail.jpg')];
-    const noUserFallback = [require('../../assets/prifileImages/person.png')];
+    const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
+    const noUserFallback = [
+      require('../../../assets/prifileImages/person.png'),
+    ];
 
     const openDeleteModal = () => {
       setOpenModal(true);
