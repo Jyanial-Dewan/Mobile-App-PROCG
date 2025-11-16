@@ -1,5 +1,12 @@
 import {useForm} from 'react-hook-form';
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RootStackScreenProps} from '../../navigations/RootStack';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
@@ -29,6 +36,8 @@ const ResetPassword = ({
   route,
 }: RootStackScreenProps<'ResetPassword'>) => {
   const {request_id, user_id, token} = route.params || {};
+  const [showPass, setShowPass] = useState(true);
+  const [showPass2, setShowPass2] = useState(true);
   const toaster = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [verifyUser, setVerifyUser] = useState<IVerifyUser | null>(null);
@@ -172,6 +181,16 @@ const ResetPassword = ({
                     message: 'Email must be at least 8 characters long',
                   },
                 }}
+                secureTextEntry={showPass}
+                rightIcon={() => (
+                  <TouchableOpacity onPress={() => setShowPass(!showPass)}>
+                    <Icon
+                      name={showPass ? 'eye-off' : 'eye'}
+                      color={COLORS.iconColor}
+                      size={22}
+                    />
+                  </TouchableOpacity>
+                )}
               />
             </Column>
             <Column>
@@ -194,14 +213,24 @@ const ResetPassword = ({
                       value === newPassword || 'Passwords do not match',
                   },
                 }}
+                secureTextEntry={showPass2}
+                rightIcon={() => (
+                  <TouchableOpacity onPress={() => setShowPass2(!showPass2)}>
+                    <Icon
+                      name={showPass2 ? 'eye-off' : 'eye'}
+                      color={COLORS.iconColor}
+                      size={22}
+                    />
+                  </TouchableOpacity>
+                )}
               />
             </Column>
           </View>
         </>
       ) : (
-        <>
-          <Text>{verifyUser?.message}</Text>
-        </>
+        <View style={styles.errHead}>
+          <Text style={styles.errText}>{verifyUser?.message}</Text>
+        </View>
       )}
     </ContainerNew>
   );
@@ -261,6 +290,20 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginHorizontal: 30,
+    marginBottom: 10,
+  },
+  errHead: {
+    marginHorizontal: 30,
+    marginTop: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  errText: {
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '500',
+    color: COLORS.red,
     marginBottom: 10,
   },
 });

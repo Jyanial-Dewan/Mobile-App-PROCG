@@ -257,11 +257,12 @@ const styles = StyleSheet.create({
   error: {
     position: 'absolute',
     color: 'red',
-    fontSize: 10,
+    fontSize: 12,
     bottom: -20,
     marginBottom: 5,
     width: '100%',
     paddingTop: 3,
+    marginLeft: 16,
   },
   newSelectedItem: {
     fontSize: 16,

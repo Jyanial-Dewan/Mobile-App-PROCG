@@ -25,7 +25,7 @@ const ForgotPassword = ({
   navigation,
 }: RootStackScreenProps<'ForgotPassword'>) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmited, setIsSubmited] = useState(true);
+  const [isSubmited, setIsSubmited] = useState(false);
   const toaster = useToast();
 
   const {control, handleSubmit, setValue} = useForm({
@@ -83,11 +83,11 @@ const ForgotPassword = ({
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
 
       {isSubmited ? (
-        <>
+        <View style={styles.subHead}>
           <Text style={styles.subTitle}>
             Check your email for reset password link
           </Text>
-        </>
+        </View>
       ) : (
         <>
           <View style={styles.headerText}>
@@ -196,6 +196,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.textNewColor,
     marginBottom: 10,
+  },
+  subHead: {
+    marginHorizontal: 30,
+    marginTop: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
   subTitle: {
     fontSize: 16,
