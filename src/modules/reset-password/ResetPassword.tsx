@@ -4,58 +4,98 @@ import {RootStackScreenProps} from '../../navigations/RootStack';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {ProcgURL} from '../../../App';
-import {useState} from 'react';
+import {useToast} from '../../common/components/CustomToast';
+import {useEffect, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
 import Column from '../../common/components/Column';
 import CustomTextNew from '../../common/components/CustomText';
 import CustomInputNew from '../../common/components/CustomInput';
 import {COLORS} from '../../common/constant/Themes';
-import CustomDatePickerNew from '../../common/components/CustomDatePicker';
 import CustomButtonNew from '../../common/components/CustomButton';
 import MainHeader from '../../common/components/MainHeader';
-import {useToast} from '../../common/components/CustomToast';
+import {decrypt} from '../../common/utility/general';
 
 interface PayloadType {
-  user_name: string;
-  email_address: string;
-  date_of_birth: string;
+  temporary_password: string;
+  new_password: string;
 }
-
-const ForgotPassword = ({
+interface IVerifyUser {
+  valid: boolean;
+  message: string;
+  result: any;
+}
+const ResetPassword = ({
   navigation,
-}: RootStackScreenProps<'ForgotPassword'>) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmited, setIsSubmited] = useState(true);
+  route,
+}: RootStackScreenProps<'ResetPassword'>) => {
+  const {request_id, user_id, token} = route.params || {};
   const toaster = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [verifyUser, setVerifyUser] = useState<IVerifyUser | null>(null);
+  const decryptedRequestId = decrypt(request_id);
+  const decryptedUserId = decrypt(user_id);
+  const decryptedToken = decrypt(token);
 
-  const {control, handleSubmit, setValue} = useForm({
+  useEffect(() => {
+    const verifyUser = async () => {
+      const params = {
+        baseURL: ProcgURL,
+        url: `${api.ForgotPassword}/verify?request_id=${decryptedRequestId}&token=${decryptedToken}`,
+      };
+      try {
+        const res = await httpRequest(params, setIsLoading);
+        setVerifyUser(res);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    verifyUser();
+  }, [decryptedToken, decryptedRequestId]);
+
+  const {control, handleSubmit, setValue, watch} = useForm({
     defaultValues: {
-      user_name: '',
-      email_address: '',
-      date_of_birth: '',
+      temporary_password: '',
+      new_password: '',
     },
   });
 
+  const newPassword = watch('new_password');
+
   const onSubmit = async (data: PayloadType) => {
+    if (!token) {
+      toaster.show({message: 'Invalid or expired reset link', type: 'error'});
+      return;
+    }
     const postData = {
-      user_name: data.user_name,
-      email_address: data.email_address,
-      date_of_birth: data.date_of_birth,
-    };
-    const params = {
-      url: api.ForgotPassword,
-      baseURL: ProcgURL,
-      data: postData,
-      method: 'POST',
+      request_id: decryptedRequestId,
+      temporary_password: data.temporary_password,
+      password: data.new_password,
     };
 
-    const res = await httpRequest(params, setIsLoading);
-    if (res) {
-      setIsSubmited(res?.success);
-      toaster.show({message: res?.message, type: 'success'});
-    } else {
-      setIsSubmited(false);
-      toaster.show({message: res?.message, type: 'error'});
+    try {
+      const params = {
+        baseURL: ProcgURL,
+        url: `${api.ResetPassword}/${decryptedUserId}`,
+        data: postData,
+        method: 'PUT',
+        access_token: decryptedToken as string,
+      };
+      const res = await httpRequest(params, setIsLoading);
+      if (res?.isSuccess) {
+        toaster.show({message: res?.message, type: 'success'});
+        navigation.navigate('Login');
+      } else {
+        toaster.show({
+          message: res?.message || 'Failed to reset password',
+          type: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Reset password error:', error);
+      toaster.show({
+        message: 'An error occurred. Please try again.',
+        type: 'error',
+      });
     }
   };
 
@@ -63,10 +103,10 @@ const ForgotPassword = ({
     <ContainerNew
       edges={['top', 'left', 'right']}
       style={styles.container}
-      header={<MainHeader routeName={'Forgot Password'} />}
+      header={<MainHeader routeName={'Reset Password'} />}
       footer={
         <>
-          {isSubmited ? null : (
+          {verifyUser?.valid ? (
             <View style={styles.footer}>
               <CustomButtonNew
                 disabled={isLoading}
@@ -77,18 +117,11 @@ const ForgotPassword = ({
                 btnTextStyle={styles.btnTxt}
               />
             </View>
-          )}
+          ) : null}
         </>
       }>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-
-      {isSubmited ? (
-        <>
-          <Text style={styles.subTitle}>
-            Check your email for reset password link
-          </Text>
-        </>
-      ) : (
+      {verifyUser?.valid ? (
         <>
           <View style={styles.headerText}>
             {/* <Text style={styles.title}>Forgot Password</Text> */}
@@ -99,7 +132,7 @@ const ForgotPassword = ({
           <View style={styles.main}>
             <Column>
               <CustomTextNew
-                text="Username"
+                text="Temporary Password"
                 txtSize={16}
                 txtWeight={'500'}
                 padBottom={5}
@@ -107,21 +140,21 @@ const ForgotPassword = ({
               <CustomInputNew
                 setValue={setValue}
                 control={control}
-                name="user_name"
-                placeholder="Enter your username"
-                // label="Enter your username"
+                name="temporary_password"
+                placeholder="Enter your temporary password"
+                // label="Enter your temporary password"
                 rules={{
-                  required: 'User name is required',
+                  required: 'Temporary password is required',
                   minLength: {
-                    value: 3,
-                    message: 'User name must be at least 3 characters long',
+                    value: 8,
+                    message: 'User name must be at least 8 characters long',
                   },
                 }}
               />
             </Column>
             <Column>
               <CustomTextNew
-                text="Email"
+                text="New Password"
                 txtSize={16}
                 txtWeight={'500'}
                 padBottom={5}
@@ -129,42 +162,51 @@ const ForgotPassword = ({
               <CustomInputNew
                 setValue={setValue}
                 control={control}
-                name="email_address"
-                placeholder="Enter your email"
-                // label="Enter your email"
+                name="new_password"
+                placeholder="Enter your new password"
+                // label="Enter your new password"
                 rules={{
-                  required: 'Email is required',
+                  required: 'New password is required',
                   minLength: {
-                    value: 3,
-                    message: 'Email must be at least 3 characters long',
+                    value: 8,
+                    message: 'Email must be at least 8 characters long',
                   },
                 }}
               />
             </Column>
             <Column>
               <CustomTextNew
-                text="Date of Birth"
+                text="Confirm Password"
                 txtSize={16}
                 txtWeight={'500'}
                 padBottom={5}
               />
-              <CustomDatePickerNew
-                name="date_of_birth"
+              <CustomInputNew
+                name="confirm_password"
                 setValue={setValue}
                 control={control}
-                // label="Enter your date of birth"
+                placeholder="Enter your confirm password"
+                // label="Enter your confirm password"
                 rules={{
-                  required: 'Date of birth is required',
+                  required: 'Confirm password is required',
+                  validate: {
+                    match: (value: string) =>
+                      value === newPassword || 'Passwords do not match',
+                  },
                 }}
               />
             </Column>
           </View>
         </>
+      ) : (
+        <>
+          <Text>{verifyUser?.message}</Text>
+        </>
       )}
     </ContainerNew>
   );
 };
-export default ForgotPassword;
+export default ResetPassword;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

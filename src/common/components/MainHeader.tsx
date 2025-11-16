@@ -20,7 +20,14 @@ interface HeaderProps {
 const Header = ({routeName, last, style}: HeaderProps) => {
   const navigation = useNavigation();
   const goBack = () => {
-    navigation.goBack();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Login'}],
+      });
+    }
     Keyboard.dismiss();
   };
   return (
