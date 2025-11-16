@@ -14,6 +14,7 @@ import SelectProfile from '../modules/select-profile/SelectProfile';
 import SettingsScreen from '../modules/settings/SettingsScreen';
 import Drawer from './drawer';
 import Login from '../auth/LoginScreen';
+import ForgotPassword from '../modules/forgot-password/ForgotPassword';
 
 declare global {
   namespace ReactNavigation {
@@ -43,6 +44,7 @@ const RootStack = () => {
       <Screen name="ScanProfiles" component={ScanProfiles} />
       <Screen name="Profiles" component={SelectProfile} />
       <Screen name="Settings" component={SettingsScreen} />
+      <Screen name="ForgotPassword" component={ForgotPassword} />
     </Navigator>
   );
 };

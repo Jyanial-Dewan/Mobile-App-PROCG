@@ -1,9 +1,7 @@
-/* eslint-disable react-native/no-inline-styles */
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {useIsFocused, useRoute} from '@react-navigation/native';
-import axios from 'axios';
 import {observer} from 'mobx-react-lite';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {
   BackHandler,
@@ -23,7 +21,7 @@ import ContainerNew from '../common/components/Container';
 import CustomButtonNew from '../common/components/CustomButton';
 import CustomInputNew from '../common/components/CustomInput';
 import {useToast} from '../common/components/CustomToast';
-import {COLORS, SIZES} from '../common/constant/Index';
+import {COLORS} from '../common/constant/Index';
 import {httpRequest} from '../common/constant/httpRequest';
 import useAsyncEffect from '../common/packages/useAsyncEffect/useAsyncEffect';
 import {clearAllStorage} from '../common/services/clearStorage';
@@ -38,6 +36,7 @@ import Row from '../common/components/Row';
 import {Checkbox} from 'react-native-paper';
 import {v4 as uuidv4} from 'uuid';
 import {secureStorage} from '../stores/rootStore';
+
 interface PayloadType {
   user: string;
   password: string;
@@ -281,7 +280,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
               />
               <Column>
                 <TouchableOpacity
-                  onPress={() => console.log('Forgot Password')}>
+                  onPress={() => navigation.navigate('ForgotPassword')}>
                   <Text style={styles.forgotPassword}>Forgot Password?</Text>
                 </TouchableOpacity>
               </Column>

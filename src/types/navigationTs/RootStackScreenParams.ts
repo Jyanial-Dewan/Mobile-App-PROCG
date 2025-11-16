@@ -26,4 +26,5 @@ export type RootStackScreensParms = {
   Run_a_Request: undefined;
   Alerts: undefined;
   Security: undefined;
+  ForgotPassword: undefined;
 };
