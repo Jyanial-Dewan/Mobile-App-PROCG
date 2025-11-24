@@ -40,7 +40,6 @@ export const api = {
   GetActionItems: '/def_action_items_view',
   UpdateActionItemAssignment: '/def_action_items',
   ActionItem: '/def_action_items',
-  CombinedUser: '/combined-user',
   ForgotPassword: '/forgot_password_request',
   ResetPassword: '/def_user_credentials/reset_forgot_password',
 };

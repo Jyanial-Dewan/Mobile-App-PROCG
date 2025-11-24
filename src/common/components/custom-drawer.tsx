@@ -11,7 +11,7 @@ import FixedContainer from './fixed-container';
 import {useRootStore} from '../../stores/rootStore';
 import {COLORS, SIZES} from '../constant/Index';
 import FastImage from 'react-native-fast-image';
-import {ProcgURL} from '../../../App';
+import {ProcgURL, ProcgURL2} from '../../../App';
 import {httpRequest} from '../constant/httpRequest';
 import SVGController from './SVGController';
 import {MMKV} from 'react-native-mmkv';
@@ -50,8 +50,9 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
         return null;
       }
       const api_params = {
-        url: api.Users + `/${userInfo?.user_id}`,
-        baseURL: url,
+        url: `${api.Users}?user_id=${userInfo?.user_id}`,
+        baseURL: ProcgURL2,
+        access_token: userInfo?.access_token,
         // isConsole: true,
         // isConsoleParams: true,
       };

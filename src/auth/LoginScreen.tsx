@@ -139,7 +139,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
 
     if (res.access_token) {
       const combined_user = {
-        url: `${api.Users}/${res.user_id}`,
+        url: `${api.Users}?user_id=${res.user_id}`,
         baseURL: ProcgURL2,
         access_token: res.access_token,
         // isConsole: true,

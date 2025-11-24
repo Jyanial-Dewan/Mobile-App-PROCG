@@ -25,7 +25,7 @@ import Image from 'react-native-image-fallback';
 import {MessageSnapshotType} from '../../../stores/messageStore';
 import {formateDateTime} from '../../../common/services/dateFormater';
 import {useRootStore} from '../../../stores/rootStore';
-import {ProcgURL} from '../../../../App';
+import {ProcgURL, ProcgURL2} from '../../../../App';
 import {COLORS} from '../../../common/constant/Themes';
 import {observer} from 'mobx-react-lite';
 import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
@@ -56,8 +56,8 @@ interface RenderMessageItemProps {
   userInfo: any;
   selectedIds: string[];
   notificationIds?: string[];
-  handleLongPress: (id: string) => void;
-  handlePress: (msgId: string, parentId: string) => Promise<void>;
+  handleLongPress: (msg: MessageSnapshotType) => void;
+  handlePress: (msg: MessageSnapshotType) => Promise<void>;
   handleDeleteFromRecycleBin: (msg: any) => Promise<void>;
 }
 const ITEMHEIGHT = 105;
@@ -210,10 +210,8 @@ const RenderMessageItem = observer(
                         : COLORS.white,
                   },
                 ]}
-                onLongPress={() => handleLongPress(item?.notification_id)}
-                onPress={() =>
-                  handlePress(item?.notification_id, item?.notification_id)
-                }>
+                onLongPress={() => handleLongPress(item)}
+                onPress={() => handlePress(item)}>
                 {/* Image Section */}
                 <View
                   style={[
@@ -348,18 +346,28 @@ const RecycleBin = observer(() => {
   const navigation = useNavigation<NotificationDetailsNavigationProp>();
   const isFocused = useIsFocused();
   const {userInfo, messageStore, selectedUrl} = useRootStore();
-  const {socket, deleteMessage, multipleDeleteMessage} = useSocketContext();
+  const {
+    socket,
+    deleteMessage,
+    handleParmanentDeleteMessage,
+    multipleDeleteMessage,
+  } = useSocketContext();
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(0);
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedMsgIds, setSelectedMsgIds] = useState<string[]>([]);
+  const [selectedMSGs, setSelectedMSGs] = useState<MessageSnapshotType[]>([]);
+  const [selectedAlertIds, setSelectedAlertIds] = useState<number[] | null>([]);
+  const [selectedActionItemIds, setSelectedActionItemIds] = useState<
+    number[] | null
+  >([]);
   const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const routeName = route.name;
   const toaster = useToast();
   const {control, setValue} = useForm();
-  const url = selectedUrl || ProcgURL;
+  const NODE_URL = selectedUrl || ProcgURL;
   const limit = 50;
   const notificationIds = messageStore.notificationMessages.map(
     msg => msg.notification_id,
@@ -376,7 +384,7 @@ const RecycleBin = observer(() => {
       }
       const api_params = {
         url: `${api.RecycleBinMessages}?user_id=${userInfo?.user_id}&page=${currentPage}&limit=${limit}`,
-        baseURL: url,
+        baseURL: NODE_URL,
         // isConsole: true,
         // isConsoleParams: true,
       };
@@ -407,56 +415,79 @@ const RecycleBin = observer(() => {
     setCurrentPage(1);
   };
 
-  const handlePress = async (msgId: string, parentId: string) => {
+  const handlePress = async (msg: MessageSnapshotType) => {
     if (isLongPressed) {
-      setSelectedIds(prev => [msgId, ...prev]);
+      setSelectedMsgIds(prev => [msg.notification_id, ...prev]);
+      setSelectedMSGs(prev => [msg, ...prev]);
+      // if (msg.alert_id) {
+      //   setSelectedAlertIds((prev: number[] | null) => [msg.alert_id, ...prev]);
+      // }
+      // if (msg.action_item_id) {
+      //   setSelectedActionItemIds((prev: number[] | null) => [
+      //     msg.action_item_id,
+      //     ...prev,
+      //   ]);
+      // }
     } else {
       navigation.navigate('Recycle_Bin_Detail', {
-        _id: msgId,
+        _id: msg.notification_id,
       });
     }
-    if (selectedIds.includes(msgId)) {
-      handleDisSelect(msgId);
+    if (selectedMsgIds.includes(msg.notification_id)) {
+      handleDisSelectMsg(msg);
     }
   };
-
-  const handleLongPress = (id: string) => {
+  console.log(selectedMSGs, '427');
+  const handleLongPress = (msg: MessageSnapshotType) => {
     setIsLongPressed(true);
-    setSelectedIds(prev => [id, ...prev]);
+    setSelectedMSGs(prev => [msg, ...prev]);
+    setSelectedMsgIds(prev => [msg.notification_id, ...prev]);
+    // if (msg.alert_id) {
+    //   setSelectedAlertIds(prev => [msg.alert_id, ...prev]);
+    // }
+    // if (msg.action_item_id) {
+    //   setSelectedActionItemIds(prev => [msg.action_item_id, ...prev]);
+    // }
   };
-
-  const handleDisSelect = (id: string) => {
-    const newSelected = selectedIds.filter(item => item !== id);
-    setSelectedIds(newSelected);
-    if (newSelected.length === 0 || !newSelected) setIsLongPressed(false);
+  const handleDisSelectMsg = (msg: MessageSnapshotType) => {
+    const newSelected = selectedMSGs.filter(
+      item => item.notification_id !== msg.notification_id,
+    );
+    setSelectedMSGs(newSelected);
+    setSelectedMsgIds(newSelected.map(item => item.notification_id));
+    // setSelectedAlertIds(newSelected.map(item => item?.alert_id));
+    // setSelectedActionItemIds(newSelected.map(item => item?.action_item_id));
   };
 
   const handleCancelLongPress = () => {
     setIsModalShow(false);
     setIsLongPressed(false);
-    setSelectedIds([]);
+    setSelectedMsgIds([]);
+    setSelectedMSGs([]);
+    setSelectedAlertIds([]);
+    setSelectedActionItemIds([]);
   };
 
   const handleMultipleDelete = async () => {
     const params = {
       url: `${api.MoveMultipleFromRecycleBin}/${userInfo?.user_id}`,
-      data: {ids: selectedIds},
+      data: {ids: selectedMsgIds},
       method: 'put',
-      baseURL: url,
+      baseURL: NODE_URL,
       isConsole: true,
       isConsoleParams: true,
     };
     try {
       const response = await httpRequest(params, setIsLoading);
       if (response) {
-        multipleDeleteMessage(selectedIds, 'Recycle');
+        multipleDeleteMessage(selectedMsgIds, 'Recycle');
 
         toaster.show({
           message: response.message,
           type: 'success',
         });
         setIsLongPressed(false);
-        setSelectedIds([]);
+        setSelectedMsgIds([]);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -466,21 +497,104 @@ const RecycleBin = observer(() => {
   };
 
   const handleDeleteFromRecycleBin = async (msg: MessageSnapshotType) => {
-    const putParams = {
-      url: `${api.DeleteFromRecycle}?notification_id=${msg.notification_id}&user_id=${userInfo?.user_id}`,
-      method: 'put',
-      baseURL: url,
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
     try {
-      const response = await httpRequest(putParams, setIsLoading);
-      if (response) {
-        deleteMessage(msg.notification_id, 'Recycle');
-        toaster.show({
-          message: response.message,
-          type: 'success',
-        });
+      if (msg.alert_id && msg.status === 'DRAFT') {
+        const deleteAlertParams = {
+          url: `${api.Alerts}/${msg.alert_id}`,
+          method: 'delete',
+          baseURL: NODE_URL,
+        };
+        const deletedAlert = await httpRequest(deleteAlertParams, setIsLoading);
+        if (deletedAlert) {
+          const deleteNotificationParams = {
+            url: `${api.Messages}/${msg.notification_id}`,
+            method: 'delete',
+            baseURL: NODE_URL,
+            isToast: true,
+          };
+          const deleteNotification = await httpRequest(
+            deleteNotificationParams,
+            setIsLoading,
+          );
+          if (deleteNotification) {
+            handleParmanentDeleteMessage(msg.notification_id);
+            toaster.show({
+              message: deleteNotification.message,
+              type: 'success',
+            });
+          }
+        }
+      } else if (msg.action_item_id && msg.status === 'DRAFT') {
+        const deleteActionItemParams = {
+          url: `${api.ActionItem}/${msg.action_item_id}`,
+          method: 'delete',
+          baseURL: ProcgURL2,
+          access_token: userInfo?.access_token,
+          isConsole: true,
+          isConsoleParams: true,
+        };
+        const deletedActionItem = await httpRequest(
+          deleteActionItemParams,
+          setIsLoading,
+        );
+        if (deletedActionItem) {
+          const deleteNotificationParams = {
+            url: `${api.Messages}/${msg.notification_id}`,
+            method: 'delete',
+            baseURL: NODE_URL,
+            isConsole: true,
+            isConsoleParams: true,
+          };
+          const deleteNotification = await httpRequest(
+            deleteNotificationParams,
+            setIsLoading,
+          );
+          if (deleteNotification) {
+            handleParmanentDeleteMessage(msg.notification_id);
+            toaster.show({
+              message: deleteNotification.message,
+              type: 'success',
+            });
+          }
+        }
+      } else if (
+        msg.status === 'DRAFT' &&
+        msg.notification_type === 'NOTIFICATION'
+      ) {
+        const deleteNotificationParams = {
+          url: `${api.Messages}/${msg.notification_id}`,
+          method: 'delete',
+          baseURL: NODE_URL,
+          isConsole: true,
+          isConsoleParams: true,
+        };
+        const deleteNotification = await httpRequest(
+          deleteNotificationParams,
+          setIsLoading,
+        );
+        if (deleteNotification) {
+          handleParmanentDeleteMessage(msg.notification_id);
+          toaster.show({
+            message: deleteNotification.message,
+            type: 'success',
+          });
+        }
+      } else {
+        const putParams = {
+          url: `${api.DeleteFromRecycle}?notification_id=${msg.notification_id}&user_id=${userInfo?.user_id}`,
+          method: 'put',
+          baseURL: NODE_URL,
+          isConsole: true,
+          isConsoleParams: true,
+        };
+        const response = await httpRequest(putParams, setIsLoading);
+        if (response) {
+          deleteMessage(msg.notification_id, 'Recycle');
+          toaster.show({
+            message: response.message,
+            type: 'success',
+          });
+        }
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -515,10 +629,10 @@ const RecycleBin = observer(() => {
       backgroundColor={COLORS.lightBackground}
       isScrollView={false}
       header={
-        isLongPressed && selectedIds.length ? (
+        isLongPressed && selectedMsgIds.length ? (
           <LongPressedHeader
             from={route.name}
-            selectedIds={selectedIds}
+            selectedIds={selectedMsgIds}
             handleCancelLongPress={handleCancelLongPress}
             handleShowModal={() => setIsModalShow(true)}
           />
@@ -538,7 +652,7 @@ const RecycleBin = observer(() => {
           <RenderMessageItem
             item={item}
             userInfo={userInfo}
-            selectedIds={selectedIds}
+            selectedIds={selectedMsgIds}
             notificationIds={notificationIds}
             handlePress={handlePress}
             handleLongPress={handleLongPress}
@@ -562,7 +676,7 @@ const RecycleBin = observer(() => {
       />
       <PlusButton />
       <CustomDeleteModal
-        total={selectedIds.length}
+        total={selectedMsgIds.length}
         isModalShow={isModalShow}
         onCancel={handleCancelLongPress}
         setIsModalShow={setIsModalShow}
