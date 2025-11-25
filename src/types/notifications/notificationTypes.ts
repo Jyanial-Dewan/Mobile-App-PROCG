@@ -36,6 +36,7 @@ export interface SocketContextType {
     type: DraftNotificationType,
   ) => void;
   deleteMessage: (notificationId: string, type: NotificationType) => void;
+  handleParmanentDeleteMessage: (notificationId: string) => void;
   multipleDeleteMessage: (
     notificationIds: string[],
     type: NotificationType,

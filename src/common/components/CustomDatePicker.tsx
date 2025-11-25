@@ -102,7 +102,7 @@ const CustomDatePickerNew = ({
                 disabled={isDisable}
                 activeOpacity={0.7}
                 onPress={() => showDatepicker()}>
-                <View>
+                <View style={styles.box}>
                   {value ? (
                     <View>
                       <Text style={[styles.newLabel]}>{label}</Text>
@@ -116,12 +116,14 @@ const CustomDatePickerNew = ({
                         borderBottomColor: value
                           ? COLORS.offDay
                           : error
-                          ? 'red'
-                          : COLORS.offDay,
+                            ? 'red'
+                            : COLORS.offDay,
                       },
                     ]}>
                     <Text style={[styles.newSelectedItem]}>
-                      {value ? date_formater(value) : placholder}
+                      {value
+                        ? date_formater(value)
+                        : date_formater(_todayDate())}
                     </Text>
 
                     <Icon
@@ -206,6 +208,11 @@ const CustomDatePickerNew = ({
 export default CustomDatePickerNew;
 
 const styles = StyleSheet.create({
+  box: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
   newLabel: {
     fontSize: 14,
     position: 'absolute',
@@ -237,7 +244,6 @@ const styles = StyleSheet.create({
   newBoxIOS: {
     overflow: 'hidden',
     borderWidth: 1,
-    flex: 1,
     paddingHorizontal: 16,
     justifyContent: 'center',
     paddingVertical: 0,
@@ -245,21 +251,24 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 44,
     backgroundColor: '#f9f9f9',
+    width: '100%',
   },
   newCalenderIcon: {position: 'absolute', right: 6, bottom: 7},
   error: {
     position: 'absolute',
     color: 'red',
-    fontSize: 10,
+    fontSize: 12,
     bottom: -20,
     marginBottom: 5,
     width: '100%',
     paddingTop: 3,
+    marginLeft: 16,
   },
   newSelectedItem: {
     fontSize: 16,
     lineHeight: 24,
     color: COLORS.textNewColor,
+    width: '100%',
   },
   iosModaContentWrapper: {
     flex: 1,

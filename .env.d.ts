@@ -4,4 +4,5 @@ declare module '@env' {
   export const msgBroker: string;
   export const secretKeyy: string;
   export const secureStorageKeyy: string;
+  export const cryptoSecretKey: string;
 }

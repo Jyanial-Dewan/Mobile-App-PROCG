@@ -82,7 +82,7 @@ const HomeMainIndex = () => {
         return null;
       }
       const api_params = {
-        url: `${api.Users}/${userInfo?.user_id}`,
+        url: `${api.Users}?user_id=${userInfo?.user_id}`,
         baseURL: PythonURL,
         access_token: userInfo?.access_token,
         // isConsole: true,

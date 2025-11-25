@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import {observer} from 'mobx-react-lite';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, Platform, StyleSheet, View} from 'react-native';
 import {COLORS, IMAGES, SIZES} from '../common/constant/Index';
 import delay from '../common/services/delay';
@@ -9,10 +9,17 @@ import BootSplash from 'react-native-bootsplash';
 import {useRootStore} from '../stores/rootStore';
 import axios from 'axios';
 import {ProcgURL} from '../../App';
+import {Linking} from 'react-native';
 
 const Loader = observer<RootStackScreenProps<'Loader'>>(
   ({navigation, route}) => {
     const {hydrate, hydrated, userInfo, selectedUrl} = useRootStore();
+    const [deepLinkData, setDeepLinkData] = useState<{
+      url: string;
+      request_id: string;
+      user_id: string;
+      token: string;
+    } | null>(null);
 
     useEffect(() => {
       (async () => {
@@ -21,9 +28,9 @@ const Loader = observer<RootStackScreenProps<'Loader'>>(
           if (isVisible) {
             await delay(500);
             await BootSplash.hide({fade: true});
-            hydrate();
+            await hydrate();
           } else if (!hydrated) {
-            hydrate();
+            await hydrate();
           }
         } catch (error) {
           console.error(error);
@@ -31,16 +38,87 @@ const Loader = observer<RootStackScreenProps<'Loader'>>(
       })();
     }, [hydrate, hydrated]);
 
+    // useEffect(() => {
+    //   if (!hydrated) return;
+
+    //   const handleDeepLink = async () => {
+    //     const url = await Linking.getInitialURL();
+    //     console.log('url', url);
+    //     if (url) {
+    //       // Handle deeplink
+    //       if (url.includes('/reset-password/')) {
+    //         const a = route.params || {};
+    //         // request_id, user_id, token
+    //         console.log(a, 'token========');
+
+    //         if (a) {
+    //           navigation.replace('ResetPassword', {
+    //             request_id: '',
+    //             user_id: '',
+    //             token: '',
+    //           });
+    //           return;
+    //         }
+    //       }
+    //     }
+
+    //     // Normal navigation
+    //     if (userInfo?.access_token) {
+    //       axios.defaults.baseURL = selectedUrl || `${ProcgURL}`;
+    //       axios.defaults.headers.common['Authorization'] =
+    //         `Bearer ${userInfo?.access_token}`;
+    //       navigation.replace('Drawer');
+    //     } else {
+    //       navigation.replace('Login');
+    //     }
+    //   };
+
+    //   handleDeepLink();
+    // }, [hydrated, navigation, userInfo, selectedUrl]);
+
+    useEffect(() => {
+      (async () => {
+        const url = await Linking.getInitialURL();
+        if (url) {
+          // console.log('App opened via deep link:', url);
+
+          // Match URLs like: https://procg.datafluent.team/invitation/10/<token>
+          const match = url.match(/reset-password\/(\d+)\/([^/]+)/);
+
+          if (match) {
+            const [user_invitation_id, token] = match;
+            // console.log('Extracted params:', {user_invitation_id, token});
+            setDeepLinkData({
+              url,
+              request_id: user_invitation_id,
+              user_id: '',
+              token,
+            });
+          } else {
+            setDeepLinkData({url, request_id: '', user_id: '', token: ''});
+          }
+        }
+      })();
+    }, []);
     useEffect(() => {
       if (hydrated) {
         delay(1000).then(() => {
-          if (userInfo?.access_token) {
-            axios.defaults.baseURL = selectedUrl || `${ProcgURL}`;
-            axios.defaults.headers.common['Authorization'] =
-              `Bearer ${userInfo?.access_token}`;
-            navigation.replace('Drawer');
+          if (deepLinkData?.url?.includes('invitation')) {
+            // console.log('Navigating to Register with params:', deepLinkData);
+            navigation.replace('ResetPassword', {
+              request_id: deepLinkData.request_id,
+              user_id: deepLinkData.user_id,
+              token: deepLinkData.token,
+            });
           } else {
-            navigation.replace('Login');
+            if (userInfo?.access_token) {
+              axios.defaults.baseURL = selectedUrl || `${ProcgURL}`;
+              axios.defaults.headers.common['Authorization'] =
+                `Bearer ${userInfo?.access_token}`;
+              navigation.replace('Drawer');
+            } else {
+              navigation.replace('Login');
+            }
           }
         });
       }

@@ -102,7 +102,10 @@ export function SocketContextProvider({children}: SocketContextProps) {
       }
     });
 
-    // Device Action
+    socket.on('permanentDeleteMessage', (notificationId: string) => {
+      messageStore.removeBinMessage(notificationId);
+    });
+
     socket?.on('addDevice', device => {
       devicesStore.addDevice(device);
     });
@@ -143,6 +146,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
       socket?.off('sentMessage');
       socket?.off('sync');
       socket?.off('deletedMessage');
+      socket?.off('permanentDeleteMessage');
       socket?.off('addDevice');
       socket?.off('restoreMessage');
       socket?.off('SentAlert');
@@ -181,6 +185,11 @@ export function SocketContextProvider({children}: SocketContextProps) {
       type,
     });
   };
+
+  const handleParmanentDeleteMessage = (notificationId: string) => {
+    socket.emit('permanentDeleteMessage', {notificationId, sender: userId});
+  };
+
   const multipleDeleteMessage = (
     selectedIds: string[],
     type: NotificationType,
@@ -227,6 +236,7 @@ export function SocketContextProvider({children}: SocketContextProps) {
         sendMessage,
         draftMessage,
         deleteMessage,
+        handleParmanentDeleteMessage,
         multipleDeleteMessage,
         readMessage,
         SendAlert,

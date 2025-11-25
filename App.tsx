@@ -57,11 +57,11 @@ const linking: LinkingOptions<any> = {
   prefixes: [
     /* your linking prefixes */
     'PROCG://',
-    'https://procg.datafluent.team',
+    'https://procg.datafluent.team/',
   ],
   config: {
     /* configuration for matching screens with paths */
-    initialRouteName: 'Loader',
+    // initialRouteName: 'Loader',
     screens: {
       // Loader: {
       //   path: 'loader/:delay?/:text?',
@@ -74,10 +74,11 @@ const linking: LinkingOptions<any> = {
       //     text: text => encodeURIComponent(text),
       //   },
       // },
-      Home: '',
+      // Home: '',
       Notification: 'notifications/inbox',
       Menu: 'menu',
       ActionItem: 'invitation',
+      ResetPassword: 'reset-password/:request_id/:user_id/:token',
     },
   },
 };

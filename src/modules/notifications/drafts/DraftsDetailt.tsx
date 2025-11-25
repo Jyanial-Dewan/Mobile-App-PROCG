@@ -466,34 +466,34 @@ const DraftsDetails = () => {
     }
   };
 
-  const handleDeleteDraftMessage = async (msgId: string) => {
-    ///notifications/move-to-recyclebin?notification_id=${notification_id}&user_id=${userId}
-    const deleteParams = {
-      url: `${api.DeleteMessage}notification_id=${notificationId}&user_id=${userInfo?.user_id}`,
-      method: 'put',
-      baseURL: selectedUrl || ProcgURL,
-      // isConsole: true,
-      // isConsoleParams: true,
-    };
-    try {
-      setIsLoading(true);
-      const response = await httpRequest(deleteParams, setIsLoading);
-      if (response) {
-        deleteMessage(notificationId, 'Drafts');
-        toaster.show({
-          message: response.message,
-          type: 'success',
-        });
-        setTimeout(async () => {
-          navigation.goBack();
-        }, 1000);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        toaster.show({message: error.message, type: 'error'});
-      }
-    }
-  };
+  // const handleDeleteDraftMessage = async (msgId: string) => {
+  //   ///notifications/move-to-recyclebin?notification_id=${notification_id}&user_id=${userId}
+  //   const deleteParams = {
+  //     url: `${api.DeleteMessage}notification_id=${msgId}&user_id=${userInfo?.user_id}`,
+  //     method: 'put',
+  //     baseURL: selectedUrl || ProcgURL,
+  //     // isConsole: true,
+  //     // isConsoleParams: true,
+  //   };
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await httpRequest(deleteParams, setIsLoading);
+  //     if (response) {
+  //       deleteMessage(msgId, 'Drafts');
+  //       toaster.show({
+  //         message: response.message,
+  //         type: 'success',
+  //       });
+  //       setTimeout(async () => {
+  //         navigation.goBack();
+  //       }, 1000);
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       toaster.show({message: error.message, type: 'error'});
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     if (recipients.length === 0) {
@@ -508,12 +508,12 @@ const DraftsDetails = () => {
       isScrollView={false}
       header={
         <MainHeader
-          last={
-            <RoundedButton
-              onPress={() => setIsOpenDeleteModal(true)}
-              child={<Feather name="trash" size={24} color="black" />}
-            />
-          }
+          // last={
+          //   <RoundedButton
+          //     onPress={() => setIsOpenDeleteModal(true)}
+          //     child={<Feather name="trash" size={24} color="black" />}
+          //   />
+          // }
           routeName={
             isLoading ? 'Loading...' : `Edit ${toTitleCase(notificationType)}`
           }
@@ -658,7 +658,7 @@ const DraftsDetails = () => {
         </View>
       }>
       {/* delete modal  */}
-      {isOpenDeleteModal && (
+      {/* {isOpenDeleteModal && (
         <CustomDeleteModal
           isModalShow={true}
           setIsModalShow={setIsOpenDeleteModal}
@@ -667,7 +667,7 @@ const DraftsDetails = () => {
           onCancel={() => setIsOpenDeleteModal(false)}
           actionName="move to Recycle Bin"
         />
-      )}
+      )} */}
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
       ) : (

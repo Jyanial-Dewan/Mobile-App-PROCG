@@ -34,7 +34,7 @@ const LongPressedHeader = ({
         text={`${selectedIds.length} selected`}
       />
       <RoundedButton
-        onPress={handleShowModal || defaultHandler}
+        onPress={handleMultipleDelete || handleShowModal || defaultHandler}
         child={<Feather name="trash" size={24} color="black" />}
       />
       {/* {from === 'Recycle_Bin' ? (
