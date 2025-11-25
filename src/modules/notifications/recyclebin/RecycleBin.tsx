@@ -358,10 +358,6 @@ const RecycleBin = observer(() => {
   const [isLongPressed, setIsLongPressed] = useState<boolean>(false);
   const [selectedMsgIds, setSelectedMsgIds] = useState<string[]>([]);
   const [selectedMSGs, setSelectedMSGs] = useState<MessageSnapshotType[]>([]);
-  const [selectedAlertIds, setSelectedAlertIds] = useState<number[] | null>([]);
-  const [selectedActionItemIds, setSelectedActionItemIds] = useState<
-    number[] | null
-  >([]);
   const [isModalShow, setIsModalShow] = useState(false);
   const route = useRoute();
   const routeName = route.name;
@@ -419,15 +415,6 @@ const RecycleBin = observer(() => {
     if (isLongPressed) {
       setSelectedMsgIds(prev => [msg.notification_id, ...prev]);
       setSelectedMSGs(prev => [msg, ...prev]);
-      // if (msg.alert_id) {
-      //   setSelectedAlertIds((prev: number[] | null) => [msg.alert_id, ...prev]);
-      // }
-      // if (msg.action_item_id) {
-      //   setSelectedActionItemIds((prev: number[] | null) => [
-      //     msg.action_item_id,
-      //     ...prev,
-      //   ]);
-      // }
     } else {
       navigation.navigate('Recycle_Bin_Detail', {
         _id: msg.notification_id,
@@ -437,26 +424,20 @@ const RecycleBin = observer(() => {
       handleDisSelectMsg(msg);
     }
   };
-  console.log(selectedMSGs, '427');
+
   const handleLongPress = (msg: MessageSnapshotType) => {
     setIsLongPressed(true);
     setSelectedMSGs(prev => [msg, ...prev]);
     setSelectedMsgIds(prev => [msg.notification_id, ...prev]);
-    // if (msg.alert_id) {
-    //   setSelectedAlertIds(prev => [msg.alert_id, ...prev]);
-    // }
-    // if (msg.action_item_id) {
-    //   setSelectedActionItemIds(prev => [msg.action_item_id, ...prev]);
-    // }
   };
   const handleDisSelectMsg = (msg: MessageSnapshotType) => {
     const newSelected = selectedMSGs.filter(
       item => item.notification_id !== msg.notification_id,
     );
     setSelectedMSGs(newSelected);
-    setSelectedMsgIds(newSelected.map(item => item.notification_id));
-    // setSelectedAlertIds(newSelected.map(item => item?.alert_id));
-    // setSelectedActionItemIds(newSelected.map(item => item?.action_item_id));
+    setSelectedMsgIds(prev =>
+      prev.filter(item => item !== msg.notification_id),
+    );
   };
 
   const handleCancelLongPress = () => {
@@ -464,30 +445,89 @@ const RecycleBin = observer(() => {
     setIsLongPressed(false);
     setSelectedMsgIds([]);
     setSelectedMSGs([]);
-    setSelectedAlertIds([]);
-    setSelectedActionItemIds([]);
   };
 
   const handleMultipleDelete = async () => {
-    const params = {
-      url: `${api.MoveMultipleFromRecycleBin}/${userInfo?.user_id}`,
-      data: {ids: selectedMsgIds},
-      method: 'put',
-      baseURL: NODE_URL,
-      isConsole: true,
-      isConsoleParams: true,
-    };
+    const draftMsgs = selectedMSGs.filter(item => item.status === 'DRAFT');
+    const notDraftMsgs = selectedMSGs.filter(item => item.status !== 'DRAFT');
     try {
-      const response = await httpRequest(params, setIsLoading);
-      if (response) {
-        multipleDeleteMessage(selectedMsgIds, 'Recycle');
+      if (draftMsgs.length > 0) {
+        const msgIds = draftMsgs.map(item => item.notification_id);
+        const alertIds = draftMsgs
+          .filter(item => item.alert_id !== null)
+          .map(item => item.alert_id);
+        const actionItemIds = draftMsgs
+          .filter(item => item.action_item_id !== null)
+          .map(item => item.action_item_id);
 
-        toaster.show({
-          message: response.message,
-          type: 'success',
-        });
-        setIsLongPressed(false);
-        setSelectedMsgIds([]);
+        const deleteDraftAlertParams = {
+          url: `${api.Alerts}/delete-multiple-alerts`,
+          method: 'delete',
+          data: {ids: alertIds},
+          baseURL: NODE_URL,
+          isConsole: true,
+          isConsoleParams: true,
+          access_token: userInfo?.access_token,
+        };
+        const deleteDraftActionItemParams = {
+          url: `${api.ActionItem}/delete_multiple_action_items`,
+          data: {ids: actionItemIds},
+          method: 'delete',
+          baseURL: ProcgURL2,
+          isConsole: true,
+          isConsoleParams: true,
+          access_token: userInfo?.access_token,
+        };
+        const deleteDraftMsgParams = {
+          url: `${api.Messages}/delete-multiple-drafts`,
+          method: 'delete',
+          data: {ids: msgIds},
+          baseURL: NODE_URL,
+          isConsole: true,
+          isConsoleParams: true,
+          access_token: userInfo?.access_token,
+        };
+        if (alertIds.length > 0) {
+          await httpRequest(deleteDraftAlertParams, () => {});
+        }
+        if (actionItemIds.length > 0) {
+          await httpRequest(deleteDraftActionItemParams, () => {});
+        }
+
+        const resMsg = await httpRequest(deleteDraftMsgParams, setIsLoading);
+        if (resMsg) {
+          msgIds.forEach(msgId => {
+            handleParmanentDeleteMessage(msgId);
+          });
+          toaster.show({
+            message: resMsg.message,
+            type: 'success',
+          });
+          setIsLongPressed(false);
+          setSelectedMsgIds([]);
+        }
+      }
+      if (notDraftMsgs.length > 0) {
+        const ids = notDraftMsgs.map(item => item.notification_id);
+        const params = {
+          url: `${api.MoveMultipleFromRecycleBin}/${userInfo?.user_id}`,
+          data: {ids: ids},
+          method: 'put',
+          baseURL: NODE_URL,
+          isConsole: true,
+          isConsoleParams: true,
+        };
+        const response = await httpRequest(params, setIsLoading);
+        if (response) {
+          multipleDeleteMessage(ids, 'Recycle');
+
+          toaster.show({
+            message: response.message,
+            type: 'success',
+          });
+          setIsLongPressed(false);
+          setSelectedMsgIds([]);
+        }
       }
     } catch (error) {
       if (error instanceof Error) {

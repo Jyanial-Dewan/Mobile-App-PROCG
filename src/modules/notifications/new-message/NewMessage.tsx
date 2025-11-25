@@ -327,7 +327,18 @@ const NewMessage = () => {
             // isConsole: true,
             // isConsoleParams: true,
           };
-          await httpRequest(sendActionItemParams, setIsDrafting);
+          const actionItemResponse = await httpRequest(
+            sendActionItemParams,
+            setIsDrafting,
+          );
+          if (actionItemResponse) {
+            if (selectedNotificationType.toLowerCase() === 'action item') {
+              toaster.show({
+                message: actionItemResponse.message,
+                type: 'success',
+              });
+            }
+          }
         }
 
         draftMessage(draftPayload.notification_id, userInfo?.user_id!, 'New');

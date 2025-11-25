@@ -23,6 +23,7 @@ export const api = {
   DeleteFromRecycle: '/notifications/remove-from-recyclebin',
   MoveMultipleToRecycleBin: '/notifications/move-multiple-to-recyclebin',
   MoveMultipleFromRecycleBin: '/notifications/move-multiple-from-recyclebin',
+  DeleteMultipleDrafts: '/notifications/delete-multiple-drafts',
   RegisterToken: '/push-notification/register-token',
   UnregisterToken: '/push-notification/unregister-token',
   SendNotification: '/push-notification/send-notification',
