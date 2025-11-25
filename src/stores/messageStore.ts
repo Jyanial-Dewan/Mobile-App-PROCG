@@ -334,13 +334,27 @@ export const MessageStore = types
       self.binMessages.replace([...existMsgs, ...validMsgs]);
     },
     addBinMessage(msg: MessageSnapshotType) {
-      const clonedMessage = {
-        ...msg,
-        creation_date: new Date(msg.creation_date),
-        last_update_date: new Date(msg.last_update_date),
-      };
-      self.binMessages.unshift(clonedMessage);
-      self.totalBin++;
+      const existingIndex = self.binMessages.findIndex(
+        m => m.notification_id === msg.notification_id,
+      );
+
+      if (existingIndex !== -1) {
+        // Replace the existing message with a model instance
+        self.binMessages[existingIndex] = MessageModel.create({
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
+        });
+      } else {
+        // Add new message at the start as a model instance
+        const clonedMessage = {
+          ...msg,
+          creation_date: new Date(msg.creation_date),
+          last_update_date: new Date(msg.last_update_date),
+        };
+        self.binMessages.unshift(clonedMessage);
+        self.totalBin++;
+      }
     },
     removeBinMessage(notificationId: string) {
       const messageToRemove = self.binMessages.find(

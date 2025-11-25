@@ -503,8 +503,6 @@ const RecycleBin = observer(() => {
             message: resMsg.message,
             type: 'success',
           });
-          setIsLongPressed(false);
-          setSelectedMsgIds([]);
         }
       }
       if (notDraftMsgs.length > 0) {
@@ -525,14 +523,16 @@ const RecycleBin = observer(() => {
             message: response.message,
             type: 'success',
           });
-          setIsLongPressed(false);
-          setSelectedMsgIds([]);
         }
       }
     } catch (error) {
       if (error instanceof Error) {
         console.log(error.message);
       }
+    } finally {
+      setIsLongPressed(false);
+      setSelectedMsgIds([]);
+      setSelectedMSGs([]);
     }
   };
 
