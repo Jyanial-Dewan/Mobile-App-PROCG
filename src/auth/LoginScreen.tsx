@@ -146,6 +146,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         // isConsoleParams: true,
       };
       const userResponse = await httpRequest(combined_user, setIsLoading);
+      console.log(userResponse, 'userResponse');
       const deviceInfoPayload = {
         user_id: res.user_id,
         deviceInfo: {
@@ -179,7 +180,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       if (response.id) {
         // response is - id , user_id, device_type, browser_name, browser_version, os, user_agent, added_at, is_active , ip_address,  location, user_name, signon_audit, signon_id,
         deviceInfoSave(response);
-        userInfoSave({...res, ...userResponse});
+        userInfoSave({...res, ...userResponse.result});
         toaster.show({message: 'Login Successfully', type: 'success'});
       }
     } else if (res === undefined || res === 401) {

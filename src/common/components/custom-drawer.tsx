@@ -57,7 +57,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      setProfilePhoto(`${url}/${res.profile_picture.original}`);
+      setProfilePhoto(`${url}/${res.result.profile_picture.original}`);
     },
     [isFocused, drawerStatus],
   );
