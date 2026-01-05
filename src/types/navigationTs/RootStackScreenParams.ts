@@ -28,4 +28,5 @@ export type RootStackScreensParms = {
   Security: undefined;
   ForgotPassword: undefined;
   ResetPassword: {request_id: string; user_id: string; token: string};
+  MFALogin: undefined;
 };
