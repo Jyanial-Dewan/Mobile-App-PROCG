@@ -15,9 +15,10 @@ interface HeaderProps {
   routeName: string;
   last?: React.ReactNode;
   style?: StyleProp<TextStyle>;
+  func?: () => void;
 }
 
-const Header = ({routeName, last, style}: HeaderProps) => {
+const Header = ({routeName, last, style, func}: HeaderProps) => {
   const navigation = useNavigation();
   const goBack = () => {
     if (navigation.canGoBack()) {
@@ -28,6 +29,7 @@ const Header = ({routeName, last, style}: HeaderProps) => {
         routes: [{name: 'Login'}],
       });
     }
+    func && func();
     Keyboard.dismiss();
   };
   return (

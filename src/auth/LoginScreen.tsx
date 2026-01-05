@@ -146,7 +146,6 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         // isConsoleParams: true,
       };
       const userResponse = await httpRequest(combined_user, setIsLoading);
-      console.log(userResponse, 'userResponse');
       const deviceInfoPayload = {
         user_id: res.user_id,
         deviceInfo: {
