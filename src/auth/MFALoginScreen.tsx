@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Button,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import ContainerNew from '../common/components/Container';
 import MainHeader from '../common/components/MainHeader';
 import CustomInputNew from '../common/components/CustomInput';
@@ -16,6 +23,8 @@ import {v4 as uuidv4} from 'uuid';
 import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import {RootStackScreenProps} from '~/navigations/RootStack';
+import RoundedButton from '../common/components/RoundedButton';
+import SVGController from '../common/components/SVGController';
 interface ILoginResponse {
   access_token: string;
   refresh_token: string;
@@ -140,7 +149,17 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
       clearTimeout(timeoutId);
     };
   }, []);
-
+  const goBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Login'}],
+      });
+    }
+    Keyboard.dismiss();
+  };
   return (
     <ContainerNew
       edges={['top', 'left', 'right']}
@@ -149,6 +168,12 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
       // header={<MainHeader routeName="MFA Verification" />}
     >
       <View style={styles.content}>
+        <View style={{position: 'absolute', top: 10, left: 10, zIndex: 1}}>
+          <RoundedButton
+            onPress={goBack}
+            child={<SVGController name="Arrow-Left" color="#41596B" />}
+          />
+        </View>
         <Text style={styles.title}>MFA Verification</Text>
         <Text style={styles.subtitle}>
           Enter the 6-digit code from your authenticator app

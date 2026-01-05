@@ -137,7 +137,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     };
 
     const res = await httpRequest(api_params, setIsLoading);
-    console.log(res, 'res');
+
     if (res?.mfa_required) {
       mfaStore.setMfaResponse(res);
       navigation.navigate('MFALogin');
