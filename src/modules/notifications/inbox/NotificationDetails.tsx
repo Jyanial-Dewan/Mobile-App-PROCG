@@ -26,6 +26,10 @@ import MainHeader from '../../../common/components/MainHeader';
 import CustomFlatListThree from '../../../common/components/CustomFlatListThree';
 import ReplyButton from '../../../common/components/ReplyButton';
 
+interface Props {
+  item: MessageSnapshotType;
+}
+
 const NotificationDetails = observer(() => {
   const isFocused = useIsFocused();
   const {usersStore, userInfo, selectedUrl} = useRootStore();
@@ -124,9 +128,7 @@ const NotificationDetails = observer(() => {
     );
     setRecivers(filterMessage?.involved_users);
   };
-  interface Props {
-    item: MessageSnapshotType;
-  }
+
   const renderItem = ({item}: Props) => {
     const {datePart, timePart} = formateDateTime(item?.creation_date as any);
 
@@ -154,6 +156,7 @@ const NotificationDetails = observer(() => {
                 Authorization: `Bearer ${userInfo?.access_token}`,
               },
             }}
+            fallback={fallbacks}
           />
         </View>
 
@@ -226,10 +229,19 @@ const NotificationDetails = observer(() => {
     );
   };
 
+  const unStageTotalMsgs = () => {
+    setTotalMessages([]);
+  };
+
   return (
     <ContainerNew
       style={styles.container}
-      header={<MainHeader routeName={'Notification Details'} />}
+      header={
+        <MainHeader
+          routeName={'Notification Details'}
+          func={unStageTotalMsgs}
+        />
+      }
       isScrollView={false}>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />

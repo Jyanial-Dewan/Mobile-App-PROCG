@@ -97,7 +97,7 @@ const ScanLoginQrCode = observer(() => {
         // navigation.replace('HomeScreen');
         const response = await httpRequest(deviceInfoApi_params, setIsLoading);
         if (response) {
-          userInfoSave({...res, ...userResponse});
+          userInfoSave({...res, ...userResponse.result});
           deviceInfoSave(response);
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});
           // navigation.reset({index: 0, routes: [{name: 'Drawer'}]});

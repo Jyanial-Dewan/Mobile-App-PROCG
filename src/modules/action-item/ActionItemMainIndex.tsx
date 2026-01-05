@@ -53,21 +53,21 @@ const ActionItemMainIndex = () => {
     setIsLoading(true);
     //url: `${flaskApi.DefActionItems}/${token.user_id}/${currentPage}/${limit}?status=${selectedOption}`,
     const api_params = {
-      url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}&action_item_name=${searchQuery}`,
+      url: `${api.ActionItem}?user_id=${userInfo?.user_id}&action_item_name=${searchQuery}&status=${selectedStatusQuery}&page=${currentPage}&limit=${limit}`,
+      // url: `${api.GetActionItems}/${userInfo?.user_id}/${currentPage}/${limit}?status=${selectedStatusQuery}&action_item_name=${searchQuery}`,
       baseURL: PythonURL,
       access_token: userInfo?.access_token,
       // isConsole: true,
       // isConsoleParams: true,
     };
     const res = await httpRequest(api_params, setIsLoading);
-
     if (res) {
-      setHasMore(res.items.length);
-      setData(res.items);
+      setHasMore(res.result.length);
+      setData(res.result);
       if (currentPage === 1) {
-        actionItems.initialActionItems(res.items);
+        actionItems.initialActionItems(res.result);
       } else {
-        actionItems.saveActionItems(res.items);
+        actionItems.saveActionItems(res.result);
       }
       actionItems.setRefreshing(false);
     }

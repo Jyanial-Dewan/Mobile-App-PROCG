@@ -89,7 +89,7 @@ const HomeMainIndex = () => {
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      setProfilePhoto(`${url}/${res.profile_picture.original}`);
+      setProfilePhoto(`${url}/${res.result.profile_picture.original}`);
     },
 
     [isFocused, drawerStatus],
@@ -110,7 +110,7 @@ const HomeMainIndex = () => {
         // isConsoleParams: true,
       };
       const res = await httpRequest(api_params, setIsLoading);
-      usersStore.saveUsers(res);
+      usersStore.saveUsers(res.result);
     },
     [isFocused, userInfo?.access_token],
   );

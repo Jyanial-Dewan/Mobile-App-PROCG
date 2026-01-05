@@ -470,8 +470,8 @@ const RecycleBin = observer(() => {
           access_token: userInfo?.access_token,
         };
         const deleteDraftActionItemParams = {
-          url: `${api.ActionItem}/delete_multiple_action_items`,
-          data: {ids: actionItemIds},
+          url: `${api.ActionItem}`,
+          data: {action_item_ids: actionItemIds},
           method: 'delete',
           baseURL: ProcgURL2,
           isConsole: true,
