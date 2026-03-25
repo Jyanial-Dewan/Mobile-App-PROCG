@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Keyboard, StyleSheet, Text, View} from 'react-native';
+import {Keyboard, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import ContainerNew from '../common/components/Container';
 import MainHeader from '../common/components/MainHeader';
 import CustomInputNew from '../common/components/CustomInput';
@@ -19,6 +19,9 @@ import {RootStackScreenProps} from '~/navigations/RootStack';
 import RoundedButton from '../common/components/RoundedButton';
 import SVGController from '../common/components/SVGController';
 import {maskEmail} from '../common/utility/general';
+import {Icon} from 'react-native-paper';
+import {COLORS} from '~/common/constant/Themes';
+import Clipboard from '@react-native-clipboard/clipboard';
 interface ILoginResponse {
   access_token: string;
   refresh_token: string;
@@ -270,6 +273,15 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
     }
   };
 
+  const pasteClipboard = async () => {
+    try {
+      const text = await Clipboard.getString();
+      setValue('mfa_code', text);
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+    }
+  };
+
   return (
     <ContainerNew
       edges={['top', 'left', 'right']}
@@ -301,6 +313,7 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
                 control={control}
                 name="mfa_code"
                 label="Enter 6-digit MFA code"
+                keyboardType="numeric"
                 rules={{
                   required: 'MFA code is required',
                   minLength: {
@@ -312,6 +325,11 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
                     message: 'MFA code must be exactly 6 digits',
                   },
                 }}
+                rightIcon={() => (
+                  <TouchableOpacity onPress={pasteClipboard}>
+                    <SVGController name="Paste" color="#41596B" />
+                  </TouchableOpacity>
+                )}
               />
 
               <View style={{marginTop: 10, alignItems: 'flex-end'}}>
@@ -391,6 +409,7 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
                 control={control}
                 name="mfa_code"
                 label="Enter 6-digit OTP code"
+                keyboardType="numeric"
                 rules={{
                   required: 'OTP code is required',
                   minLength: {
@@ -402,6 +421,11 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
                     message: 'OTP code must be exactly 6 digits',
                   },
                 }}
+                rightIcon={() => (
+                  <TouchableOpacity onPress={pasteClipboard}>
+                    <SVGController name="Paste" color="#41596B" />
+                  </TouchableOpacity>
+                )}
               />
 
               <View

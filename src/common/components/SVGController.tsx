@@ -35,6 +35,7 @@ import CircleDot from '../../assets/Icons/circle-dot.svg';
 import AlertHigh from '../../assets/Icons/shield-alert.svg';
 import AlertNormal from '../../assets/Icons/triangle-alert.svg';
 import AlertLow from '../../assets/Icons/circle-alert.svg';
+import Clipboard from '../../assets/Icons/clipboard.svg';
 
 interface SVGControllerProps {
   name: string;
@@ -128,6 +129,8 @@ const SVGController = ({
         return <AlertNormal width={width} height={height} color={color} />;
       case 'Alert-Low':
         return <AlertLow width={width} height={height} color={color} />;
+      case 'Paste':
+        return <Clipboard width={width} height={height} color={color} />;
 
       default:
         return <BellIcon width={width} height={height} color={color} />;
