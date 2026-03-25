@@ -21,3 +21,25 @@ export const decrypt = (value: string) => {
     return null;
   }
 };
+
+export const maskEmail = (email: string) => {
+  if (!email.includes('@')) return email;
+
+  const [username, domain] = email.split('@');
+
+  // If username is too short, mask everything except first char
+  if (username.length <= 4) {
+    return (
+      username.charAt(0) +
+      '*'.repeat(Math.max(username.length - 1, 0)) +
+      '@' +
+      domain
+    );
+  }
+
+  const start = username.slice(0, 2);
+  const end = username.slice(-2);
+  const maskedCount = Math.max(username.length - 4, 0);
+
+  return start + '*'.repeat(maskedCount) + end + '@' + domain;
+};

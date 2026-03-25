@@ -1,12 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Button,
-  Keyboard,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import {Keyboard, StyleSheet, Text, View} from 'react-native';
 import ContainerNew from '../common/components/Container';
 import MainHeader from '../common/components/MainHeader';
 import CustomInputNew from '../common/components/CustomInput';
@@ -25,6 +18,7 @@ import {observer} from 'mobx-react-lite';
 import {RootStackScreenProps} from '~/navigations/RootStack';
 import RoundedButton from '../common/components/RoundedButton';
 import SVGController from '../common/components/SVGController';
+import {maskEmail} from '../common/utility/general';
 interface ILoginResponse {
   access_token: string;
   refresh_token: string;
@@ -45,8 +39,12 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
   } = useRootStore();
   const toaster = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifyingLoading, setIsVerifyingLoading] = useState(false);
   const [isModalShow, setIsModalShow] = useState(false);
-
+  const [isTryAnotherWayClicked, setIsTryAnotherWayClicked] = useState(false);
+  const [viaEmailOrSms, setViaEmailOrSms] = useState<'EMAIL' | 'SMS' | ''>('');
+  const [codeSentEmail, setCodeSentEmail] = useState('');
+  // console.log(codeSentEmail, 'codeSentEmail');
   const {control, handleSubmit, setValue, reset, getValues} = useForm({
     defaultValues: {mfa_code: ''},
   });
@@ -111,7 +109,7 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: {mfa_code: string}) => {
     const response = await httpRequest(
       {
         url: `${api.AuthAppsLogin}/verify-mfa-login`,
@@ -125,7 +123,7 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
         // isConsole: true,
         // isConsoleParams: true,
       },
-      setIsLoading,
+      setIsVerifyingLoading,
     );
 
     if (response.access_token) {
@@ -149,8 +147,61 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
       clearTimeout(timeoutId);
     };
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (viaEmailOrSms === 'EMAIL') {
+        const res = await httpRequest(
+          {
+            baseURL: ProcgURL,
+            data: {mfa_token: mfaStore?.mfaResponse?.mfa_token || ''},
+            url: `${api.AuthAppsLogin}/send-email-mfa-code`,
+            method: 'POST',
+          },
+          setIsLoading,
+        );
+        if (res?.message) {
+          setCodeSentEmail(res.email);
+          toaster.show({message: res.message, type: 'success'});
+        } else {
+          toaster.show({message: 'Failed to send email', type: 'error'});
+        }
+      }
+    })();
+  }, [mfaStore?.mfaResponse?.mfa_token, viaEmailOrSms]);
+
+  const handleEmailOTPCodeSubmit = async (data: {mfa_code: string}) => {
+    const response = await httpRequest(
+      {
+        baseURL: ProcgURL,
+        data: {
+          mfa_token: mfaStore?.mfaResponse?.mfa_token || '',
+          otp: Number(data.mfa_code),
+        },
+        url: `${api.AuthAppsLogin}/verify-email-mfa-code`,
+        method: 'POST',
+      },
+      setIsVerifyingLoading,
+    );
+    // console.log(response, 'reponse');
+    if (response.access_token) {
+      handleSetTokenData(response);
+    } else {
+      toaster.show({
+        message:
+          response?.message || 'OTP verification failed. Please try again.',
+        type: 'warning',
+      });
+    }
+  };
+
   const goBack = () => {
     if (navigation.canGoBack()) {
+      setValue('mfa_code', '', {shouldValidate: false});
+      setCodeSentEmail('');
+      setViaEmailOrSms('EMAIL');
+      setTimeLeft(1 * 60);
+      setIsResendCode(false);
       navigation.goBack();
     } else {
       navigation.reset({
@@ -160,6 +211,65 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
     }
     Keyboard.dismiss();
   };
+
+  const handleMethodSelect = (method: 'EMAIL' | 'SMS') => {
+    setViaEmailOrSms(method);
+    setValue('mfa_code', '', {shouldValidate: false});
+  };
+
+  const [timeLeft, setTimeLeft] = useState(1 * 60);
+  const [isResendCode, setIsResendCode] = useState(false);
+
+  useEffect(() => {
+    if (codeSentEmail.length > 0) {
+      const interval = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime === 0) {
+            clearInterval(interval);
+            return 0;
+          }
+          if (isResendCode) {
+            clearInterval(interval);
+            setIsResendCode(false);
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      // Cleanup interval when the component is unmounted
+      return () => clearInterval(interval);
+    }
+  }, [codeSentEmail.length, isResendCode, timeLeft]);
+
+  // Convert seconds into MM:SS format
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  const handleSendCodeViaEmailOrSMS = async () => {
+    const response = await httpRequest(
+      {
+        url: `${api.AuthAppsLogin}/resend-mfa-code`,
+        method: 'POST',
+        data: {
+          mfa_id: mfaStore?.mfaResponse?.mfa_methods[0].mfa_id,
+          mfa_token: mfaStore?.mfaResponse?.mfa_token,
+        },
+        baseURL: ProcgURL,
+        // isConsole: true,
+        // isConsoleParams: true,
+      },
+      setIsLoading,
+    );
+
+    if (response) {
+      setIsResendCode(true);
+      setTimeLeft(1 * 60);
+      toaster.show({message: 'Code resent successfully', type: 'success'});
+    } else {
+      toaster.show({message: response.message, type: 'warning'});
+    }
+  };
+
   return (
     <ContainerNew
       edges={['top', 'left', 'right']}
@@ -174,50 +284,165 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
             child={<SVGController name="Arrow-Left" color="#41596B" />}
           />
         </View>
-        <Text style={styles.title}>MFA Verification</Text>
-        <Text style={styles.subtitle}>
-          Enter the 6-digit code from your authenticator app
-        </Text>
-        <View style={styles.codeInputContainer}>
-          <CustomInputNew
-            setValue={setValue}
-            control={control}
-            name="mfa_code"
-            label="Enter 6-digit MFA code"
-            rules={{
-              required: 'MFA code is required',
-              minLength: {
-                value: 6,
-                message: 'MFA code must be exactly 6 digits',
-              },
-              maxLength: {
-                value: 6,
-                message: 'MFA code must be exactly 6 digits',
-              },
-            }}
-          />
-
-          <View style={{marginTop: 10, alignItems: 'flex-end'}}>
-            <Text
-              style={{
-                color: '#666',
-                fontSize: 14,
-                textDecorationLine: 'underline',
-              }}>
-              Try another way
+        {!isTryAnotherWayClicked && (
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+            }}>
+            <Text style={styles.title}>MFA Verification</Text>
+            <Text style={styles.subtitle}>
+              Enter the 6-digit code from your authenticator app
             </Text>
-          </View>
+            <View style={styles.codeInputContainer}>
+              <CustomInputNew
+                setValue={setValue}
+                control={control}
+                name="mfa_code"
+                label="Enter 6-digit MFA code"
+                rules={{
+                  required: 'MFA code is required',
+                  minLength: {
+                    value: 6,
+                    message: 'MFA code must be exactly 6 digits',
+                  },
+                  maxLength: {
+                    value: 6,
+                    message: 'MFA code must be exactly 6 digits',
+                  },
+                }}
+              />
 
-          <CustomButtonNew
-            disabled={isLoading}
-            btnText="Verify"
-            isLoading={isLoading}
-            onBtnPress={handleSubmit(onSubmit)}
-            btnstyle={styles.btn}
-            btnTextStyle={styles.btnTxt}
-          />
-        </View>
+              <View style={{marginTop: 10, alignItems: 'flex-end'}}>
+                <Text
+                  onPress={() => setIsTryAnotherWayClicked(true)}
+                  style={{
+                    color: '#666',
+                    fontSize: 14,
+                    textDecorationLine: 'underline',
+                  }}>
+                  Try another way
+                </Text>
+              </View>
+
+              <CustomButtonNew
+                disabled={isVerifyingLoading}
+                btnText="Verify"
+                isLoading={isVerifyingLoading}
+                onBtnPress={handleSubmit(onSubmit)}
+                btnstyle={styles.btn}
+                btnTextStyle={styles.btnTxt}
+              />
+            </View>
+          </View>
+        )}
+
+        {isTryAnotherWayClicked && (!viaEmailOrSms || !codeSentEmail) && (
+          <View
+            style={{
+              minWidth: '100%',
+            }}>
+            <Text style={styles.title}>Select a Method</Text>
+            <Text style={styles.subtitle}>
+              Try another way to verify your identity
+            </Text>
+            <View
+              style={{
+                marginTop: 20,
+                flexDirection: 'row',
+                // gap: 20,
+                justifyContent: 'space-around',
+              }}>
+              <CustomButtonNew
+                disabled={isLoading}
+                btnText="Email"
+                isLoading={isLoading}
+                onBtnPress={() => handleMethodSelect('EMAIL')}
+                btnstyle={[styles.btn, {width: '45%'}]}
+                btnTextStyle={styles.btnTxt}
+              />
+              <CustomButtonNew
+                disabled={true}
+                btnText="SMS"
+                isLoading={false}
+                onBtnPress={() => handleMethodSelect('SMS')}
+                btnstyle={[styles.btn, {width: '45%'}]}
+                btnTextStyle={styles.btnTxt}
+              />
+            </View>
+          </View>
+        )}
+
+        {isTryAnotherWayClicked && viaEmailOrSms && codeSentEmail && (
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+            }}>
+            <Text style={styles.title}>Sent Verification Code</Text>
+            <Text style={styles.subtitle}>
+              The OTP code has been sent to {maskEmail(codeSentEmail)}
+            </Text>
+            <View style={styles.codeInputContainer}>
+              <CustomInputNew
+                setValue={setValue}
+                control={control}
+                name="mfa_code"
+                label="Enter 6-digit OTP code"
+                rules={{
+                  required: 'OTP code is required',
+                  minLength: {
+                    value: 6,
+                    message: 'OTP code must be exactly 6 digits',
+                  },
+                  maxLength: {
+                    value: 6,
+                    message: 'OTP code must be exactly 6 digits',
+                  },
+                }}
+              />
+
+              <View
+                style={{
+                  marginTop: 10,
+                  justifyContent: 'space-between',
+                  flexDirection: 'row',
+                }}>
+                <Text
+                  style={{
+                    color: '#666',
+                    fontSize: 14,
+                  }}>
+                  {String(minutes).padStart(2, '0')}:
+                  {String(seconds).padStart(2, '0')}
+                </Text>
+                <Text
+                  disabled={timeLeft > 0}
+                  onPress={() => handleSendCodeViaEmailOrSMS()}
+                  style={{
+                    color: timeLeft > 0 ? '#ccc' : '#666',
+                    fontSize: 14,
+                    textDecorationLine: 'underline',
+                  }}>
+                  Resend Code
+                </Text>
+              </View>
+
+              <CustomButtonNew
+                disabled={isVerifyingLoading}
+                btnText="Verify"
+                isLoading={isVerifyingLoading}
+                onBtnPress={handleSubmit(handleEmailOTPCodeSubmit)}
+                btnstyle={styles.btn}
+                btnTextStyle={styles.btnTxt}
+              />
+            </View>
+          </View>
+        )}
       </View>
+
       <CustomInvalidModal
         isModalShow={isModalShow}
         setIsModalShow={setIsModalShow}
@@ -239,10 +464,14 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   content: {
-    // width: '80%',
+    // width: 100,
+    // height: 100,
+    minHeight: 100,
+    minWidth: 100,
     paddingVertical: 30,
     paddingHorizontal: 25,
     borderRadius: 12,
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
     elevation: 5,
@@ -255,6 +484,13 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  disabledTitle: {
+    color: '#666',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   subtitle: {
     color: 'black',
