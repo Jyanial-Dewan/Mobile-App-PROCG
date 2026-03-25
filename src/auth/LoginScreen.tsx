@@ -52,6 +52,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     deviceInfoSave,
     selectedUrl,
     fcmTokenSave,
+    mfaStore,
   } = useRootStore();
 
   const initValue = {
@@ -137,59 +138,65 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
 
     const res = await httpRequest(api_params, setIsLoading);
 
-    if (res.access_token) {
-      const combined_user = {
-        url: `${api.Users}?user_id=${res.user_id}`,
-        baseURL: ProcgURL2,
-        access_token: res.access_token,
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-      const userResponse = await httpRequest(combined_user, setIsLoading);
-      const deviceInfoPayload = {
-        user_id: res.user_id,
-        deviceInfo: {
-          id: 0,
-          device_type: deviceInfoData?.device_type,
-          browser_name: 'App',
-          browser_version: '1.0',
-          os: deviceInfoData?.os,
-          user_agent: deviceInfoData?.user_agent,
-          is_active: 1,
-          ip_address: deviceInfoData?.ip_address,
-          location: deviceInfoData?.location || 'Unknown (Location off)',
-        },
-        signon_audit: {
-          signon_id,
-          login: new Date(),
-          logout: '',
-          session_log: [],
-        },
-      };
-      const deviceInfoApi_params = {
-        url: api.AddDeviceInfo,
-        data: deviceInfoPayload,
-        method: 'post',
-        baseURL: ProcgURL,
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-
-      const response = await httpRequest(deviceInfoApi_params, setIsLoading);
-      if (response.id) {
-        // response is - id , user_id, device_type, browser_name, browser_version, os, user_agent, added_at, is_active , ip_address,  location, user_name, signon_audit, signon_id,
-        deviceInfoSave(response);
-        userInfoSave({...res, ...userResponse.result});
-        toaster.show({message: 'Login Successfully', type: 'success'});
-      }
-    } else if (res === undefined || res === 401) {
-      setIsModalShow(true);
-      toaster.show({message: res?.message, type: 'warning'});
+    if (res?.mfa_required) {
+      mfaStore.setMfaResponse(res);
+      navigation.navigate('MFALogin');
       return;
-    } else {
-      reset();
-      signOut();
-      toaster.show({message: res?.message, type: 'warning'});
+    } else if (res && !res.mfa_required) {
+      if (res.access_token) {
+        const combined_user = {
+          url: `${api.Users}?user_id=${res.user_id}`,
+          baseURL: ProcgURL2,
+          access_token: res.access_token,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+        const userResponse = await httpRequest(combined_user, setIsLoading);
+        const deviceInfoPayload = {
+          user_id: res.user_id,
+          deviceInfo: {
+            id: 0,
+            device_type: deviceInfoData?.device_type,
+            browser_name: 'App',
+            browser_version: '1.0',
+            os: deviceInfoData?.os,
+            user_agent: deviceInfoData?.user_agent,
+            is_active: 1,
+            ip_address: deviceInfoData?.ip_address,
+            location: deviceInfoData?.location || 'Unknown (Location off)',
+          },
+          signon_audit: {
+            signon_id,
+            login: new Date(),
+            logout: '',
+            session_log: [],
+          },
+        };
+        const deviceInfoApi_params = {
+          url: api.AddDeviceInfo,
+          data: deviceInfoPayload,
+          method: 'post',
+          baseURL: ProcgURL,
+          // isConsole: true,
+          // isConsoleParams: true,
+        };
+
+        const response = await httpRequest(deviceInfoApi_params, setIsLoading);
+        if (response.id) {
+          // response is - id , user_id, device_type, browser_name, browser_version, os, user_agent, added_at, is_active , ip_address,  location, user_name, signon_audit, signon_id,
+          deviceInfoSave(response);
+          userInfoSave({...res, ...userResponse.result});
+          toaster.show({message: 'Login Successfully', type: 'success'});
+        }
+      } else if (res === undefined || res === 401) {
+        setIsModalShow(true);
+        toaster.show({message: res?.message, type: 'warning'});
+        return;
+      } else {
+        reset();
+        signOut();
+        toaster.show({message: res?.message, type: 'warning'});
+      }
     }
   };
 

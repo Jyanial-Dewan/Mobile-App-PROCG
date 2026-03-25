@@ -12,6 +12,7 @@ import {viewRequestStore} from './viewRequestStore';
 import {DevicesStore} from './linkedDevicesStore';
 import {AlertsStore} from './alertsStore';
 import {ActionItemsStore} from './actionItems';
+import {MFAStore} from './mfaStore';
 
 const RootStore = types
   .model('RootStore', {
@@ -33,6 +34,7 @@ const RootStore = types
     devicesStore: types.optional(DevicesStore, {devices: []}),
     alertsStore: AlertsStore,
     actionItems: ActionItemsStore,
+    mfaStore: types.optional(MFAStore, {}),
   })
 
   .actions(self => ({

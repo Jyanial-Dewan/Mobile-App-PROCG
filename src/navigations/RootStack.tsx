@@ -16,6 +16,7 @@ import Drawer from './drawer';
 import Login from '../auth/LoginScreen';
 import ForgotPassword from '../modules/forgot-password/ForgotPassword';
 import ResetPassword from '../modules/reset-password/ResetPassword';
+import MFALoginScreen from '../auth/MFALoginScreen';
 
 declare global {
   namespace ReactNavigation {
@@ -47,6 +48,7 @@ const RootStack = () => {
       <Screen name="Settings" component={SettingsScreen} />
       <Screen name="ForgotPassword" component={ForgotPassword} />
       <Screen name="ResetPassword" component={ResetPassword} />
+      <Screen name="MFALogin" component={MFALoginScreen} />
     </Navigator>
   );
 };
