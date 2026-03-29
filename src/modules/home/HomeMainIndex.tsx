@@ -310,7 +310,7 @@ export default observer(HomeMainIndex);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 20,
+    paddingTop: 20,
   },
   topContainer: {
     width: '100%',
