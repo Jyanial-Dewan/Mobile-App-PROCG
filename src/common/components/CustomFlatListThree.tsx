@@ -5,6 +5,7 @@ import {COLORS} from '../constant/Themes';
 interface Props {
   key?: any;
   keyExtractor: any;
+  columnWrapperStyle?: any;
   data: any;
   isLoading?: boolean;
   setCurrentPage?: any;
@@ -25,6 +26,7 @@ const CustomFlatListThree: React.FC<Props> = ({
   data = [],
   key,
   keyExtractor,
+  columnWrapperStyle,
   isLoading,
   setCurrentPage,
   RenderItems,
@@ -84,6 +86,7 @@ const CustomFlatListThree: React.FC<Props> = ({
       renderItem={RenderItems}
       numColumns={numColumns}
       keyExtractor={keyExtractor}
+      columnWrapperStyle={columnWrapperStyle}
       ListFooterComponent={renderMoreDataLoader}
       onEndReached={() => currentPage && onEndReached()}
       onEndReachedThreshold={0.1}

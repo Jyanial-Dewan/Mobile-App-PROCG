@@ -1,6 +1,6 @@
 export const dynamicColorFunc = (title: string) => {
   switch (title) {
-    case 'Total Async Tasks':
+    case 'Async Tasks':
       return {
         container: '#f9fafb',
         text: '#4b5563',
@@ -12,13 +12,13 @@ export const dynamicColorFunc = (title: string) => {
         text: '#16a34a',
         border: 'green',
       };
-    case 'Total Scheduled Tasks':
+    case 'Scheduled Tasks':
       return {
         container: '#fff7ed',
         text: '#ea580c',
         border: 'orange',
       };
-    case 'Total Users':
+    case 'Users':
       return {
         container: '#f9fafb',
         text: '#4b5563',
