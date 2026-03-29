@@ -43,4 +43,5 @@ export const api = {
   ActionItem: '/def_action_items',
   ForgotPassword: '/forgot_password_request',
   ResetPassword: '/def_user_credentials/reset_forgot_password',
+  Dashboard: '/dashboard/summary',
 };

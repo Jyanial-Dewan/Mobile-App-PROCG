@@ -37,6 +37,7 @@ import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams'
 import {Badge} from 'react-native-paper';
 import CustomTextNew from '~/common/components/CustomText';
 import {DrawerNavigationHelpers} from '@react-navigation/drawer/lib/typescript/src/types';
+import HomeContent from './HomeContent';
 
 const edges: Edge[] = ['right', 'left'];
 const wait = (timeout: any) => {
@@ -238,6 +239,7 @@ const HomeMainIndex = () => {
 
   return (
     <ContainerNew style={styles.container}>
+      {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
           onPress={drawerNav.toggleDrawer}
@@ -297,6 +299,8 @@ const HomeMainIndex = () => {
           </View>
         </TouchableOpacity>
       </View>
+      {/* Bottom Section */}
+      <HomeContent />
     </ContainerNew>
   );
 };
