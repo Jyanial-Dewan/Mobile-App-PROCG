@@ -238,7 +238,7 @@ const HomeMainIndex = () => {
   }, []);
 
   return (
-    <ContainerNew style={styles.container}>
+    <ContainerNew isScrollView={false} style={styles.container}>
       {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
@@ -318,7 +318,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 20,
   },
   profileImage: {
     width: 56,

@@ -8,18 +8,24 @@ import {DashboardData, DashboardSection} from '../../types/home/homedashboard';
 import {dynamicColorFunc} from '../../common/constant/dynamicColorFunc';
 import {convertToTitleCase} from '../../common/utility/general';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
-import CustomFlatList from '../../common/components/CustomFlatList';
-import ContainerNew from '../../common/components/Container';
 import {formateDateTime} from '../../common/services/dateFormater';
+import DefaultLoading from '../../common/components/DefaultLoading';
 
 const renderItem1 = ({
   item,
 }: {
   item: {key: string; value: DashboardSection};
 }) => (
-  <View style={[styles.itemContainer, {}]}>
+  <View
+    style={[
+      styles.itemContainer,
+      {
+        backgroundColor: dynamicColorFunc(convertToTitleCase(item?.key))
+          .container,
+      },
+    ]}>
     <Text style={{color: 'gray', fontWeight: 'bold'}}>
-      {formatTitle(item?.key)}
+      {formatTitle(item?.key, true)}
     </Text>
     <Text
       style={{
@@ -67,10 +73,10 @@ const renderItem2 = ({item}: {item: any}) => (
   </View>
 );
 
-const formatTitle = (key: string) => {
-  if (key === 'async_tasks') return 'Total Async Tasks';
-  if (key === 'scheduled_tasks') return 'Total Scheduled Tasks';
-  if (key === 'users') return 'Total Users';
+const formatTitle = (key: string, addTotal: boolean = false) => {
+  if (key === 'async_tasks' && addTotal) return 'Total Async Tasks';
+  if (key === 'scheduled_tasks' && addTotal) return 'Total Scheduled Tasks';
+  if (key === 'users' && addTotal) return 'Total Users';
 
   return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
@@ -89,15 +95,15 @@ const HomeContent = () => {
           url: api.Dashboard,
           baseURL: ProcgURL2,
           access_token: userInfo?.access_token,
-          isConsole: true,
-          isConsoleParams: true,
+          // isConsole: true,
+          // isConsoleParams: true,
         },
         setIsLoading,
       );
       setdata(response);
     })();
   }, []);
-  console.log(Object.keys(data || {}), 'eeeee');
+  // console.log(Object.keys(data || {}), 'eeeee');
   const allowedKeys = ['async_tasks', 'scheduled_tasks', 'workflows', 'users'];
 
   const filteredSections = Object.entries(data || {})
@@ -106,78 +112,82 @@ const HomeContent = () => {
       key,
       value,
     }));
-  return (
-    <>
-      <View style={{flex: 1, gap: 10}}>
-        {/* Summary Cards */}
-        <CustomFlatListThree
-          horizontal={true}
-          keyExtractor={(item: any) => item?.key}
-          data={data ? filteredSections : []}
-          contentContainerStyle={{
-            paddingVertical: 20,
-            paddingHorizontal: 10,
-            gap: 10,
-            overflow: 'hidden',
-            backgroundColor: '#f5f5f599',
-          }}
-          showHorizontalScrollIndicator={false}
-          RenderItems={renderItem1}
-        />
-        {/* Table Cards */}
-        <CustomFlatListThree
-          horizontal={false}
-          data={data ? filteredSections : []}
-          keyExtractor={(item: any) => item?.key}
-          RenderItems={({
-            item,
-          }: {
-            item: {key: string; value: DashboardSection};
-          }) => (
-            <View
-              style={[
-                {
-                  padding: 10,
-                  margin: 10,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: '#e0e0e0',
-                },
-              ]}>
-              <Text style={{color: 'gray', fontWeight: 'bold'}}>
-                Recent {formatTitle(item?.key)}
-              </Text>
 
+  if (isLoading) {
+    return <DefaultLoading />;
+  }
+  return (
+    <View style={{flex: 1, marginTop: 10}}>
+      <CustomFlatListThree
+        horizontal={false}
+        data={data ? filteredSections : []}
+        keyExtractor={(item: any) => item?.key}
+        headerComponent={
+          <>
+            {/* Summary Cards */}
+            <CustomFlatListThree
+              horizontal={true}
+              keyExtractor={(item: any) => item?.key}
+              data={data ? filteredSections : []}
+              contentContainerStyle={{
+                paddingVertical: 20,
+                paddingHorizontal: 10,
+                gap: 10,
+                overflow: 'hidden',
+                // backgroundColor: '#f5f5f599',
+              }}
+              showHorizontalScrollIndicator={false}
+              RenderItems={renderItem1}
+            />
+          </>
+        }
+        RenderItems={({
+          item,
+        }: {
+          item: {key: string; value: DashboardSection};
+        }) => (
+          <View
+            style={[
+              {
+                padding: 10,
+                margin: 10,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#e0e0e0',
+              },
+            ]}>
+            <Text style={{color: 'gray', fontWeight: 'bold'}}>
+              Recent {formatTitle(item?.key)}
+            </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                // justifyContent: 'space-between',
+                gap: 20,
+              }}>
+              <Text style={{color: 'black'}}>ID</Text>
               <View
                 style={{
+                  flex: 1,
                   flexDirection: 'row',
-                  // justifyContent: 'space-between',
-                  gap: 20,
+                  justifyContent: 'space-between',
+                  gap: 10,
                 }}>
-                <Text style={{color: 'black'}}>ID</Text>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    gap: 10,
-                  }}>
-                  <Text style={{color: 'black'}}>Name</Text>
-                  <Text style={{color: 'black'}}>Created</Text>
-                </View>
+                <Text style={{color: 'black'}}>Name</Text>
+                <Text style={{color: 'black'}}>Created</Text>
               </View>
-
-              <CustomFlatListThree
-                horizontal={false}
-                data={item?.value?.items || []}
-                keyExtractor={(item: any) => item?.id}
-                RenderItems={renderItem2}
-              />
             </View>
-          )}
-        />
-      </View>
-    </>
+
+            {(item?.value?.items || []).map((innerItem: any) => (
+              <View key={innerItem?.id}>
+                {renderItem2({item: innerItem})}
+              </View>
+            ))}
+          </View>
+        )}
+      />
+    </View>
   );
 };
 export default HomeContent;
