@@ -193,7 +193,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
         toaster.show({message: res?.message, type: 'warning'});
         return;
       } else {
-        reset();
+        // reset();
         signOut();
         toaster.show({message: res?.message, type: 'warning'});
       }

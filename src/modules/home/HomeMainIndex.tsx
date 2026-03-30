@@ -215,21 +215,22 @@ const HomeMainIndex = () => {
       //console.log('render time home-------------------');
       if (Platform.OS === 'android') {
         // Handle for Android 8.1 or lower
-        if (Platform.Version < 28) {
+        if (Platform.Version < 33) {
           // For Android 8.1 or lower, permission is automatically granted (no need for POST_NOTIFICATIONS)
           if (!resPushNotificaton || resPushNotificaton === 'askMeLater')
             showAlert();
         } else {
-          // For Android 9 and above, request POST_NOTIFICATIONS permission
+          // For Android 12 and above, request POST_NOTIFICATIONS permission
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
           );
 
           if (granted === PermissionsAndroid.RESULTS.GRANTED) {
             allowPushNotification();
-          } else {
-            Alert.alert('Permission Denied');
           }
+          // else {
+          //   Alert.alert('Permission Denied');
+          // }
         }
       }
     };
