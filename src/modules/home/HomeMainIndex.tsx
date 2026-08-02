@@ -3,8 +3,8 @@ import {
   useIsFocused,
   useNavigation,
 } from '@react-navigation/native';
-import {observer} from 'mobx-react-lite';
-import React, {useEffect, useState} from 'react';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   PermissionsAndroid,
@@ -17,26 +17,26 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import {Edge} from 'react-native-safe-area-context';
+import { Edge } from 'react-native-safe-area-context';
 import ContainerNew from '../../common/components/Container';
-import {COLORS} from '../../common/constant/Index';
-import {httpRequest} from '../../common/constant/httpRequest';
+import { COLORS } from '../../common/constant/Index';
+import { httpRequest } from '../../common/constant/httpRequest';
 import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {secureStorage, useRootStore} from '../../stores/rootStore';
-import {api} from '../../common/api/api';
-import {ProcgURL, ProcgURL2} from '../../../App';
+import { secureStorage, useRootStore } from '../../stores/rootStore';
+import { api } from '../../common/api/api';
+import { ProcgURL, ProcgURL2 } from '../../../App';
 import messaging from '@react-native-firebase/messaging';
 import SVGController from '../../common/components/SVGController';
 // import Image from 'react-native-image-fallback';
 import FastImage from 'react-native-fast-image';
-import {useSocketContext} from '../../context/SocketContext';
+import { useSocketContext } from '../../context/SocketContext';
 // import {Profile} from '../../common/components/custom-drawer';
-import {useDrawerStatus} from '@react-navigation/drawer';
+import { useDrawerStatus } from '@react-navigation/drawer';
 import axios from 'axios';
-import {RootStackScreensParms} from '~/types/navigationTs/RootStackScreenParams';
-import {Badge} from 'react-native-paper';
+import { RootStackScreensParms } from '~/types/navigationTs/RootStackScreenParams';
+import { Badge } from 'react-native-paper';
 import CustomTextNew from '~/common/components/CustomText';
-import {DrawerNavigationHelpers} from '@react-navigation/drawer/lib/typescript/src/types';
+import { DrawerNavigationHelpers } from '@react-navigation/drawer/lib/typescript/src/types';
 import HomeContent from './HomeContent';
 
 const edges: Edge[] = ['right', 'left'];
@@ -62,7 +62,7 @@ const HomeMainIndex = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const drawerNav = useNavigation<DrawerNavigationHelpers>();
   const drawerStatus = useDrawerStatus();
-  const {socket} = useSocketContext();
+  const { socket } = useSocketContext();
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(false);
   const resPushNotificaton = secureStorage.getItem('pushNotificaton');
@@ -197,7 +197,7 @@ const HomeMainIndex = () => {
 
     const allowPushNotification = async () => {
       const token = await messaging().getToken();
-      fcmTokenSave({fcmToken: token});
+      fcmTokenSave({ fcmToken: token });
 
       const tokenPayload = {
         token: token,
@@ -214,13 +214,13 @@ const HomeMainIndex = () => {
     const requestPermissionAndroid = async () => {
       //console.log('render time home-------------------');
       if (Platform.OS === 'android') {
-        // Handle for Android 8.1 or lower
+        // Handle for Android 12 or lower
         if (Platform.Version < 33) {
-          // For Android 8.1 or lower, permission is automatically granted (no need for POST_NOTIFICATIONS)
+          // For Android 12 or lower, permission is automatically granted (no need for POST_NOTIFICATIONS)
           if (!resPushNotificaton || resPushNotificaton === 'askMeLater')
             showAlert();
         } else {
-          // For Android 12 and above, request POST_NOTIFICATIONS permission
+          // For Android 13 and above, request POST_NOTIFICATIONS permission
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
           );
@@ -244,7 +244,7 @@ const HomeMainIndex = () => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           onPress={drawerNav.toggleDrawer}
-          style={{flexDirection: 'row', gap: 4, alignItems: 'center'}}>
+          style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
           {/* <Image
             style={styles.profileImage}
             source={{uri: profilePhoto}}
@@ -268,10 +268,10 @@ const HomeMainIndex = () => {
 
           <View>
             <Text
-              style={{color: COLORS.black, fontWeight: '600', fontSize: 14}}>
+              style={{ color: COLORS.black, fontWeight: '600', fontSize: 14 }}>
               Welcome!
             </Text>
-            <Text style={{color: COLORS.darkGray, fontSize: 14}}>
+            <Text style={{ color: COLORS.darkGray, fontSize: 14 }}>
               {userInfo?.user_name}
             </Text>
           </View>
