@@ -10,7 +10,7 @@ const NoData = ({data}: any) => {
     <>
       {dataLength === 0 ? (
         <View style={styles.main}>
-          <FastImage source={IMAGES.NoDataImage} style={styles.image} />
+          <FastImage source={IMAGES.NoImage} style={styles.image} />
           <CustomTextNew text={'No Data Found'} txtAlign={'center'} />
         </View>
       ) : null}
