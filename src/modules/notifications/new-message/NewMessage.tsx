@@ -136,6 +136,7 @@ const NewMessage = () => {
       recipients: recipients,
       subject,
       body,
+      type: 'notification',
     };
 
     const sendParams = {
@@ -189,6 +190,27 @@ const NewMessage = () => {
               });
             }
             SendAlert(alertResponse.result.alert_id, recipients, false);
+
+            const pushAlertPayload = {
+              alert_id: alertResponse.data.result.alert_id,
+              alert_name: alertName,
+              description: alertDescription,
+              recipients: recipients,
+              sender: userInfo?.user_name,
+              type: 'alert',
+            };
+
+            const pushAlertNotificationParams = {
+              url: api.PushAlertNotification,
+              data: pushAlertPayload,
+              method: 'post',
+              baseURL: urlNode,
+              access_token: userInfo?.access_token,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+
+            await httpRequest(pushAlertNotificationParams, setIsSending);
           }
         }
 

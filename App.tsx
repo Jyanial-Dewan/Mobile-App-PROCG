@@ -30,7 +30,9 @@ import Geolocation from 'react-native-geolocation-service';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {PermissionsAndroid} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import notifee, {EventType} from '@notifee/react-native';
 import Drawer from './src/navigations/drawer';
+import {navigationRef} from './src/navigations/RootNavigation';
 import {
   SocketContextProvider,
   useSocketContext,
@@ -144,6 +146,7 @@ const Main = observer(() => {
     userInfo,
     logout,
     messageStore,
+    alertsStore,
     selectedUrl,
   } = useRootStore();
   const rootStore = useRootStore();
@@ -154,36 +157,53 @@ const Main = observer(() => {
   // Handle background messages
   messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('Received background message:', remoteMessage);
-
-    // Check if data is available
-    if (remoteMessage.data?.payload) {
-      const data = JSON.parse(remoteMessage.data.payload);
-      const formattedData = {...data, date: new Date(data.date)};
-      messageStore.addReceivedMessage(formattedData);
-      messageStore.addNotificationMessage(formattedData);
-      // messageStore.addTotalReceived();
-      // onDisplayNotification(remoteMessage);
-    } else {
-      console.error('No payload in background message');
-    }
+    handleNotificationPayload(remoteMessage);
   });
 
-  // Handle notifications when the app is in quit mode
-  messaging().onNotificationOpenedApp(async remoteMessage => {
-    console.log('Notification opened from quit state:', remoteMessage);
-
-    // Check if data is available
-    if (remoteMessage.data?.payload) {
-      const data = JSON.parse(remoteMessage.data.payload);
-      const formattedData = {...data, date: new Date(data.date)};
-      messageStore.addReceivedMessage(formattedData);
-      messageStore.addNotificationMessage(formattedData);
-      // messageStore.addTotalReceived();
-      // onDisplayNotification(remoteMessage);
-    } else {
-      console.error('No payload in notification');
-    }
+  // Handle notifications pressed while the app is in background
+  messaging().onNotificationOpenedApp(remoteMessage => {
+    console.log('Notification opened from background state:', remoteMessage);
+    handleNotificationPress(remoteMessage);
   });
+
+  // Handle notification that opened the app from a quit state (FCM)
+  useEffect(() => {
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log(
+            'Notification caused app to open from quit state:',
+            remoteMessage,
+          );
+          handleNotificationPress(remoteMessage);
+        }
+      });
+  }, []);
+
+  // Handle notification that opened the app from a quit state (notifee)
+  useEffect(() => {
+    notifee.getInitialNotification().then(notificationEvent => {
+      if (notificationEvent?.notification) {
+        console.log(
+          'Notifee notification caused app to open from quit state:',
+          notificationEvent.notification,
+        );
+        handleNotificationPress(notificationEvent.notification);
+      }
+    });
+  }, []);
+
+  // Handle notifee notification presses (foreground)
+  useEffect(() => {
+    const unsubscribe = notifee.onForegroundEvent(({type, detail}) => {
+      if (type === EventType.PRESS) {
+        console.log('User pressed notification:', detail.notification);
+        handleNotificationPress(detail.notification);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     setUserId(userInfo?.user_id);
@@ -195,6 +215,139 @@ const Main = observer(() => {
     }
     return DefaultTheme;
   }, [isDark]);
+
+  // Process the notification payload and store it locally
+  const handleNotificationPayload = useCallback(
+    async (remoteMessage: any) => {
+      try {
+        const data =
+          remoteMessage?.data?.payload &&
+          JSON.parse(remoteMessage.data.payload);
+        console.log(data);
+        if (!data) {
+          return;
+        }
+        if (data.type === 'read') {
+          const id =
+            data.notification_id ?? data.parent_id ?? data.notificationID;
+          console.log(id);
+          if (id) {
+            // remove from in-app stores too
+            messageStore.removeReceivedMessage(id);
+            // messageStore.removeNotificationMessage(id);
+            // remove from the notification bar
+            await notifee.cancelNotification(id);
+          }
+          return;
+        }
+        if (data.type === 'alert') {
+          const fallbackId = data.alert_id ?? Date.now();
+          const formattedAlert = {
+            user_id:
+              data.user_id ?? userInfo?.user_id ?? data.recipients?.[0] ?? 0,
+            user_name: data.user_name ?? '',
+            notification_id:
+              data.notification_id ?? data.notificationID ?? String(fallbackId),
+            alert_id: Number(fallbackId),
+            alert_name: data.alert_name ?? '',
+            description: data.description ?? '',
+            acknowledge: data.acknowledge ?? false,
+            notification_status: data.notification_status ?? 'unread',
+            created_by: data.created_by ?? data.sender ?? 0,
+            creation_date: data.creation_date || data.date || Date.now(),
+            last_updated_by: data.last_updated_by ?? data.sender ?? 0,
+            last_update_date: data.last_update_date || data.date || Date.now(),
+          };
+          alertsStore.addAlert(formattedAlert);
+          return;
+        }
+        if (data?.notification_id) {
+          const formattedData = {
+            ...data,
+            creation_date: new Date(
+              data.creation_date || data.date || Date.now(),
+            ),
+            last_update_date: new Date(
+              data.last_update_date || data.date || Date.now(),
+            ),
+          };
+          messageStore.addReceivedMessage(formattedData);
+          messageStore.addNotificationMessage(formattedData);
+        }
+      } catch (error) {
+        console.error('Error processing notification payload:', error);
+      }
+    },
+    [messageStore, alertsStore, userInfo],
+  );
+
+  // Redirect to the notification screen or a specific notification on press
+  const redirectToNotification = useCallback(
+    (notificationId?: string) => {
+      let attempts = 0;
+      const tryNavigate = () => {
+        if (!navigationRef.isReady() || !rootStore.userInfo?.isLoggedIn) {
+          if (attempts < 120) {
+            attempts++;
+            setTimeout(tryNavigate, 500);
+          }
+          return;
+        }
+        console.log('Redirecting to notification:', notificationId);
+        if (notificationId) {
+          navigationRef.navigate('NotificationDetails', {_id: notificationId});
+        } else {
+          navigationRef.navigate('BottomTab', {screen: 'Notification'});
+        }
+      };
+      tryNavigate();
+    },
+    [rootStore],
+  );
+
+  // Redirect to the alerts screen when an alert push is pressed
+  const redirectToAlerts = useCallback(() => {
+    let attempts = 0;
+    const tryNavigate = () => {
+      if (!navigationRef.isReady() || !rootStore.userInfo?.isLoggedIn) {
+        if (attempts < 120) {
+          attempts++;
+          setTimeout(tryNavigate, 500);
+        }
+        return;
+      }
+      console.log('Redirecting to alerts');
+      navigationRef.navigate('Alerts');
+    };
+    tryNavigate();
+  }, [rootStore]);
+
+  // Extract the notification id and redirect when a push is pressed
+  const handleNotificationPress = useCallback(
+    (remoteMessage: any) => {
+      console.log(remoteMessage, '272');
+      handleNotificationPayload(remoteMessage);
+      try {
+        const data =
+          remoteMessage?.data?.payload &&
+          JSON.parse(remoteMessage.data.payload);
+        if (data?.type === 'alert') {
+          redirectToAlerts();
+          return;
+        }
+        let notificationId: string | undefined;
+        notificationId =
+          data?.parentId ||
+          data?.notificationID ||
+          data?.parent_notification_id;
+        redirectToNotification(notificationId);
+      } catch (error) {
+        console.error('Error parsing notification payload:', error);
+        redirectToNotification();
+      }
+    },
+    [handleNotificationPayload, redirectToNotification, redirectToAlerts],
+  );
 
   const onReady = useCallback(async () => {
     try {
@@ -316,6 +469,7 @@ const Main = observer(() => {
         <ToastProvider>
           <NavigationContainer
             linking={linking}
+            ref={navigationRef}
             theme={theme}
             onReady={onReady}>
             {userInfo?.isLoggedIn ? <Drawer /> : <RootStack />}

@@ -265,6 +265,7 @@ const DraftsDetails = () => {
       recipients: recipients,
       subject,
       body,
+      type: 'notification',
     };
     const sendNotificationParams = {
       url: `${api.Messages}/${notificationId}`,

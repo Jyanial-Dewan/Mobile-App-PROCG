@@ -27,6 +27,7 @@ export const api = {
   RegisterToken: '/push-notification/register-token',
   UnregisterToken: '/push-notification/unregister-token',
   SendNotification: '/push-notification/send-notification',
+  PushAlertNotification: '/push-notification/send-alert',
   GetMenu: '/mobile-menu',
   getViewRequest: '/view_requests',
   GetARMTasks: '/arm-tasks/def_async_tasks',

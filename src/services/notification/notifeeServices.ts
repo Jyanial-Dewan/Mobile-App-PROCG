@@ -68,6 +68,9 @@ export const onDisplayNotification = async (remoteMessage: any) => {
 
   // Display a notification
   await notifee.displayNotification({
+    id: String(
+      remoteMessage.data.notification_id ?? remoteMessage.data.alert_id,
+    ),
     title: remoteMessage.notification.title,
     body: remoteMessage.notification.body.slice(0, 100),
     android: {
@@ -75,6 +78,7 @@ export const onDisplayNotification = async (remoteMessage: any) => {
       smallIcon: 'ic_notification',
       color: COLORS.primary,
       lightUpScreen: true,
+
       // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
       // pressAction is needed if you want the notification to open the app when pressed
       pressAction: {

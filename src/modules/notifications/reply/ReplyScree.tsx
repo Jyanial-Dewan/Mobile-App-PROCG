@@ -127,6 +127,7 @@ const ReplyScreen = () => {
       recipients: recipients,
       subject,
       body,
+      type: 'notification',
     };
     const sendNotificationParams = {
       url: api.SendNotification,
