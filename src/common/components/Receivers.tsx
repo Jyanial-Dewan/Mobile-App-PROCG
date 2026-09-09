@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import {ProcgURL} from '../../../App';
+import {FlaskURL, ProcgURL} from '../../../App';
 import {useRootStore} from '../../stores/rootStore';
 import {COLORS} from '../constant/Themes';
 import CustomTextNew from './CustomText';
@@ -61,7 +61,7 @@ const Receivers = ({
                       <Image
                         style={styles.profileImage}
                         source={{
-                          uri: `${url}/${renderProfilePicture(recver, usersStore.users)}`,
+                          uri: `${FlaskURL}/${renderProfilePicture(recver, usersStore.users)}`,
                           headers: {
                             Authorization: `Bearer ${userInfo?.access_token}`,
                           },

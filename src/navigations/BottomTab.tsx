@@ -17,7 +17,6 @@ import {useIsFocused} from '@react-navigation/native';
 import {api} from '../common/api/api';
 import {observer} from 'mobx-react-lite';
 import SVGController from '../common/components/SVGController';
-import {MessageSnapshotType} from '../stores/messageStore';
 
 const {Navigator, Screen} = createMaterialBottomTabNavigator<any>();
 const BottomTab = observer(() => {

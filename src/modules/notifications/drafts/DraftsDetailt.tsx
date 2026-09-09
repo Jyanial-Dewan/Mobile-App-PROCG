@@ -17,7 +17,7 @@ import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import MainHeader from '../../../common/components/MainHeader';
 import {COLORS} from '../../../common/constant/Themes';
 import {httpRequest} from '../../../common/constant/httpRequest';
-import {ProcgURL, ProcgURL2} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import {api} from '../../../common/api/api';
 import {useRootStore} from '../../../stores/rootStore';
 import Feather from 'react-native-vector-icons/Feather';
@@ -98,7 +98,7 @@ const DraftsDetails = () => {
     user?.user_name?.toLowerCase().includes(query.toLowerCase()),
   );
   const urlNode = selectedUrl || ProcgURL;
-  const urlPython = ProcgURL2;
+  const urlPython = FlaskURL;
   //Fetch SingleMessage
   useAsyncEffect(
     async isMounted => {
@@ -265,6 +265,7 @@ const DraftsDetails = () => {
       recipients: recipients,
       subject,
       body,
+      type: 'notification',
     };
     const sendNotificationParams = {
       url: `${api.Messages}/${notificationId}`,
@@ -807,7 +808,7 @@ const DraftsDetails = () => {
                               <Image
                                 style={styles.profileImage}
                                 source={{
-                                  uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
+                                  uri: `${FlaskURL}/${usr.profile_picture.thumbnail}`,
                                   // headers: {
                                   //   Authorization: `Bearer ${userInfo?.access_token}`,
                                   // },
@@ -850,7 +851,7 @@ const DraftsDetails = () => {
                   <Image
                     style={styles.profileImage}
                     source={{
-                      uri: `${url}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
+                      uri: `${FlaskURL}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
                       // headers: {
                       //   Authorization: `Bearer ${userInfo?.access_token}`,
                       // },

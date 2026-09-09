@@ -20,6 +20,7 @@ const RootStore = types
       types.union(types.literal('light'), types.literal('dark')),
     ),
     hydrated: false,
+    profilePictureVersion: types.optional(types.number, 0),
     userInfo: types.maybe(UserInfoStore),
     usersStore: UsersStore,
     deviceInfoData: DeviceInfoStore,
@@ -108,6 +109,18 @@ const RootStore = types
     },
     pushNotificaton(status: string) {
       secureStorage.setItem('pushNotificaton', status);
+    },
+    updateProfilePicture(profilePicture: {
+      original: string;
+      thumbnail: string;
+    }) {
+      if (self.userInfo) {
+        self.userInfo = {
+          ...self.userInfo,
+          profile_picture: profilePicture,
+        } as any;
+        self.profilePictureVersion += 1;
+      }
     },
 
     logout() {

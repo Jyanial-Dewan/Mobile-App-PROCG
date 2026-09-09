@@ -9,7 +9,7 @@ import {useSocketContext} from '../../../context/SocketContext';
 import {useToast} from '../../../common/components/CustomToast';
 import {useRootStore} from '../../../stores/rootStore';
 import {MessageSnapshotType} from '../../../stores/messageStore';
-import {ProcgURL} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
 import {api} from '../../../common/api/api';
 import {httpRequest} from '../../../common/constant/httpRequest';
@@ -151,7 +151,7 @@ const NotificationDetails = observer(() => {
               borderRadius: 50,
             }}
             source={{
-              uri: `${url}/${renderProfilePicture(item.sender, usersStore.users)}`,
+              uri: `${FlaskURL}/${renderProfilePicture(item.sender, usersStore.users)}`,
               headers: {
                 Authorization: `Bearer ${userInfo?.access_token}`,
               },

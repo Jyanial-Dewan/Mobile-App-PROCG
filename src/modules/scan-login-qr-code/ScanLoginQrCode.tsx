@@ -10,7 +10,7 @@ import {UserInfoStoreType} from '../../stores/userInfo';
 import {useRootStore} from '../../stores/rootStore';
 import {Buffer} from 'buffer';
 import {api} from '../..//common/api/api';
-import {ProcgURL, ProcgURL2} from '../../../App';
+import {FlaskURL, ProcgURL} from '../../../App';
 import {httpRequest} from '../../common/constant/httpRequest';
 import axios from 'axios';
 import ContainerNew from '../../common/components/Container';
@@ -47,7 +47,7 @@ const ScanLoginQrCode = observer(() => {
         url: api.VerifyToken,
         data: verifyTokenPayload,
         method: 'post',
-        baseURL: url,
+        baseURL: FlaskURL,
         isConsole: true,
         isConsoleParams: true,
       };
@@ -56,7 +56,7 @@ const ScanLoginQrCode = observer(() => {
       if (res.access_token) {
         const combined_user = {
           url: `${api.Users}?user_id=${res.user_id}`,
-          baseURL: ProcgURL2,
+          baseURL: FlaskURL,
           access_token: res.access_token,
           // isConsole: true,
           // isConsoleParams: true,

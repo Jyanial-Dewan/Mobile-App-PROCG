@@ -35,7 +35,7 @@ import {toTitleCase} from '../../../common/utility/general';
 import CustomTextNew from '../../../common/components/CustomText';
 import FooterDraftButton from '../../../common/components/FooterDraftButton';
 import FooterSendButton from '../../../common/components/FooterSendButton';
-import {ProcgURL, ProcgURL2} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import ContainerNew from '../../../common/components/Container';
 import MainHeader from '../../../common/components/MainHeader';
 import {COLORS} from '../../../common/constant/Themes';
@@ -84,7 +84,7 @@ const NewMessage = () => {
   );
 
   const urlNode = selectedUrl || ProcgURL;
-  const urlPython = ProcgURL2;
+  const urlPython = FlaskURL;
   const fallbacks = [require('../../../assets/prifileImages/thumbnail.jpg')];
 
   const handleReciever = (reciever: number) => {
@@ -136,6 +136,7 @@ const NewMessage = () => {
       recipients: recipients,
       subject,
       body,
+      type: 'notification',
     };
 
     const sendParams = {
@@ -189,6 +190,27 @@ const NewMessage = () => {
               });
             }
             SendAlert(alertResponse.result.alert_id, recipients, false);
+
+            const pushAlertPayload = {
+              alert_id: alertResponse.data.result.alert_id,
+              alert_name: alertName,
+              description: alertDescription,
+              recipients: recipients,
+              sender: userInfo?.user_name,
+              type: 'alert',
+            };
+
+            const pushAlertNotificationParams = {
+              url: api.PushAlertNotification,
+              data: pushAlertPayload,
+              method: 'post',
+              baseURL: urlNode,
+              access_token: userInfo?.access_token,
+              // isConsole: true,
+              // isConsoleParams: true,
+            };
+
+            await httpRequest(pushAlertNotificationParams, setIsSending);
           }
         }
 
@@ -590,7 +612,7 @@ const NewMessage = () => {
                             <Image
                               style={styles.profileImage}
                               source={{
-                                uri: `${urlNode}/${usr.profile_picture.thumbnail}`,
+                                uri: `${FlaskURL}/${usr.profile_picture.thumbnail}`,
                                 // headers: {
                                 //   Authorization: `Bearer ${userInfo?.access_token}`,
                                 // },
@@ -630,7 +652,7 @@ const NewMessage = () => {
                 <Image
                   style={styles.profileImage}
                   source={{
-                    uri: `${urlNode}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
+                    uri: `${FlaskURL}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
                     // headers: {
                     //   Authorization: `Bearer ${userInfo?.access_token}`,
                     // },

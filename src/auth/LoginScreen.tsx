@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import OcIcon from 'react-native-vector-icons/Octicons';
-import {ProcgURL, ProcgURL2} from '../../App';
+import {FlaskURL, ProcgURL} from '../../App';
 import Column from '../common/components/Column';
 import ContainerNew from '../common/components/Container';
 import CustomButtonNew from '../common/components/CustomButton';
@@ -124,19 +124,19 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
     const loginPayload = {
       user: data?.user?.trim(),
       password: data?.password?.trim(),
-      strDeviceId: fcmToken,
     };
 
     const api_params = {
       url: api.AuthAppsLogin,
       data: loginPayload,
-      method: 'post',
-      baseURL: ProcgURL,
+      method: 'POST',
+      baseURL: FlaskURL,
       // isConsole: true,
       // isConsoleParams: true,
     };
 
     const res = await httpRequest(api_params, setIsLoading);
+    console.log(res);
 
     if (res?.mfa_required) {
       mfaStore.setMfaResponse(res);
@@ -146,7 +146,7 @@ const Login = observer<RootStackScreenProps<'Login'>>(({navigation}) => {
       if (res.access_token) {
         const combined_user = {
           url: `${api.Users}?user_id=${res.user_id}`,
-          baseURL: ProcgURL2,
+          baseURL: FlaskURL,
           access_token: res.access_token,
           // isConsole: true,
           // isConsoleParams: true,

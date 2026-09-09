@@ -14,7 +14,7 @@ import {
   renderSlicedUsername,
 } from '../../../common/utility/notifications.utility';
 import Receivers from '../../../common/components/Receivers';
-import {ProcgURL} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
 import {api} from '../../../common/api/api';
 import {httpRequest} from '../../../common/constant/httpRequest';
@@ -231,7 +231,7 @@ const RecycleBinDetail = observer(() => {
               <Image
                 style={styles.profileImage}
                 source={{
-                  uri: `${url}/${findOrigin(parrentMessage!) === 'Inbox' ? renderProfilePicture(parrentMessage?.sender, usersStore.users) : renderProfilePicture(parrentMessage?.recipients[0], usersStore.users)}`,
+                  uri: `${FlaskURL}/${findOrigin(parrentMessage!) === 'Inbox' ? renderProfilePicture(parrentMessage?.sender, usersStore.users) : renderProfilePicture(parrentMessage?.recipients[0], usersStore.users)}`,
                   // headers: {
                   //   Authorization: `Bearer ${userInfo?.access_token}`,
                   // },

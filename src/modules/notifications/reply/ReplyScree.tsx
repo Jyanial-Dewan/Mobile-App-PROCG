@@ -18,7 +18,7 @@ import {useRootStore} from '../../../stores/rootStore';
 import {useToast} from '../../../common/components/CustomToast';
 import {httpRequest} from '../../../common/constant/httpRequest';
 import {api} from '../../../common/api/api';
-import {ProcgURL} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import {v4 as uuidv4} from 'uuid';
 import useAsyncEffect from '../../../common/packages/useAsyncEffect/useAsyncEffect';
 import ReceiversModal from '../../../common/components/ReceiversModal';
@@ -127,6 +127,7 @@ const ReplyScreen = () => {
       recipients: recipients,
       subject,
       body,
+      type: 'notification',
     };
     const sendNotificationParams = {
       url: api.SendNotification,
@@ -264,7 +265,7 @@ const ReplyScreen = () => {
                     <Image
                       style={styles.profileImage}
                       source={{
-                        uri: `${url}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
+                        uri: `${FlaskURL}/${renderProfilePicture(recipients[recipients.length - 1], usersStore.users)}`,
                         // headers: {
                         //   Authorization: `Bearer ${userInfo?.access_token}`,
                         // },
