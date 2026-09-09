@@ -7,7 +7,7 @@ import {useForm} from 'react-hook-form';
 import CustomButtonNew from '../common/components/CustomButton';
 import {httpRequest} from '../common/constant/httpRequest';
 import {api} from '../common/api/api';
-import {ProcgURL, ProcgURL2} from '../../App';
+import {FlaskURL, ProcgURL} from '../../App';
 import {useRootStore} from '../stores/rootStore';
 import {useToast} from '../common/components/CustomToast';
 import {clearAllStorage} from '../common/services/clearStorage';
@@ -56,7 +56,7 @@ const MFALoginScreen = ({navigation}: RootStackScreenProps<'MFALogin'>) => {
     if (res.access_token) {
       const combined_user = {
         url: `${api.Users}?user_id=${res.user_id}`,
-        baseURL: ProcgURL2,
+        baseURL: FlaskURL,
         access_token: res.access_token,
         // isConsole: true,
         // isConsoleParams: true,

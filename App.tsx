@@ -50,7 +50,7 @@ if ((TextInput as any).defaultProps == null) {
   (TextInput as any).defaultProps.allowFontScaling = false;
 }
 export const ProcgURL = procgURLL;
-export const ProcgURL2 = procgURLL2;
+export const FlaskURL = procgURLL2;
 export const MsgBroker = msgBroker;
 export const secretKey = secretKeyy;
 export const secureStorageKey = secureStorageKeyy;

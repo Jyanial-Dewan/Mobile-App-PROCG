@@ -22,7 +22,7 @@ import CustomFlatList from '../../../common/components/CustomFlatList';
 import MainHeader from '../../../common/components/MainHeader';
 import {_todayDate} from '../../../common/services/todayDate';
 import {api} from '../../../common/api/api';
-import {ProcgURL} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import {httpRequest} from '../../../common/constant/httpRequest';
 import Feather from 'react-native-vector-icons/Feather';
 import CustomDropDownNew from '../../../common/components/CustomDropDownTwo';
@@ -241,7 +241,7 @@ const RenderMessageItem = ({
                   <Image
                     style={styles.profileImage}
                     source={{
-                      uri: `${url}/${renderProfilePicture(item.sender, usersStore.users)}`,
+                      uri: `${FlaskURL}/${renderProfilePicture(item.sender, usersStore.users)}`,
                       // uri: `${url}/${item.sender.profile_picture}`,
                       // headers: {
                       //   Authorization: `Bearer ${userInfo?.access_token}`,

@@ -25,7 +25,7 @@ import Image from 'react-native-image-fallback';
 import {MessageSnapshotType} from '../../../stores/messageStore';
 import {formateDateTime} from '../../../common/services/dateFormater';
 import {useRootStore} from '../../../stores/rootStore';
-import {ProcgURL, ProcgURL2} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import {COLORS} from '../../../common/constant/Themes';
 import {observer} from 'mobx-react-lite';
 import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
@@ -237,7 +237,7 @@ const RenderMessageItem = observer(
                       style={styles.profileImage}
                       source={{
                         // uri: `${url}/${findOrigin(item) === 'Inbox' ? item?.sender?.profile_picture : item?.recivers[0]?.profile_picture}`,
-                        uri: `${url}/${findOrigin(item) === 'Inbox' ? renderProfilePicture(item.sender, usersStore.users) : renderProfilePicture(item.recipients[0], usersStore.users)}`,
+                        uri: `${FlaskURL}/${findOrigin(item) === 'Inbox' ? renderProfilePicture(item.sender, usersStore.users) : renderProfilePicture(item.recipients[0], usersStore.users)}`,
                         // headers: {
                         //   Authorization: `Bearer ${userInfo?.access_token}`,
                         // },
@@ -473,7 +473,7 @@ const RecycleBin = observer(() => {
           url: `${api.ActionItem}`,
           data: {action_item_ids: actionItemIds},
           method: 'delete',
-          baseURL: ProcgURL2,
+          baseURL: FlaskURL,
           isConsole: true,
           isConsoleParams: true,
           access_token: userInfo?.access_token,
@@ -568,7 +568,7 @@ const RecycleBin = observer(() => {
         const deleteActionItemParams = {
           url: `${api.ActionItem}/${msg.action_item_id}`,
           method: 'delete',
-          baseURL: ProcgURL2,
+          baseURL: FlaskURL,
           access_token: userInfo?.access_token,
           isConsole: true,
           isConsoleParams: true,

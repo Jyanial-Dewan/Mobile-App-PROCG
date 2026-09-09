@@ -28,7 +28,7 @@ import {RootStackScreensParms} from '../../../types/navigationTs/RootStackScreen
 import {RenderMessageItemProps} from '../inbox/InboxScreen';
 import {formateDateTime} from '../../../common/services/dateFormater';
 import {useRootStore} from '../../../stores/rootStore';
-import {ProcgURL} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import {COLORS} from '../../../common/constant/Themes';
 import CustomDeleteModal from '../../../common/components/CustomDeleteModal';
 import Image from 'react-native-image-fallback';
@@ -227,7 +227,7 @@ const RenderMessageItem = ({
                     style={styles.profileImage}
                     source={{
                       // uri: `${url}/${item.recivers[0]?.profile_picture}`,
-                      uri: `${url}/${renderProfilePicture(item.recipients[0], usersStore.users)}`,
+                      uri: `${FlaskURL}/${renderProfilePicture(item.recipients[0], usersStore.users)}`,
                       // headers: {
                       //   Authorization: `Bearer ${userInfo?.access_token}`,
                       // },

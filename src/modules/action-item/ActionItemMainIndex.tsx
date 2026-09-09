@@ -22,7 +22,7 @@ import SearchBar from '../../common/components/SearchBar';
 import {convertDate} from '../../common/services/DateConverter';
 import {api} from '../../common/api/api';
 import {httpRequest} from '../../common/constant/httpRequest';
-import {ProcgURL2} from '../../../App';
+import {FlaskURL} from '../../../App';
 import CustomFlatListThree from '../../common/components/CustomFlatListThree';
 import RenderItems from './RenderItems';
 import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
@@ -42,7 +42,7 @@ const ActionItemMainIndex = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const PythonURL = ProcgURL2;
+  const PythonURL = FlaskURL;
   const [hasMore, setHasMore] = useState(0);
   const [selectedItem, setSelectedItem] = useState<
     ActionItemsStoreSnapshotType | undefined

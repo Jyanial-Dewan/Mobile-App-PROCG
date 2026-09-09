@@ -1,7 +1,7 @@
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import {useState, useEffect} from 'react';
 import {httpRequest} from '../../common/constant/httpRequest';
-import {ProcgURL2} from '../../../App';
+import {FlaskURL} from '../../../App';
 import {api} from '../../common/api/api';
 import {useRootStore} from '../../stores/rootStore';
 import {DashboardData, DashboardSection} from '../../types/home/homedashboard';
@@ -93,7 +93,7 @@ const HomeContent = () => {
       const response = await httpRequest(
         {
           url: api.Dashboard,
-          baseURL: ProcgURL2,
+          baseURL: FlaskURL,
           access_token: userInfo?.access_token,
           // isConsole: true,
           // isConsoleParams: true,
@@ -180,9 +180,7 @@ const HomeContent = () => {
             </View>
 
             {(item?.value?.items || []).map((innerItem: any) => (
-              <View key={innerItem?.id}>
-                {renderItem2({item: innerItem})}
-              </View>
+              <View key={innerItem?.id}>{renderItem2({item: innerItem})}</View>
             ))}
           </View>
         )}

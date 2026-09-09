@@ -15,7 +15,7 @@ import CustomButtonNew from '../../common/components/CustomButton';
 import {convertDate} from '../../common/services/DateConverter';
 import {ActionItemsStoreSnapshotType} from '../../stores/actionItems';
 import {api} from '../../common/api/api';
-import {ProcgURL2} from '../../../App';
+import {FlaskURL} from '../../../App';
 import {useRootStore} from '../../stores/rootStore';
 import {httpRequest} from '../../common/constant/httpRequest';
 import {useToast} from '../../common/components/CustomToast';
@@ -41,7 +41,7 @@ const RenderItems = ({
   setIsLoading,
   allStatus,
 }: Props) => {
-  const PythonURL = ProcgURL2;
+  const PythonURL = FlaskURL;
   const {userInfo, actionItems} = useRootStore();
   const toaster = useToast();
   const refRBSheetViewDetails = useRef<RBSheet>(null);

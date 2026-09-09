@@ -1,13 +1,6 @@
-import {
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
+import {RefreshControl, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import ContainerNew from '../../common/components/Container';
-import {ProcgURL, ProcgURL2} from '../../../App';
 import MainHeader from '../../common/components/MainHeader';
 import {COLORS} from '../../common/constant/Themes';
 import CustomTextNew from '../../common/components/CustomText';
@@ -15,17 +8,13 @@ import Row from '../../common/components/Row';
 import {useRootStore} from '../../stores/rootStore';
 import {observer} from 'mobx-react-lite';
 import CustomFlatListTwo from '../../common/components/CustomFlatListTwo';
-import {TextInput} from 'react-native-paper';
-import SVGController from '../../common/components/SVGController';
 import CustomBottomSheetNew from '../../common/components/CustomBottomSheet';
 import RBSheet from '../../common/packages/RBSheet/RBSheet';
 import {useIsFocused} from '@react-navigation/native';
-import useAsyncEffect from '../../common/packages/useAsyncEffect/useAsyncEffect';
-import {api} from '../../common/api/api';
-import {httpRequest} from '../../common/constant/httpRequest';
 import axios from 'axios';
 import {convertDate} from '../../common/services/DateConverter';
 import Column from '../../common/components/Column';
+import {FlaskURL} from '../../../App';
 
 interface IViewRequest {
   request_id: number;
@@ -143,11 +132,9 @@ const ViewRequestsScreen = observer(() => {
   axios.defaults.headers.common['Authorization'] =
     `Bearer ${userInfo?.access_token}`;
 
-  const PythonURL = ProcgURL2;
+  const PythonURL = FlaskURL;
 
   const refSheet = useRef<RBSheet>(null);
-
-  const [text, setText] = useState('');
 
   useEffect(() => {
     if (isFocused) {

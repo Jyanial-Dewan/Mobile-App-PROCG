@@ -22,7 +22,7 @@ import CustomFlatList from '../../../common/components/CustomFlatList';
 import MainHeader from '../../../common/components/MainHeader';
 import {_todayDate} from '../../../common/services/todayDate';
 import {api} from '../../../common/api/api';
-import {ProcgURL} from '../../../../App';
+import {FlaskURL, ProcgURL} from '../../../../App';
 import {httpRequest} from '../../../common/constant/httpRequest';
 import CustomDropDownNew from '../../../common/components/CustomDropDownTwo';
 import {useForm} from 'react-hook-form';
@@ -226,7 +226,7 @@ const RenderMessageItem = ({
                   <Image
                     style={styles.profileImage}
                     source={{
-                      uri: `${url}/${renderProfilePicture(item.recipients[0], usersStore.users)}`,
+                      uri: `${FlaskURL}/${renderProfilePicture(item.recipients[0], usersStore.users)}`,
                       // uri: `${url}/${item.recivers[0].profile_picture}`,
                       // headers: {
                       //   Authorization: `Bearer ${userInfo?.access_token}`,

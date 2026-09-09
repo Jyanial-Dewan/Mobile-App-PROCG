@@ -11,7 +11,7 @@ import FixedContainer from './fixed-container';
 import {useRootStore} from '../../stores/rootStore';
 import {COLORS, SIZES} from '../constant/Index';
 import FastImage from 'react-native-fast-image';
-import {ProcgURL, ProcgURL2} from '../../../App';
+import {FlaskURL, ProcgURL} from '../../../App';
 import {httpRequest} from '../constant/httpRequest';
 import SVGController from './SVGController';
 import {MMKV} from 'react-native-mmkv';
@@ -23,44 +23,31 @@ import CustomBottomSheetNew from './CustomBottomSheet';
 import CustomButtonNew from './CustomButton';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {api} from '../api/api';
-import useAsyncEffect from '../packages/useAsyncEffect/useAsyncEffect';
 import CustomLoading from './CustomLoading';
 
 const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isTakeLoading, setIsTakeLoading] = useState(false);
+  const [isSelectLoading, setIsSelectLoading] = useState(false);
   const [isLogout, setIsLogout] = useState(false);
   const toaster = useToast();
-  const isFocused = useIsFocused();
-  const refRBSheet = useRef<RBSheet>(null);
-  const drawerStatus = useDrawerStatus();
-  const {userInfo, logout, deviceInfoData, fcmToken, selectedUrl} =
-    useRootStore();
-  const {inactiveDevice, handleDisconnect} = useSocketContext();
-  const storage = new MMKV();
-  const url = selectedUrl || ProcgURL;
-  const [profilePhoto, setProfilePhoto] = useState(
-    `${url}/${userInfo?.profile_picture.original}`,
-  );
-  const [imageError, setImageError] = useState(false);
 
-  //Fetch Unique User
-  useAsyncEffect(
-    async isMounted => {
-      if (!isMounted()) {
-        return null;
-      }
-      const api_params = {
-        url: `${api.Users}?user_id=${userInfo?.user_id}`,
-        baseURL: ProcgURL2,
-        access_token: userInfo?.access_token,
-        // isConsole: true,
-        // isConsoleParams: true,
-      };
-      const res = await httpRequest(api_params, setIsLoading);
-      setProfilePhoto(`${url}/${res.result.profile_picture.original}`);
-    },
-    [isFocused, drawerStatus],
-  );
+  const refRBSheet = useRef<RBSheet>(null);
+  const {
+    userInfo,
+    logout,
+    deviceInfoData,
+    fcmToken,
+    selectedUrl,
+    updateProfilePicture,
+    profilePictureVersion,
+  } = useRootStore();
+  const {inactiveDevice, handleDisconnect} = useSocketContext();
+  // const storage = new MMKV();
+  const url = selectedUrl || ProcgURL;
+  const cacheBuster = profilePictureVersion;
+
+  const [imageError, setImageError] = useState(false);
 
   const fallbacks = require('../../assets/prifileImages/profile.jpg');
 
@@ -130,22 +117,23 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
       });
 
       const profile_params = {
-        url: api.ProfilePhoto + userInfo?.user_id,
-        method: 'put',
+        url: '/users/profile_picture',
+        method: 'POST',
         isParamsAndmediaFile: true,
         mediaFile: {
           uri: image.path,
           name: image.filename,
           type: image.mime,
         },
-        baseURL: url,
+        baseURL: FlaskURL,
         // isConsole: true,
         // isConsoleParams: true,
       };
 
-      const res = await httpRequest(profile_params, setIsLoading);
+      const res = await httpRequest(profile_params, setIsTakeLoading);
+      console.log(res);
       if (res && image) {
-        setProfilePhoto(image.path);
+        updateProfilePicture(res.profile_picture);
         refRBSheet.current?.close();
       }
     } catch (error) {
@@ -166,22 +154,23 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
       });
 
       const profile_params = {
-        url: api.ProfilePhoto + userInfo?.user_id,
-        method: 'put',
+        url: '/users/profile_picture',
+        method: 'POST',
         isParamsAndmediaFile: true,
         mediaFile: {
           uri: image.path,
           name: image.filename,
           type: image.mime,
         },
-        baseURL: url,
+        baseURL: FlaskURL,
         // isConsole: true,
         // isConsoleParams: true,
       };
 
-      const res = await httpRequest(profile_params, setIsLoading);
+      const res = await httpRequest(profile_params, setIsSelectLoading);
+      console.log(res, 'pf');
       if (res) {
-        setProfilePhoto(image.path);
+        updateProfilePicture(res.profile_picture);
         refRBSheet.current?.close();
       }
     } catch (error) {
@@ -210,7 +199,7 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
           ) : (
             <FastImage
               source={{
-                uri: profilePhoto,
+                uri: `${FlaskURL}/${userInfo?.profile_picture.original}?t=${cacheBuster}`,
                 headers: {
                   Authorization: `Bearer ${userInfo?.access_token}`,
                 },
@@ -315,23 +304,23 @@ const CustomDrawer = observer<DrawerContentComponentProps>(({navigation}) => {
         </Text>
 
         <CustomButtonNew
-          disabled={isLoading}
+          disabled={isTakeLoading || isSelectLoading}
           btnText="Take Photo"
-          isLoading={isLoading}
+          isLoading={isTakeLoading}
           onBtnPress={() => onTakePhoto()}
           btnstyle={styles.btn}
           btnTextStyle={styles.btnTxt}
         />
         <CustomButtonNew
-          disabled={isLoading}
+          disabled={isTakeLoading || isSelectLoading}
           btnText="Choose from gallery"
-          isLoading={isLoading}
+          isLoading={isSelectLoading}
           onBtnPress={() => onPickImage()}
           btnstyle={styles.btn}
           btnTextStyle={styles.btnTxt}
         />
         <CustomButtonNew
-          disabled={isLoading}
+          disabled={isTakeLoading || isSelectLoading}
           btnText="Cancel"
           isLoading={isLoading}
           onBtnPress={() => handleCloseBottomSheet()}
